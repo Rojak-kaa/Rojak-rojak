@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { CHEFS, PALETTE } from '../shared/profile.mjs'
 import { COLORS, HEIGHT, INGREDIENTS, RECIPES, WIDTH } from '../shared/kitchen.mjs'
 import type { Station } from '../shared/kitchen.mjs'
 import type { Item, Player, StationState } from './model'
@@ -170,17 +171,50 @@ export function drawChef(g: Phaser.GameObjects.Graphics, player: Player, x: numb
   const bounce = moving ? Math.sin(time / 65) * 2 : 0
   const color = hex(COLORS[player.color])
   const alpha = player.connected ? 1 : 0.38
-  const skin = [0xf9c59e, 0xc78761, 0xe4a276, 0xad6a4d][player.color]
+  const character = player.outfit && CHEFS[player.outfit.chef]
+  const skin = character?.skin ?? [0xf9c59e, 0xc78761, 0xe4a276, 0xad6a4d][player.color]
   g.fillStyle(0x3b2637, 0.19).fillEllipse(x, y + 17, 38, 11)
   g.fillStyle(0x423044, alpha).fillRoundedRect(x - 12, y + 10, 10, 9, 4).fillRoundedRect(x + 2, y + 10, 10, 9, 4)
   y += bounce
-  g.fillStyle(color, alpha).fillRoundedRect(x - 17, y - 7, 34, 23, 9)
-  g.fillStyle(0xffead5, alpha).fillRoundedRect(x - 9, y + 3, 18, 11, 4)
+  const outfit = player.outfit
+  const fabric = outfit ? hex(PALETTE[outfit.fabric]) : color
+  const trim = outfit ? hex(PALETTE[outfit.trim]) : 0xffead5
+  g.fillStyle(fabric, alpha).fillRoundedRect(x - 17, y - 7, 34, 23, 8)
+  g.fillStyle(trim, alpha)
+  switch (outfit?.garment) {
+    case 'bajuMelayu':
+      g.fillRoundedRect(x - 14, y + 5, 28, 9, 2).fillRect(x - 1, y - 5, 2, 10)
+      break
+    case 'bajuKurung':
+      g.fillRoundedRect(x - 13, y + 11, 26, 3, 1).fillEllipse(x, y - 2, 9, 5)
+      break
+    case 'samfu':
+    case 'cheongsam':
+      g.fillRect(x - 6, y - 4, 12, 3).fillRect(x + 3, y - 1, 8, 2).fillRect(x + 5, y + 4, 8, 2)
+      if (outfit.garment === 'cheongsam') g.fillRect(x - 10, y + 11, 20, 2)
+      break
+    case 'kurta':
+      g.fillRoundedRect(x - 4, y - 4, 8, 14, 2).fillRect(x - 12, y + 11, 24, 2)
+      break
+    case 'saree':
+      g.fillTriangle(x - 14, y - 6, x - 6, y - 6, x + 15, y + 15).fillTriangle(x - 14, y - 6, x + 6, y + 15, x + 15, y + 15)
+      break
+    default:
+      g.fillRoundedRect(x - 9, y + 3, 18, 11, 4)
+  }
+  g.fillStyle(color, alpha).fillCircle(x + 12, y + 10, 3)
   g.fillStyle(skin, alpha).fillCircle(x - 16, y + 3, 5).fillCircle(x + 16, y + 3, 5).fillRoundedRect(x - 12, y - 22, 24, 23, 9)
   const look = player.facing * 2
   g.fillStyle(0x3e292e, alpha).fillCircle(x - 5 + look, y - 9, 1.7).fillCircle(x + 5 + look, y - 9, 1.7)
   g.fillStyle(0xca7867, alpha).fillEllipse(x - 8, y - 5, 4, 2.5).fillEllipse(x + 8, y - 5, 4, 2.5)
-  g.fillStyle(0xe4cbc1, alpha).fillRoundedRect(x - 13, y - 26, 26, 10, 4)
-  g.fillStyle(0xfffbf2, alpha).fillCircle(x - 9, y - 25, 8).fillCircle(x + 8, y - 26, 8).fillCircle(x, y - 30, 10)
+  if (!outfit || outfit.accessory === 'chef') {
+    g.fillStyle(0xe4cbc1, alpha).fillRoundedRect(x - 13, y - 26, 26, 10, 4)
+    g.fillStyle(0xfffbf2, alpha).fillCircle(x - 9, y - 25, 8).fillCircle(x + 8, y - 26, 8).fillCircle(x, y - 30, 10)
+  } else if (outfit.accessory === 'songkok') {
+    g.fillStyle(0x312735, alpha).fillRoundedRect(x - 13, y - 30, 26, 13, 3)
+  } else {
+    g.fillStyle(character?.hair ?? 0x493031, alpha).fillEllipse(x, y - 21, 24, 9)
+    if (outfit.accessory === 'flower') g.fillStyle(0xffe4a3, alpha).fillCircle(x + 9, y - 22, 4)
+  }
   if (player.item) drawItem(g, x + 20, y + 10, player.item)
 }

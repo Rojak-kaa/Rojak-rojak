@@ -4,14 +4,16 @@ A real-time Malaysian hawker-stall game for one to four desktop players. The Rea
 
 ## Run locally
 
-Use Node.js 22 or newer and npm. From the project directory:
+Use Node.js 22.13 or newer and npm. From the project directory:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. Vite forwards Socket.IO to the Express server on port 3001. Choose **Play Solo** for a one-player match with a slower order pace, longer tickets, and more time to plate hot food. Choose **Play with Friends** to create or join a room for up to four players. You can also start a room by yourself if you want to select a different difficulty.
+Open http://localhost:5173. Vite forwards account requests and Socket.IO to the Express server on port 3001. Create an account or sign in to play. Choose **Play Solo** for a one-player match or **Play Team** to create or join a room for up to four players.
+
+Open **Profile & outfit** to choose Ayu, Li Wei, or Kavitha, change your nickname, and design your chef’s outfit. The wardrobe includes Malay baju Melayu and baju kurung, Chinese samfu and cheongsam, and Indian kurta and sari, with custom fabric colours, trims and headwear. Choose Bahasa Melayu, Mandarin Chinese (Simplified), Tamil, or English. Your account saves your profile and lifetime dishes served.
 
 Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
 
@@ -60,7 +62,7 @@ npm start
 
 Run the resulting project on a single long-running Node.js instance with HTTPS and WebSocket support. Express serves `dist/` and Socket.IO on the same origin. Set the `PORT` environment variable if your host requires it. The default is `3001`. Configure the reverse proxy to forward HTTP and WebSocket upgrades for `/socket.io/`. Use `GET /health` for a readiness check. Share the public HTTPS address with your players.
 
-Keep the service at a single replica for this version. Rooms, match data, and reconnect sessions are in memory and expire on server restart. A static-only host does not run the game server.
+Keep the service at a single replica for this version. Rooms and live matches are in memory and expire on restart. Accounts, signed-in sessions, language preferences, outfits, and dishes served persist in SQLite at `data/rojak.sqlite`. Mount a persistent volume for it or set `ROJAK_DB` to a database path on that volume. Set `COOKIE_SECURE=1` when serving over HTTPS. A static-only host does not run the game server.
 
 ## Verify
 

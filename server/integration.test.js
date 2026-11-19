@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
-const { http, io } = createKitchenServer()
+const { http, io } = createKitchenServer({ database: ':memory:' })
 const sockets = []
 after(async () => {
   for (const socket of sockets) socket.disconnect()
@@ -33,8 +36,8 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   http.listen(0, '127.0.0.1')
   await once(http, 'listening')
   const address = 'http://127.0.0.1:' + http.address().port
-  async function open() {
-    const socket = connect(address, { forceNew: true, transports: ['websocket'], reconnection: false })
+  async function open(cookie) {
+    const socket = connect(address, { forceNew: true, transports: ['websocket'], reconnection: false, extraHeaders: cookie ? { cookie } : {} })
     sockets.push(socket)
     await new Promise((resolve, reject) => {
       socket.once('connect', resolve)
@@ -42,10 +45,20 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
     })
     return socket
   }
-  const [a, b, c, d, outsider] = await Promise.all(Array.from({ length: 5 }, open))
+  const guest = await open()
   const send = (socket, event, data) => socket.timeout(1500).emitWithAck(event, data)
+  assert.match((await send(guest, 'enter', { name: 'Guest', create: true })).error, /Sign in/)
+  const cookies = await Promise.all(Array.from({ length: 5 }, (_, index) => register(address, 'chef_' + index)))
+  const outfit = { chef: 'kavitha', garment: 'kurta', accessory: 'chef', fabric: 4, trim: 3 }
+  const updated = await fetch(address + '/api/account/me', {
+    method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Pip', language: 'ta', outfit })
+  })
+  assert.equal(updated.status, 200)
+  const [a, b, c, d, outsider] = await Promise.all(cookies.map(open))
   const command = (socket, type, value) => send(socket, 'lobby', { type, value })
   const host = await send(a, 'enter', { name: 'Pip', create: true })
+  assert.deepEqual(host.room.players[0].outfit, outfit)
   const code = host.room.code
   assert.match(code, /^[A-Z0-9]{6}$/)
   const extraRoom = await send(outsider, 'enter', { name: 'Miso', create: true })
@@ -85,7 +98,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const transferred = waitFor(c, state => state.host === member.id && state.players.some(player => player.id === host.id && !player.connected))
   a.disconnect()
   await transferred
-  const returning = await open()
+  const returning = await open(cookies[0])
   const resumed = await send(returning, 'resume', host.token)
   assert.equal(resumed.id, host.id)
   assert.equal(resumed.room.host, member.id)
@@ -123,6 +136,51 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const pairStarted = waitFor(outsider, state => state.phase === 'playing')
   await Promise.all([d, outsider].map(socket => command(socket, 'briefed')))
   assert.equal((await pairStarted).game.solo, false)
+})
+
+async function register(address, username) {
+  const response = await fetch(address + '/api/account/register', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, name: 'Chef', password: 'testing-123', language: 'en' })
+  })
+  assert.equal(response.status, 200)
+  return response.headers.get('set-cookie').split(';')[0]
+}
+
+test('sign-in, language and outfit survive a server restart', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'rojak-accounts-'))
+  const database = join(directory, 'accounts.sqlite')
+  let instance
+  try {
+    async function boot() {
+      instance = createKitchenServer({ database })
+      instance.http.listen(0, '127.0.0.1')
+      await once(instance.http, 'listening')
+      return 'http://127.0.0.1:' + instance.http.address().port
+    }
+    const first = await boot()
+    const cookie = await register(first, 'chef_persist')
+    const profile = { name: 'Mei', language: 'zh', outfit: { chef: 'liWei', garment: 'samfu', accessory: 'flower', fabric: 2, trim: 4 } }
+    const updated = await fetch(first + '/api/account/me', {
+      method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(profile)
+    })
+    assert.equal(updated.status, 200)
+    await instance.io.close()
+    const second = await boot()
+    const response = await fetch(second + '/api/account/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'chef_persist', password: 'testing-123' })
+    })
+    const restored = await response.json()
+    assert.equal(response.status, 200)
+    assert.equal(restored.name, profile.name)
+    assert.equal(restored.language, profile.language)
+    assert.deepEqual(restored.outfit, profile.outfit)
+    assert.equal(restored.password, undefined)
+  } finally {
+    if (instance?.http.listening) await instance.io.close()
+    rmSync(directory, { recursive: true, force: true })
+  }
 })
 
 function stationPaths(stations) {

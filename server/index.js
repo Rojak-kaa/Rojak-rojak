@@ -5,27 +5,30 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Server } from 'socket.io'
 import { COLORS, DIFFICULTIES, TRAINING_RECIPES } from '../shared/kitchen.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
+import { createAccounts } from './accounts.js'
 
 const GRACE = 30000
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url))
 const respond = (ack, data) => { if (typeof ack === 'function') ack(data) }
 
-export function createKitchenServer() {
+export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data/rojak.sqlite' } = {}) {
   const app = express()
   const http = createServer(app)
   const io = new Server(http, { maxHttpBufferSize: 4096 })
   const rooms = new Map()
   const sessions = new Map()
+  const accounts = createAccounts(database)
 
+  app.use('/api/account', accounts.router)
   app.get('/health', (_req, res) => res.json({ ok: true }))
   app.use(express.static(DIST))
 
   function snapshot(room, now = Date.now()) {
     return {
       code: room.code, host: room.host, phase: room.phase, difficulty: room.difficulty, solo: room.solo, training: room.training, now,
-      players: [...room.players.values()].map(({ id, name, color, ready, socketId, x, y, facing, item, served }) =>
-        ({ id, name, color, ready, connected: Boolean(socketId), x, y, facing, item, served })),
+      players: [...room.players.values()].map(({ id, name, color, outfit, ready, socketId, x, y, facing, item, served }) =>
+        ({ id, name, color, outfit, ready, connected: Boolean(socketId), x, y, facing, item, served })),
       game: room.game
     }
   }
@@ -82,6 +85,8 @@ export function createKitchenServer() {
 
     socket.on('enter', (data, ack) => {
       if (membership().room) return respond(ack, { error: 'Leave your current room first.' })
+      const account = accounts.identify(socket.request.headers)
+      if (!account) return respond(ack, { error: 'Sign in to continue.' })
       const name = typeof data?.name === 'string' ? data.name.trim().slice(0, 20) : ''
       if (!name) return respond(ack, { error: 'Enter a chef nickname.' })
       let room
@@ -102,7 +107,7 @@ export function createKitchenServer() {
       }
       const taken = new Set([...room.players.values()].map(player => player.color))
       const player = {
-        id: randomUUID(), token: randomBytes(24).toString('base64url'), name, ready: false,
+        id: randomUUID(), token: randomBytes(24).toString('base64url'), name, ready: false, accountId: account.id, outfit: account.outfit,
         color: COLORS.findIndex((_color, index) => !taken.has(index))
       }
       room.players.set(player.id, player)
@@ -113,8 +118,9 @@ export function createKitchenServer() {
 
     socket.on('resume', (token, ack) => {
       const entry = typeof token === 'string' && sessions.get(token)
+      const account = accounts.identify(socket.request.headers)
       const current = membership()
-      if (current.room || !entry || entry.player.socketId || entry.player.graceUntil <= Date.now()) {
+      if (current.room || !entry || entry.player.accountId !== account?.id || entry.player.socketId || entry.player.graceUntil <= Date.now()) {
         return respond(ack, { error: 'Your previous session is unavailable.' })
       }
       attach(entry.room, entry.player, ack)
@@ -179,7 +185,9 @@ export function createKitchenServer() {
     socket.on('act', action => {
       const { room, player } = membership()
       if (room?.phase !== 'playing' || !['use', 'work'].includes(action)) return
+      const servedBefore = player.served
       const notice = interact(room, player, action === 'work', Date.now())
+      if (player.served > servedBefore) accounts.serve(player.accountId)
       if (notice) socket.emit('notice', notice)
       else publish(room)
     })
@@ -220,7 +228,10 @@ export function createKitchenServer() {
     }
   }, 50)
   timer.unref()
-  http.on('close', () => clearInterval(timer))
+  http.on('close', () => {
+    clearInterval(timer)
+    accounts.close()
+  })
 
   return { http, io }
 }

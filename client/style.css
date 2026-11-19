@@ -195,3 +195,15 @@ form .button { margin-top: 9px; }
   .landing-buttons { justify-content: center; }
   .landing-scene { top: max(56%, min(calc(175px + 100vw / 3), 100% - 100vw / 3)); }
 }
+.account-form { min-width: 0; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+.dialog { max-height: min(88dvh, 780px); overflow-y: auto; }
+.outfit-heading { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.outfit-preview { display: inline-block; flex: 0 0 auto; width: 32px; height: 30px; border: 3px solid; clip-path: polygon(29% 0, 71% 0, 100% 23%, 85% 51%, 75% 42%, 82% 100%, 18% 100%, 25% 42%, 15% 51%, 0 23%); }
+.outfit-saree { border-inline-start-width: 10px; border-radius: 6px 0 10px 3px; }
+.outfit-cheongsam, .outfit-samfu { border-top-width: 7px; }
+.outfit-bajuMelayu { border-bottom-width: 8px; }
+.palette { display: flex; gap: 9px; margin-top: 12px; border: 0; padding: 0; }
+.palette legend { font-weight: 800; margin-bottom: 6px; }
+.swatch { width: 27px; height: 27px; border: 1px solid #37263f; border-radius: 50%; }
+.swatch[aria-pressed="true"] { outline: 2px solid #37263f; outline-offset: 2px; }

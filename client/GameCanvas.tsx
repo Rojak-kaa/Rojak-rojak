@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
 import { INGREDIENTS, nearestStation, SPAWNS, stationsFor } from '../shared/kitchen.mjs'
 import { drawChef, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
+import { t } from './i18n'
 import type { Player, Room } from './model'
 
 type Props = {
@@ -37,7 +38,7 @@ class KitchenScene extends Phaser.Scene {
     const room = this.current().room
     for (const station of stationsFor(room?.difficulty ?? 'Hard', room?.training)) {
       const caption = station.kind === 'crate' ? INGREDIENTS[station.id].label : names[station.kind]
-      if (caption) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 48, caption, {
+      if (caption) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 48, t(caption), {
         fontFamily: 'system-ui', fontSize: '8px', fontStyle: 'bold', color: '#5d3840',
         backgroundColor: '#fff2d8', padding: { x: 3, y: 1 }
       }).setOrigin(0.5)
@@ -81,9 +82,9 @@ class KitchenScene extends Phaser.Scene {
         label.setText(Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's').setBackgroundColor('#392633').setVisible(true)
       } else if (state?.status === 'cooked') {
         const seconds = Math.ceil((state.until - room.now) / 1000)
-        label.setText(state.until ? 'BURN ' + Math.max(1, seconds) + 's' : 'READY').setBackgroundColor(state.until && seconds <= 6 ? '#9e3829' : '#266346').setVisible(true)
+        label.setText(state.until ? t('BURN') + ' ' + Math.max(1, seconds) + 's' : t('READY')).setBackgroundColor(state.until && seconds <= 6 ? '#9e3829' : '#266346').setVisible(true)
       } else if (state?.status === 'burned') {
-        label.setText('BURNED').setBackgroundColor('#9e3829').setVisible(true)
+        label.setText(t('BURNED')).setBackgroundColor('#9e3829').setVisible(true)
       } else {
         label.setVisible(false)
       }
