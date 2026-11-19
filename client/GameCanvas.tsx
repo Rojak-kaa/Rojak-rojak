@@ -14,7 +14,7 @@ type Props = {
 
 const names: Record<string, string> = {
   board: 'CHOP', pot: 'STOVE', grill: 'GRILL', mix: 'MIX', shave: 'ICE STATION', sink: 'WASH', serve: 'SERVE',
-  plates: 'PLATES', dirty: 'RETURN', bin: 'BIN', fryer: 'FRYER'
+  plates: 'PLATES', dirty: 'RETURN', cups: 'CUPS', cupReturn: 'CUP RETURN', counter: 'TABLE', bin: 'BIN', fryer: 'FRYER'
 }
 
 const demo: Player[] = SPAWNS.map(([x, y], color) => ({
@@ -42,7 +42,7 @@ class KitchenScene extends Phaser.Scene {
         fontFamily: 'system-ui', fontSize: '8px', fontStyle: 'bold', color: '#5d3840',
         backgroundColor: '#fff2d8', padding: { x: 3, y: 1 }
       }).setOrigin(0.5)
-      if (!this.preview && !['crate', 'counter', 'serve', 'plates', 'dirty', 'bin'].includes(station.kind)) {
+      if (!this.preview && !['crate', 'counter', 'serve', 'plates', 'dirty', 'cups', 'cupReturn', 'bin'].includes(station.kind)) {
         this.stationTimers.set(station.id, this.add.text((station.x + 0.5) * TILE, station.y * TILE + 3, '', {
           fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#fff8ee',
           backgroundColor: '#392633', padding: { x: 4, y: 2 }

@@ -7,7 +7,7 @@ export const STATIONS: Station[]
 export type Method = { label: string; action: string; busy: string; hot: boolean; scale: number }
 export const METHODS: Record<string, Method | undefined>
 export const INGREDIENTS: Record<string, { name: string; label: string; color: string; chop?: boolean }>
-export type Recipe = { name: string; station: string; ingredients: string[]; method: string; color: string; points: number; included?: string }
+export type Recipe = { name: string; station: string; ingredients: string[]; method: string; color: string; points: number; included?: string; vessel?: 'cup' }
 export const RECIPES: Record<string, Recipe>
 export const TRAINING_RECIPES: string[]
 export const SHOPS: Record<string, { name: string; x: number; y: number; pool: string[] }>

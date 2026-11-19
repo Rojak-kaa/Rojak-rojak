@@ -27,6 +27,12 @@ export function floor(g: Phaser.GameObjects.Graphics) {
   }
 }
 
+function cup(g: Phaser.GameObjects.Graphics, x: number, y: number, drink?: string) {
+  g.lineStyle(2, 0xb0c6c8).strokeEllipse(x + 8, y, 8, 8)
+  g.fillStyle(0xe8f6f2).fillRoundedRect(x - 9, y - 7, 17, 17, 4)
+  g.fillStyle(drink ? hex(drink) : 0xbcd2d5).fillEllipse(x - 1, y - 6, 15, 6)
+}
+
 function plate(g: Phaser.GameObjects.Graphics, x: number, y: number, dirty = false) {
   g.fillStyle(0xa6c4c8).fillEllipse(x, y + 3, 32, 23)
   g.fillStyle(0xf8ffff).fillEllipse(x, y, 32, 23)
@@ -57,6 +63,11 @@ function ingredient(g: Phaser.GameObjects.Graphics, x: number, y: number, name: 
 }
 
 export function drawItem(g: Phaser.GameObjects.Graphics, x: number, y: number, item: Item) {
+  const drink = item.kind === 'dish' && item.name && RECIPES[item.name]?.vessel === 'cup' ? RECIPES[item.name] : undefined
+  if (item.kind === 'cup' || item.kind === 'dirtyCup' || drink) {
+    cup(g, x, y, drink?.color ?? (item.kind === 'dirtyCup' ? '#936e53' : undefined))
+    return
+  }
   if (item.kind === 'fried') {
     g.fillStyle(0xaf6836).fillEllipse(x - 3, y - 3, 14, 4).fillEllipse(x + 2, y + 3, 14, 4)
   } else if (item.kind === 'raw' || item.kind === 'chopped') ingredient(g, x, y, item.name ?? '', item.kind === 'chopped')
@@ -140,6 +151,11 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
     case 'dirty':
       plate(g, cx, cy + 4, station.kind === 'dirty')
       plate(g, cx, cy - 2, station.kind === 'dirty')
+      break
+    case 'cups':
+    case 'cupReturn':
+      cup(g, cx - 8, cy + 1, station.kind === 'cupReturn' ? '#936e53' : undefined)
+      cup(g, cx + 8, cy - 3, station.kind === 'cupReturn' ? '#936e53' : undefined)
       break
     case 'sink':
       g.fillStyle(0x497f7d).fillRoundedRect(cx - 18, cy - 12, 36, 25, 6)

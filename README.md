@@ -21,6 +21,8 @@ Open **Hawker Centre** and select **Training** to practise Fruit Rojak, Nasi Lem
 
 Each shop stocks only the ingredients needed for its own menu. Chicken Rice Shop serves chicken rice dishes, barley water, and iced liang teh. Mamak serves roti, mee goreng, teh tarik, nasi kandar, and ayam paprik. Hawker Centre serves ban mee, chicken rice, char kway teow, curry laksa, and fruit rojak. Kopitiam serves kaya butter toast, black coffee, white coffee, and half-boiled eggs.
 
+Drink ingredients are along the left wall, with stoves and prep tables along the bottom. Fill drinks using a clean cup from **Cups**. Collect used cups at **Cup Return** and wash them at the sink. Food uses the separate plate stock.
+
 For a one-computer multiplayer test, open two or more separate tabs and enter a different nickname in each. Each tab uses a separate room session unless it inherited one from a duplicated tab.
 
 Create a private room and share its code or invite link. Select aprons, have every chef mark ready, and start from the host's screen. For LAN play, use the host computer's LAN IP and port 5173 in every browser. Allow port 5173 through the host firewall if required.

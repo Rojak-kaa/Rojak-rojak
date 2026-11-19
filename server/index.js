@@ -4,7 +4,7 @@ import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Server } from 'socket.io'
 import { COLORS, DIFFICULTIES, SHOPS, TRAINING_RECIPES } from '../shared/kitchen.mjs'
-import { interact, startMatch, tickMatch } from './kitchen.js'
+import { interact, returnDishware, startMatch, tickMatch } from './kitchen.js'
 import { createAccounts } from './accounts.js'
 
 const GRACE = 30000
@@ -55,8 +55,7 @@ export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data
 
   function remove(room, player) {
     if (room.phase === 'playing') {
-      if (player.item?.kind === 'plate') room.game.clean++
-      if (['dish', 'dirty'].includes(player.item?.kind)) room.game.dirty++
+      returnDishware(room.game, player.item)
     }
     room.players.delete(player.id)
     sessions.delete(player.token)

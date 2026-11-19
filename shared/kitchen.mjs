@@ -75,9 +75,10 @@ export function menuFor(difficulty, training, shop) {
 }
 
 const SHOP_CRATE_SLOTS = [
-  [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [12, 1], [13, 1],
-  [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [4, 7], [5, 7], [6, 7]
+  [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [12, 1],
+  [2, 7], [4, 7], [5, 7], [10, 7]
 ]
+const DRINK_CRATE_SLOTS = [[1, 3], [1, 4], [1, 5], [1, 6], [1, 7]]
 
 function buildStations(difficulty, pool, shop = false) {
   const recipes = pool.map(id => recipeFor(difficulty, id))
@@ -89,10 +90,21 @@ function buildStations(difficulty, pool, shop = false) {
     return !Object.hasOwn(METHODS, station.kind) || methods.has(station.kind)
   })
   if (shop) {
-    for (const [index, id] of [...ingredients].entries()) {
-      const [x, y] = SHOP_CRATE_SLOTS[index]
-      stations.push({ id, kind: 'crate', x, y })
+    const drinkIngredients = new Set(recipes.filter(recipe => recipe.vessel === 'cup').flatMap(recipe => recipe.ingredients))
+    const foodIngredients = [...ingredients].filter(id => !drinkIngredients.has(id))
+    const foodSlots = [...SHOP_CRATE_SLOTS, ...DRINK_CRATE_SLOTS.slice(drinkIngredients.size)]
+    for (const [ids, slots] of [[drinkIngredients, DRINK_CRATE_SLOTS], [foodIngredients, foodSlots]]) {
+      for (const [index, id] of [...ids].entries()) {
+        const [x, y] = slots[index]
+        stations.push({ id, kind: 'crate', x, y })
+      }
     }
+    if (drinkIngredients.size) {
+      stations.push({ id: 'cups', kind: 'cups', x: 13, y: 2 }, { id: 'cupReturn', kind: 'cupReturn', x: 13, y: 5 })
+    }
+    stations.push({ id: 'counterF', kind: 'counter', x: 9, y: 7 })
+    const lowerCounter = { potA: 6, potB: 7, counterE: 8 }
+    return stations.map(station => Object.hasOwn(lowerCounter, station.id) ? { ...station, x: lowerCounter[station.id], y: 7 } : station)
   }
   return stations
 }

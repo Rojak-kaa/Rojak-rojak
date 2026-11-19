@@ -39,6 +39,7 @@ export function startMatch(room, now) {
   room.game = {
     solo, duration: rules.duration, orderLife: rules.orderLife, endsAt: now + rules.duration, nextOrder: now + rules.interval, sequence: 0,
     score: 0, served: 0, missed: 0, streak: 0, bestStreak: 0, clean: rules.plates, dirty: 0,
+    cleanCups: room.stations.some(station => station.kind === 'cups') ? rules.plates : 0, dirtyCups: 0,
     orders: [], stations: Object.fromEntries(room.stations.map(({ id }) => [id, { item: null, ingredients: [], status: 'empty', until: 0 }]))
   }
   addOrder(room, now)
@@ -58,7 +59,8 @@ function advanceStation(room, state, now) {
     state.item = { kind: 'chopped', name: state.item.name }
     state.status = 'ready'
   } else if (state.status === 'washing') {
-    room.game.clean++
+    room.game[state.item?.kind === 'dirtyCup' ? 'cleanCups' : 'clean']++
+    state.item = null
     state.status = 'empty'
   } else if (state.status === 'frying' || state.status === 'cooking') {
     const frying = state.status === 'frying'
@@ -186,7 +188,7 @@ export function interact(room, player, start, now) {
         Object.assign(state, { recipe: complete[0], status: 'cooking', until: now + Math.round(room.matchRules.cook * method.scale) })
         return ''
       }
-      if (!start && state.status === 'cooked' && item?.kind === 'plate') {
+      if (!start && state.status === 'cooked' && item?.kind === (RECIPES[state.recipe].vessel ?? 'plate')) {
         const recipe = state.recipe
         reset()
         return take({ kind: 'dish', name: recipe })
@@ -206,37 +208,45 @@ export function interact(room, player, start, now) {
         return take(null)
       }
       if (state.status === 'burned') return 'Press Space to clear the burned batch.'
-      if (state.status === 'cooked') return 'Bring clean dishware and press E.'
+      if (state.status === 'cooked') return RECIPES[state.recipe].vessel === 'cup' ? 'Bring a clean cup and press E.' : 'Bring a clean plate and press E.'
       if (state.status === 'cooking') return method.busy + '…'
       return 'Add the ticket ingredients with E, then press Space to start.'
     }
     case 'plates':
-      if (start) return 'Use E to take a clean plate.'
-      if (item?.kind === 'plate') {
-        game.clean++
+    case 'cups': {
+      const vessel = station.kind === 'cups' ? 'cup' : 'plate'
+      const stock = vessel === 'cup' ? 'cleanCups' : 'clean'
+      if (start) return 'Use E to take a clean ' + vessel + '.'
+      if (item?.kind === vessel) {
+        game[stock]++
         return take(null)
       }
-      if (item) return 'Free your hands before taking a plate.'
-      if (!game.clean) return 'Wash a dirty plate to restock.'
-      game.clean--
-      return take({ kind: 'plate' })
+      if (item) return 'Free your hands before taking clean dishware.'
+      if (!game[stock]) return 'Wash a dirty ' + vessel + ' to restock.'
+      game[stock]--
+      return take({ kind: vessel })
+    }
     case 'dirty':
-      if (!start && !item && game.dirty) {
-        game.dirty--
-        return take({ kind: 'dirty' })
+    case 'cupReturn': {
+      const cup = station.kind === 'cupReturn'
+      const stock = cup ? 'dirtyCups' : 'dirty'
+      if (!start && !item && game[stock]) {
+        game[stock]--
+        return take({ kind: cup ? 'dirtyCup' : 'dirty' })
       }
-      return 'Use E with empty hands to pick up a returned plate.'
+      return 'Use E with empty hands to pick up returned dishware.'
+    }
     case 'sink':
       if (state.status === 'washing') return 'This sink is busy.'
-      if (!start && item?.kind === 'dirty' && !state.item) {
+      if (!start && ['dirty', 'dirtyCup'].includes(item?.kind) && !state.item) {
         Object.assign(state, { item, status: 'dirty' })
         return take(null)
       }
       if (start && state.status === 'dirty') {
-        Object.assign(state, { item: null, status: 'washing', until: now + WASH_TIME })
+        Object.assign(state, { status: 'washing', until: now + WASH_TIME })
         return ''
       }
-      return 'Place a dirty plate with E, then wash with Space.'
+      return 'Place dirty dishware with E, then wash with Space.'
     case 'serve': {
       if (start || item?.kind !== 'dish') return 'Bring a plated dish and serve with E.'
       const index = game.orders.findIndex(order => order.recipe === item.name && order.expiresAt > now)
@@ -245,7 +255,7 @@ export function interact(room, player, start, now) {
       game.streak++
       game.bestStreak = Math.max(game.bestStreak, game.streak)
       game.score += RECIPES[item.name].points + (room.training ? 0 : Math.floor((order.expiresAt - now) / 3000) + Math.min(game.streak - 1, 5) * 5)
-      game.dirty++
+      returnDishware(game, item)
       game.served++
       player.served++
       if (room.training) room.phase = 'results'
@@ -253,10 +263,16 @@ export function interact(room, player, start, now) {
     }
     case 'bin':
       if (start || !item) return 'Use E to discard a held item.'
-      if (item.kind === 'plate') game.clean++
-      if (item.kind === 'dirty' || item.kind === 'dish') game.dirty++
+      returnDishware(game, item)
       return take(null)
     default:
       return ''
   }
+}
+
+export function returnDishware(game, item) {
+  if (item?.kind === 'plate') game.clean++
+  if (item?.kind === 'cup') game.cleanCups++
+  if (item?.kind === 'dirtyCup' || (item?.kind === 'dish' && RECIPES[item.name].vessel === 'cup')) game.dirtyCups++
+  else if (item?.kind === 'dirty' || item?.kind === 'dish') game.dirty++
 }

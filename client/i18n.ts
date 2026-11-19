@@ -150,6 +150,14 @@ ICE STATION|STESEN AIS|刨冰台|பனிக்கட்டி நிலைய�
 WASH|BASUH|清洗|கழுவு
 SERVE|SAJI|出餐|பரிமாறு
 PLATES|PINGGAN|餐盘|தட்டுகள்
+CUPS|CAWAN|杯子|கோப்பைகள்
+CUP RETURN|CAWAN KOTOR|杯子回收|கோப்பைத் திருப்புக
+TABLE|MEJA|备餐台|மேசை
+Clean cups|Cawan bersih|干净杯子|சுத்தமான கோப்பைகள்
+Cup returns|Cawan kotor|已退回的杯子|திரும்பிய கோப்பைகள்
+Serve in a cup|Hidang dalam cawan|用杯子盛装|கோப்பையில் பரிமாறு
+E · Fill a clean cup|E · Isi cawan bersih|E · 用干净杯子盛装|E · சுத்தமான கோப்பையை நிரப்பு
+E · Use a clean plate|E · Guna pinggan bersih|E · 用干净餐盘装盘|E · சுத்தமான தட்டைப் பயன்படுத்து
 RETURN|PULANG|回收|திருப்புக
 BIN|TONG|垃圾桶|குப்பைத்தொட்டி
 FRYER|PENGGORENG|炸锅|பொரிப்பான்

@@ -27,22 +27,23 @@ export const SHOP_INGREDIENTS = {
 }
 
 const dish = (name, station, ingredients, method, color, points = 100) => ({ name, station, ingredients, method, color, points })
+const drink = (...args) => ({ ...dish(...args), vessel: 'cup' })
 export const SHOP_RECIPES = {
   chickenRice: dish('Chicken Rice', 'pot', ['fragrantRice', 'chicken', 'soy'], 'Steam at the stove', '#d3a751'),
-  barleyWater: dish('Barley Water', 'pot', ['barley', 'water'], 'Simmer barley in water at the stove', '#d1b77e', 75),
-  icedLiangTeh: dish('Iced Liang Teh', 'mix', ['herbalTea', 'ice'], 'Mix the herbal tea with ice', '#8aa186', 75),
+  barleyWater: drink('Barley Water', 'pot', ['barley', 'water'], 'Simmer barley in water at the stove', '#d1b77e', 75),
+  icedLiangTeh: drink('Iced Liang Teh', 'mix', ['herbalTea', 'ice'], 'Mix the herbal tea with ice', '#8aa186', 75),
   charSiewRice: dish('Char Siew Rice', 'grill', ['charSiew', 'fragrantRice'], 'Glaze and warm at the grill', '#c46643'),
   roastedChickenRice: dish('Roasted Chicken Rice', 'grill', ['chicken', 'roastGlaze', 'fragrantRice'], 'Roast the glazed chicken and plate with rice', '#bd784c'),
   rotiCanai: dish('Roti Canai', 'grill', ['dough', 'butter'], 'Griddle until golden', '#e8b665', 85),
   rotiTissue: dish('Roti Tissue', 'grill', ['dough', 'sugar'], 'Griddle the thin roti with sugar', '#e0a256', 85),
   meeGoreng: dish('Mee Goreng', 'pot', ['yellowNoodles', 'wokSauce', 'sprouts'], 'Stir-fry at the stove', '#cf7141'),
-  tehTarik: dish('Teh Tarik', 'mix', ['tea', 'condensedMilk'], 'Pull the tea and milk at the mixing station', '#b57c52', 80),
+  tehTarik: drink('Teh Tarik', 'mix', ['tea', 'condensedMilk'], 'Pull the tea and milk at the mixing station', '#b57c52', 80),
   nasiKandar: dish('Nasi Kandar', 'pot', ['fragrantRice', 'curry', 'chicken'], 'Heat the curry and chicken at the stove', '#cb9a45'),
   ayamPaprik: dish('Ayam Paprik', 'pot', ['chicken', 'vegetables', 'paprikSauce'], 'Stir-fry chicken and vegetables in paprik sauce', '#bd6341'),
   banMee: dish('Ban Mee', 'pot', ['panNoodles', 'mince', 'stock'], 'Simmer the noodles and mince in stock', '#b89258'),
   kayaToast: dish('Kaya Butter Toast', 'grill', ['bread', 'kaya', 'butter'], 'Toast at the grill and add kaya and butter', '#dca45a', 85),
-  blackCoffee: dish('Black Coffee', 'pot', ['coffee', 'water'], 'Brew at the stove', '#8a533b', 75),
-  whiteCoffee: dish('White Coffee', 'pot', ['coffee', 'water', 'condensedMilk'], 'Brew at the stove with condensed milk', '#ba966a', 80),
+  blackCoffee: drink('Black Coffee', 'pot', ['coffee', 'water'], 'Brew at the stove', '#8a533b', 75),
+  whiteCoffee: drink('White Coffee', 'pot', ['coffee', 'water', 'condensedMilk'], 'Brew at the stove with condensed milk', '#ba966a', 80),
   halfBoiledEgg: dish('Half-boiled Eggs', 'pot', ['egg', 'water'], 'Soft-boil at the stove', '#d8a65e', 75)
 }
 

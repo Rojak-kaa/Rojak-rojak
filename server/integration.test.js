@@ -225,6 +225,12 @@ for (const recipe of TRAINING_RECIPES) {
 
 for (const [id, shop] of Object.entries(SHOPS)) {
   test(shop.name + ' stocks and serves its own menu', () => {
+    const layout = stationsFor('Easy', null, id)
+    assert.equal(new Set(layout.map(({ x, y }) => x + ',' + y)).size, layout.length)
+    assert.equal(layout.find(station => station.id === 'potA').y, 7)
+    for (const drink of shop.pool.map(key => recipeFor('Easy', key)).filter(recipe => recipe.vessel === 'cup')) {
+      for (const ingredient of drink.ingredients) assert.equal(layout.find(station => station.id === ingredient).x, 1)
+    }
     verifyMenu('Easy', { ...DIFFICULTIES.Easy, pool: shop.pool }, null, id)
   })
 }
@@ -284,7 +290,13 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
     assert.equal(game.stations[station].status, 'cooked')
     assert.equal(Boolean(game.stations[station].until), METHODS[recipe.station].hot)
     const platingChef = chefs[1] ?? chefs[0]
-    use(platingChef, 'plates')
+    const drink = recipe.vessel === 'cup'
+    if (drink) {
+      use(platingChef, 'plates')
+      assert.match(act(platingChef, station), /clean cup/)
+      use(platingChef, 'plates')
+    }
+    use(platingChef, drink ? 'cups' : 'plates')
     use(platingChef, station)
     assert.equal(platingChef.item.name, key)
     use(platingChef, 'serve')
@@ -294,12 +306,14 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
       assert.equal(game.score, recipe.points)
       return
     }
-    use(chefs[2], 'dirty')
+    assert.equal(game.dirtyCups, drink ? 1 : 0)
+    use(chefs[2], drink ? 'cupReturn' : 'dirty')
     use(chefs[2], 'sink')
     use(chefs[2], 'sink', true)
     advance(2200)
     assert.equal(game.clean, rules.plates)
     assert.equal(game.dirty, 0)
+    if (drink) assert.equal(game.cleanCups, rules.plates)
   }
   assert.equal(game.served, rules.pool.length)
   assert.equal(game.bestStreak, rules.pool.length)

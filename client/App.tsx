@@ -130,7 +130,10 @@ function guidance(room: Room, player?: Player) {
   const remaining = state.until ? Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's' : ''
   const method = METHODS[station.kind]
   if (method) {
-    if (state.status === 'cooked') return method.hot && state.until ? 'E · Plate now · Burns in ' + remaining : 'E · Pick up the dish with clean dishware'
+    if (state.status === 'cooked') {
+      const action = state.recipe && RECIPES[state.recipe].vessel === 'cup' ? 'E · Fill a clean cup' : 'E · Use a clean plate'
+      return t(action) + (method.hot && state.until ? ' · ' + t('Burns in') + ' ' + remaining : '')
+    }
     if (state.status === 'cooking') return method.busy + ' · ' + remaining
     if (state.status === 'burned') return 'Space · Clear the burned batch'
     if (state.status === 'loaded') return 'E · Add or take back an ingredient   /   Space · ' + method.action
@@ -148,9 +151,11 @@ function guidance(room: Room, player?: Player) {
       if (state.status === 'chopping') return 'Chopping · ' + remaining
       if (state.status === 'raw') return 'Space · Chop   /   E · Pick up'
       return state.item ? 'E · Pick up chopped ingredient' : 'E · Put down an ingredient'
-    case 'sink': return state.status === 'washing' ? 'Washing · ' + remaining : state.status === 'dirty' ? 'Space · Wash plate' : 'E · Put down a dirty plate'
+    case 'sink': return state.status === 'washing' ? 'Washing · ' + remaining : state.status === 'dirty' ? 'Space · Wash dishware' : 'E · Put down dirty dishware'
     case 'plates': return 'E · Take or return a clean plate'
+    case 'cups': return 'E · Take or return a clean cup'
     case 'dirty': return 'E · Collect a dirty plate'
+    case 'cupReturn': return 'E · Collect a dirty cup'
     case 'serve': return 'E · Serve a plated order'
     case 'bin': return 'E · Discard held item'
     default: return ''
@@ -481,6 +486,7 @@ export default function App() {
             <div className="ticket-heading"><strong>1 × {recipe.name}</strong></div>
             <RecipeIngredients ingredients={recipe.ingredients} />
             <div className="recipe-method">{t(recipe.method)}</div>
+            {recipe.vessel === 'cup' && <div>{t('Serve in a cup')}</div>}
             {!room.training && <div className="receipt-time"><span>{t("TIME LEFT")}</span><span className="ticket-clock" role="timer">{formatTime(remaining)}</span></div>}
             {!room.training && <progress value={Math.max(0, remaining)} max={room.game!.orderLife} aria-label={recipe.name + ' time remaining'} />}
           </article>
@@ -499,7 +505,9 @@ export default function App() {
         socket.emit('act', action)
         ping(sound, [380])
       }} /></Suspense></div>
-      <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b></span></div>
+      <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
+        {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
+      </span></div>
       <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, place, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
       </section>
     </main>}
