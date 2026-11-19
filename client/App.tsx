@@ -294,8 +294,10 @@ export default function App() {
   const canStart = Boolean(room?.players.length && room.players.every(player => player.ready && player.connected))
   const roundLeft = room?.game ? Math.max(0, room.game.endsAt - room.now) : 0
 
+  const onLanding = !room && page === 'home'
+
   return <div className="site">
-    {phase !== 'playing' && <header className="topbar">
+    {phase !== 'playing' && <header className={onLanding ? 'topbar landing-topbar' : 'topbar'}>
       <div className="shell nav">
         <button className="brand" onClick={() => { if (!room) { setPage('home'); window.scrollTo(0, 0) } }} aria-label="Rojak-rojak home">
           <span className="brand-icon">♨</span><span>Rojak-rojak</span>
@@ -307,8 +309,8 @@ export default function App() {
       </div>
     </header>}
 
-    {!room && page === 'home' && <main className="landing">
-      <section className="landing-hero" aria-labelledby="landing-title">
+    {onLanding && <main className="landing">
+      <section className="landing-hero" aria-labelledby="landing-title" style={{ backgroundImage: `url("${kitchenCrew}")` }}>
         <div className="landing-play">
           <h1 id="landing-title">Rojak-rojak</h1>
           <div className="landing-buttons">
