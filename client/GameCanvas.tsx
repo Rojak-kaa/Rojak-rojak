@@ -5,7 +5,7 @@ import { drawChef, drawnIngredients, drawItem, drawStation, floor, TILE, WORLD_H
 import { t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
-import { drawEcoWalk, ecoPortrait, tintEcoPortrait, usesEcoPortrait } from './ecoPortrait'
+import { drawEcoWalk, ecoPortrait, garmentHem, tintEcoPortrait, usesEcoPortrait } from './ecoPortrait'
 import type { Player, Room } from './model'
 
 type Props = {
@@ -181,7 +181,7 @@ class KitchenScene extends Phaser.Scene {
         const increment = Math.min(delta, 55)
         portrait.stride += ((moving ? 1 : 0) - portrait.stride) * (1 - Math.exp(-increment / 65))
         portrait.phase += increment * 0.015 * portrait.stride
-        drawEcoWalk(portrait.texture.getContext(), portrait.tinted, portrait.phase, portrait.stride)
+        drawEcoWalk(portrait.texture.getContext(), portrait.tinted, portrait.phase, portrait.stride, garmentHem(outfit.garment))
         portrait.texture.refresh()
         this.layer.fillStyle(0x3b2637, 0.19).fillEllipse(px, py + 17, 38, 11)
         portrait.image.setPosition(px, py + 20 + bounce * 0.35).setFlipX(player.facing < 0).setAlpha(player.connected ? 1 : 0.38)

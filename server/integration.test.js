@@ -50,7 +50,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const send = (socket, event, data) => socket.timeout(1500).emitWithAck(event, data)
   assert.match((await send(guest, 'enter', { name: 'Guest', create: true })).error, /Sign in/)
   const cookies = await Promise.all(Array.from({ length: 5 }, (_, index) => register(address, 'chef_' + index)))
-  const outfit = { chef: 'kavitha', garment: 'kurta', accessory: 'chef', fabric: 4, trim: 3 }
+  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8 }
   const updated = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Pip', language: 'ta', outfit })

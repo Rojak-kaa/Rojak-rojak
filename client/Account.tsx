@@ -97,7 +97,12 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   function outfit(part: keyof Outfit, value: string | number) {
-    setDraft(previous => ({ ...previous, outfit: part === 'chef' && value === ECO_OUTFIT.chef ? { ...ECO_OUTFIT } : { ...previous.outfit, [part]: value } }))
+    setDraft(previous => {
+      if (part === 'chef' && value === ECO_OUTFIT.chef) return { ...previous, outfit: { ...ECO_OUTFIT } }
+      const next = { ...previous.outfit, [part]: value }
+      if (part === 'garment' && value === 'cheongsam') Object.assign(next, { fabric: 0, trim: 8 })
+      return { ...previous, outfit: next }
+    })
     setSaved(false)
   }
   async function submit(event: FormEvent<HTMLFormElement>) {

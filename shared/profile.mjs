@@ -15,6 +15,6 @@ export const GARMENTS = {
   striped: 'Striped shirt'
 }
 export const ACCESSORIES = { chef: 'Chef hat', songkok: 'Songkok', flower: 'Flower', sprout: 'Sprout', none: 'No headwear' }
-export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc']
+export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029']
 export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3 }
 export const ECO_OUTFIT = { chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7 }

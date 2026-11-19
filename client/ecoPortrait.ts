@@ -1,10 +1,10 @@
-import { ECO_OUTFIT, PALETTE } from '../shared/profile.mjs'
+import { CHEFS, ECO_OUTFIT, PALETTE } from '../shared/profile.mjs'
 import type { Outfit } from '../shared/profile.mjs'
 
 export { default as ecoPortrait } from './assets/eco-chef.webp'
 
 export function usesEcoPortrait(outfit?: Outfit) {
-  return Boolean(outfit && outfit.chef === ECO_OUTFIT.chef && outfit.garment === ECO_OUTFIT.garment)
+  return Boolean(outfit && Object.hasOwn(CHEFS, outfit.chef))
 }
 
 export const ECO_WIDTH = 303
@@ -12,6 +12,101 @@ export const ECO_HEIGHT = 480
 
 function rgb(color: string) {
   return [1, 3, 5].map(offset => Number.parseInt(color.slice(offset, offset + 2), 16))
+}
+
+function tintCharacter(context: CanvasRenderingContext2D, outfit: Outfit) {
+  if (outfit.chef === ECO_OUTFIT.chef) return
+  const chef = CHEFS[outfit.chef]
+  const skin = rgb('#' + chef.skin.toString(16).padStart(6, '0'))
+  const hair = rgb('#' + chef.hair.toString(16).padStart(6, '0'))
+  const pixels = context.getImageData(0, 52, ECO_WIDTH, ECO_HEIGHT - 52)
+  for (let y = 0; y < pixels.height; y++) {
+    for (let x = 0; x < pixels.width; x++) {
+      const i = (y * pixels.width + x) * 4
+      const [red, green, blue, alpha] = pixels.data.subarray(i, i + 4)
+      if (!alpha) continue
+      const onHair = y < 168 && (y < 79 || x < 89 || x > 205)
+      const foxClip = onHair && x > 75 && x < 132 && y > 36 && y < 86 && red > 150 && red > blue * 1.35
+      const tone = onHair && (Math.max(red, green, blue) < 73 || foxClip) ? hair :
+        red > 190 && green < red * 0.95 && blue < green * 0.98 ? skin : null
+      if (!tone) continue
+      const shade = tone === skin ? red / 250 : foxClip ? 1 : Math.max(0.65, red / 34)
+      for (let channel = 0; channel < 3; channel++) pixels.data[i + channel] = tone[channel] * shade
+    }
+  }
+  context.putImageData(pixels, 0, 52)
+}
+
+export function garmentHem(garment: string) {
+  return ({ cheongsam: 388, saree: 399, bajuKurung: 390, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
+}
+
+function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit) {
+  if (outfit.garment === 'striped') return
+  const hem = garmentHem(outfit.garment)
+  const fitted = outfit.garment === 'cheongsam'
+  const trim = PALETTE[outfit.trim]
+  context.beginPath()
+  context.moveTo(100, 224)
+  context.quadraticCurveTo(108, 211, 128, 209)
+  context.lineTo(131, fitted ? 200 : 209)
+  context.quadraticCurveTo(144, 205, 158, fitted ? 199 : 208)
+  context.lineTo(163, 209)
+  context.quadraticCurveTo(179, 213, 185, 226)
+  context.quadraticCurveTo(181, 253, fitted ? 171 : 180, 266)
+  context.bezierCurveTo(175, 282, 196, hem - 33, 199, hem - 12)
+  context.quadraticCurveTo(199, hem + 6, 151, hem)
+  context.quadraticCurveTo(97, hem + 3, 93, hem - 13)
+  context.quadraticCurveTo(97, 309, fitted ? 116 : 103, 270)
+  context.quadraticCurveTo(107, 250, 100, 224)
+  context.closePath()
+  context.lineWidth = 3.5
+  context.strokeStyle = '#473037'
+  context.fillStyle = PALETTE[outfit.fabric]
+  context.fill()
+  context.stroke()
+  context.strokeStyle = trim
+  context.lineCap = 'round'
+  if (fitted || outfit.garment === 'samfu') {
+    context.beginPath()
+    context.moveTo(132, 205)
+    context.quadraticCurveTo(144, 211, 157, 204)
+    context.moveTo(151, 212)
+    context.quadraticCurveTo(145, 237, 120, 250)
+    context.stroke()
+    for (const [x, y] of [[148, 218], [142, 228], [134, 237]]) {
+      context.beginPath()
+      context.moveTo(x - 4, y - 3)
+      context.lineTo(x + 5, y + 4)
+      context.stroke()
+    }
+    if (fitted) {
+      context.beginPath()
+      context.moveTo(184, hem - 7)
+      context.lineTo(175, hem - 39)
+      context.stroke()
+    }
+  } else if (outfit.garment === 'saree') {
+    context.lineWidth = 10
+    context.beginPath()
+    context.moveTo(115, 220)
+    context.quadraticCurveTo(137, 264, 176, 288)
+    context.lineTo(178, hem - 8)
+    context.stroke()
+  } else {
+    context.beginPath()
+    context.moveTo(130, 216)
+    context.quadraticCurveTo(145, 232, 160, 216)
+    context.moveTo(145, 225)
+    context.lineTo(145, outfit.garment === 'kurta' ? 270 : 248)
+    context.moveTo(104, hem - 9)
+    context.quadraticCurveTo(150, hem - 3, 191, hem - 9)
+    context.stroke()
+    if (outfit.garment === 'bajuMelayu') {
+      context.fillStyle = trim
+      context.fillRect(103, 283, 87, 9)
+    }
+  }
 }
 
 function drawHeadwear(context: CanvasRenderingContext2D, accessory: string) {
@@ -69,8 +164,9 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   canvas.height = ECO_HEIGHT
   const context = canvas.getContext('2d')!
   context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
+  tintCharacter(context, outfit)
   drawHeadwear(context, outfit.accessory)
-  if (outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas
+  if (outfit.garment === 'striped' && outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas
 
   const fabric = rgb(PALETTE[outfit.fabric])
   const trim = rgb(PALETTE[outfit.trim])
@@ -83,7 +179,7 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
       const isGreen = green > red * 1.035 && green > blue * 1.22 && green > 79
       const isStripe = red >= 185 && green >= red * 0.93 && blue >= green * 0.79
       if (!isGreen && !isStripe) continue
-      const base = isGreen ? fabric : trim
+      const base = isGreen || outfit.garment !== 'striped' ? fabric : trim
       const shade = isGreen ? green / 163 : green / 238
       for (let channel = 0; channel < 3; channel++) {
         pixels.data[offset + channel] = Math.min(255, base[channel] * shade)
@@ -91,10 +187,11 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
     }
   }
   context.putImageData(pixels, 74, 211)
+  drawGarment(context, outfit)
   return canvas
 }
 
-export function drawEcoWalk(context: CanvasRenderingContext2D, source: HTMLCanvasElement, phase: number, stride: number) {
+export function drawEcoWalk(context: CanvasRenderingContext2D, source: HTMLCanvasElement, phase: number, stride: number, hem: number) {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height)
   context.save()
   context.scale(context.canvas.width / ECO_WIDTH, context.canvas.height / ECO_HEIGHT)
@@ -105,12 +202,12 @@ export function drawEcoWalk(context: CanvasRenderingContext2D, source: HTMLCanva
     const split = 151
     for (const [left, width, hip, direction] of [[68, split - 68, 125, 1], [split, 92, 169, -1]]) {
       context.save()
-      context.translate(hip, 338 - Math.max(0, swing * direction) * 9)
+      context.translate(hip, hem - 8 - Math.max(0, swing * direction) * 9)
       context.rotate(swing * direction * 0.14)
-      context.drawImage(source, left, 337, width, ECO_HEIGHT - 337, left - hip, -1, width, ECO_HEIGHT - 337)
+      context.drawImage(source, left, hem - 10, width, ECO_HEIGHT - hem + 10, left - hip, -2, width, ECO_HEIGHT - hem + 10)
       context.restore()
     }
-    context.drawImage(source, 0, 0, ECO_WIDTH, 347, 0, 0, ECO_WIDTH, 347)
+    context.drawImage(source, 0, 0, ECO_WIDTH, hem, 0, 0, ECO_WIDTH, hem)
   }
   context.restore()
 }
