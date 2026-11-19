@@ -20,6 +20,19 @@ Design your chef|Reka cef anda|设计你的厨师|உங்கள் சமை�
 Save and continue|Simpan dan teruskan|保存并继续|சேமித்துத் தொடரவும்
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
+Facial expression|Ekspresi muka|面部表情|முகபாவனை
+Hand sign|Isyarat tangan|手势|கை சைகை
+Calm|Tenang|平静|அமைதி
+Happy|Gembira|开心|மகிழ்ச்சி
+Wink|Kenyit mata|眨眼|கண் சிமிட்டு
+Worried|Risau|担心|கவலை
+Determined|Bertekad|坚定|உறுதி
+Sleepy|Mengantuk|困倦|தூக்கக் கலக்கம்
+Peace sign|Isyarat damai|比耶|வெற்றி சைகை
+Wave|Lambai|挥手|கையசை
+Fist|Genggam|握拳|முஷ்டி
+Point|Tuding|指向|சுட்டிக்காட்டு
+OK sign|Isyarat OK|OK 手势|சரி சைகை
 Clothing|Pakaian|服装|உடை
 Casual|Kasual|休闲|சாதாரண உடை
 Striped shirt|Baju berjalur|条纹上衣|கோடிட்ட சட்டை

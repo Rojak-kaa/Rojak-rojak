@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, CHEFS, ECO_OUTFIT, GARMENTS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, CHEFS, ECO_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -138,6 +138,12 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     </select>}
     <label>{t('Headwear')}<select value={draft.outfit.accessory} onChange={event => outfit('accessory', event.target.value)}>
       {Object.entries(ACCESSORIES).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
+    </select></label>
+    <label>{t('Facial expression')}<select value={draft.outfit.expression} onChange={event => outfit('expression', event.target.value)}>
+      {Object.entries(EXPRESSIONS).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
+    </select></label>
+    <label>{t('Hand sign')}<select value={draft.outfit.handSign} onChange={event => outfit('handSign', event.target.value)}>
+      {Object.entries(HAND_SIGNS).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
     {([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
       <fieldset className="palette" key={part}><legend>{t(label)}</legend>{PALETTE.map((color, index) =>

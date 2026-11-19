@@ -50,7 +50,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const send = (socket, event, data) => socket.timeout(1500).emitWithAck(event, data)
   assert.match((await send(guest, 'enter', { name: 'Guest', create: true })).error, /Sign in/)
   const cookies = await Promise.all(Array.from({ length: 5 }, (_, index) => register(address, 'chef_' + index)))
-  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8 }
+  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8, expression: 'wink', handSign: 'wave' }
   const updated = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Pip', language: 'ta', outfit })
@@ -166,7 +166,7 @@ test('sign-in, language and outfit survive a server restart', async () => {
     const cookie = await register(first, 'chef_persist')
     const initial = await fetch(first + '/api/account/me', { headers: { cookie } }).then(response => response.json())
     assert.equal(initial.outfitConfigured, false)
-    const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2 } }
+    const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2, expression: 'happy', handSign: 'okay' } }
     assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {
       method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' },

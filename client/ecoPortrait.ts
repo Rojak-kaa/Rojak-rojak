@@ -14,6 +14,84 @@ function rgb(color: string) {
   return [1, 3, 5].map(offset => Number.parseInt(color.slice(offset, offset + 2), 16))
 }
 
+function sampleColour(context: CanvasRenderingContext2D, x: number, y: number) {
+  const [r, g, b] = context.getImageData(x, y, 1, 1).data
+  return `rgb(${r}, ${g}, ${b})`
+}
+
+function drawExpression(context: CanvasRenderingContext2D, expression: string) {
+  if (expression === 'calm') return
+  const skin = sampleColour(context, 145, 164)
+  for (const [x, y, rx, ry] of [[111, 162, 17, 16], [177, 163, 17, 16], [146, 180, 10, 6]]) {
+    context.fillStyle = skin
+    context.beginPath()
+    context.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2)
+    context.fill()
+  }
+  context.lineCap = 'round'
+  context.lineWidth = 3.4
+  context.strokeStyle = '#452830'
+  const arc = 'M102 168 Q111 154 122 166'
+  const arcRight = 'M167 166 Q177 154 187 168'
+  if (expression === 'happy' || expression === 'wink') {
+    context.stroke(new Path2D(arcRight))
+    if (expression === 'happy') context.stroke(new Path2D(arc))
+  } else if (expression === 'sleepy') {
+    context.stroke(new Path2D('M103 166 Q112 169 121 166 M168 166 Q177 169 186 166'))
+  } else {
+    const brow = expression === 'worried' ? 'M104 152 L119 146 M170 146 L184 152' : 'M102 148 L119 155 M169 154 L187 148'
+    context.stroke(new Path2D(brow))
+  }
+  if (['wink', 'worried', 'determined'].includes(expression)) {
+    for (const x of expression === 'wink' ? [111] : [111, 177]) {
+      context.fillStyle = '#583840'
+      context.beginPath()
+      context.ellipse(x, 164, 6, 8, 0, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#fff3e6'
+      context.beginPath()
+      context.arc(x - 2, 161, 2, 0, Math.PI * 2)
+      context.fill()
+    }
+  }
+  if (expression === 'worried') {
+    context.lineWidth = 2
+    context.stroke(new Path2D('M141 183 Q146 178 152 182'))
+    return
+  }
+  const mouth = expression === 'sleepy'
+    ? new Path2D('M142 182 Q146 177 150 182 Q151 186 146 186 Q141 185 142 182')
+    : new Path2D('M137 177 Q146 180 155 177 Q152 190 146 190 Q140 189 137 177')
+  context.fillStyle = '#da8f91'
+  context.fill(mouth)
+  context.lineWidth = 1.4
+  context.stroke(mouth)
+}
+
+const handPaths: Record<string, string> = {
+  wave: 'M83 220 Q76 215 72 208 L66 202 Q64 197 69 198 L76 204 L69 192 Q68 188 72 189 L80 199 L75 185 Q76 180 80 184 L86 197 L85 183 Q89 179 91 184 L94 202 Q98 200 99 205 Q99 216 91 220 Z',
+  fist: 'M83 220 Q76 216 75 209 L76 199 Q78 194 82 197 Q86 193 90 197 Q94 194 96 200 L98 208 Q98 216 91 220 Z M78 205 Q86 202 91 207',
+  point: 'M83 220 Q75 214 76 206 L78 196 L76 186 Q77 181 81 184 L88 200 Q95 195 97 204 L98 210 Q97 216 91 220 Z',
+  okay: 'M83 220 Q75 216 75 207 Q73 201 77 198 L73 192 Q72 188 76 189 L82 196 L80 186 Q83 182 86 186 L89 198 Q95 198 98 205 Q101 216 91 220 Z M84 204 Q92 200 94 207 Q90 212 85 210 Q82 208 84 204 Z'
+}
+
+function drawHandSign(context: CanvasRenderingContext2D, handSign: string) {
+  const outline = handPaths[handSign]
+  if (!outline) return
+  const skin = sampleColour(context, 89, 218)
+  context.save()
+  context.globalCompositeOperation = 'destination-out'
+  context.fill(new Path2D('M72 188 L92 186 L98 204 L99 217 L93 221 L82 220 L71 210 Z'))
+  context.restore()
+  context.fillStyle = skin
+  context.strokeStyle = '#65434a'
+  context.lineWidth = 1.8
+  context.lineJoin = 'round'
+  const path = new Path2D(outline)
+  context.fill(path, 'evenodd')
+  context.stroke(path)
+}
+
 function tintCharacter(context: CanvasRenderingContext2D, outfit: Outfit) {
   if (outfit.chef === ECO_OUTFIT.chef) return
   const chef = CHEFS[outfit.chef]
@@ -166,6 +244,8 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
   tintCharacter(context, outfit)
   drawHeadwear(context, outfit.accessory)
+  drawExpression(context, outfit.expression)
+  drawHandSign(context, outfit.handSign)
   if (outfit.garment === 'striped' && outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas
 
   const fabric = rgb(PALETTE[outfit.fabric])
