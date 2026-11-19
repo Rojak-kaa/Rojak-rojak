@@ -4,8 +4,7 @@ import type { Outfit } from '../shared/profile.mjs'
 export { default as ecoPortrait } from './assets/eco-chef.webp'
 
 export function usesEcoPortrait(outfit?: Outfit) {
-  return Boolean(outfit && outfit.chef === ECO_OUTFIT.chef && outfit.garment === ECO_OUTFIT.garment &&
-    outfit.accessory === ECO_OUTFIT.accessory)
+  return Boolean(outfit && outfit.chef === ECO_OUTFIT.chef && outfit.garment === ECO_OUTFIT.garment)
 }
 
 export const ECO_WIDTH = 303
@@ -15,12 +14,62 @@ function rgb(color: string) {
   return [1, 3, 5].map(offset => Number.parseInt(color.slice(offset, offset + 2), 16))
 }
 
+function drawHeadwear(context: CanvasRenderingContext2D, accessory: string) {
+  if (accessory === ECO_OUTFIT.accessory) return
+  const sprout = context.getImageData(107, 0, 70, 55)
+  for (let offset = 0; offset < sprout.data.length; offset += 4) {
+    const [red, green, blue] = sprout.data.subarray(offset, offset + 3)
+    if (green > red * 1.035 && green > blue * 1.15) sprout.data[offset + 3] = 0
+  }
+  context.putImageData(sprout, 107, 0)
+  context.lineWidth = 3
+  context.strokeStyle = '#33252b'
+
+  if (accessory === 'chef') {
+    context.beginPath()
+    context.moveTo(111, 63)
+    context.bezierCurveTo(104, 56, 100, 40, 108, 32)
+    context.bezierCurveTo(115, 24, 125, 26, 132, 28)
+    context.bezierCurveTo(135, 9, 159, 8, 168, 24)
+    context.bezierCurveTo(184, 18, 199, 28, 198, 43)
+    context.bezierCurveTo(197, 53, 189, 57, 185, 60)
+    context.lineTo(185, 70)
+    context.quadraticCurveTo(148, 77, 111, 69)
+    context.closePath()
+    context.fillStyle = '#fff5e4'
+    context.fill()
+    context.stroke()
+    context.fillStyle = '#e4cbbf'
+    context.fillRect(116, 62, 64, 3)
+  } else if (accessory === 'songkok') {
+    context.beginPath()
+    context.roundRect(107, 35, 82, 34, [13, 13, 6, 6])
+    context.fillStyle = '#342936'
+    context.fill()
+    context.stroke()
+    context.fillStyle = '#66536a'
+    context.fillRect(114, 58, 68, 3)
+  } else if (accessory === 'flower') {
+    context.fillStyle = '#f3a18f'
+    for (const [x, y] of [[190, 55], [201, 61], [197, 73], [184, 73], [180, 61]]) {
+      context.beginPath()
+      context.arc(x, y, 7, 0, Math.PI * 2)
+      context.fill()
+    }
+    context.beginPath()
+    context.arc(190, 64, 5, 0, Math.PI * 2)
+    context.fillStyle = '#fff0b2'
+    context.fill()
+  }
+}
+
 export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   const canvas = document.createElement('canvas')
   canvas.width = ECO_WIDTH
   canvas.height = ECO_HEIGHT
   const context = canvas.getContext('2d')!
   context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
+  drawHeadwear(context, outfit.accessory)
   if (outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas
 
   const fabric = rgb(PALETTE[outfit.fabric])
