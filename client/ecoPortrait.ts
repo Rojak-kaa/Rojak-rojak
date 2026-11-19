@@ -1,4 +1,4 @@
-import { CHEFS, ECO_OUTFIT, LI_WEN_OUTFIT, PALETTE } from '../shared/profile.mjs'
+import { CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT, PALETTE } from '../shared/profile.mjs'
 import type { Outfit } from '../shared/profile.mjs'
 
 export { default as ecoPortrait } from './assets/eco-chef.webp'
@@ -225,10 +225,49 @@ function drawLiWenSamfu(context: CanvasRenderingContext2D, handSign: string) {
   context.stroke(new Path2D('M113 329 Q117 316 130 318 Q126 309 119 314 M114 330 Q123 323 132 328 M184 329 Q180 316 167 318 Q171 309 178 314 M183 330 Q174 323 165 328'))
 }
 
+function drawKavithaKurta(context: CanvasRenderingContext2D, handSign: string) {
+  const cream = '#f3df9f'
+  const red = '#ac2531'
+  const pieces = [
+    [red, 'M107 343 L192 343 Q195 368 185 396 L188 446 Q173 454 154 446 L149 379 L141 446 Q122 453 103 446 L107 392 Q99 373 107 343 Z'],
+    [red, 'M104 446 Q121 455 141 449 L139 461 Q125 473 103 465 Z M154 449 Q172 455 188 446 Q196 467 180 468 Q162 468 154 461 Z'],
+    [cream, handSign === 'relaxed'
+      ? 'M116 220 Q104 226 95 249 L77 290 Q86 300 100 297 L121 264 Z'
+      : 'M118 219 L108 234 L96 215 L81 222 Q85 246 113 265 L122 253 Z'],
+    [cream, 'M179 220 Q195 226 201 249 L223 292 Q213 303 201 300 L180 270 Z'],
+    [cream, 'M112 221 Q123 213 135 211 L137 204 L150 216 L163 204 L166 211 Q181 214 187 224 L183 268 L195 355 Q151 372 103 355 L115 268 Z'],
+    ['#fbefc6', 'M105 345 Q151 362 193 345 L195 355 Q151 372 103 355 Z'],
+    [red, 'M122 215 Q128 210 135 211 L132 342 Q125 350 116 342 Z M165 211 Q172 210 179 216 L183 342 Q175 349 166 342 Z']
+  ]
+  context.lineJoin = 'round'
+  context.strokeStyle = '#65434a'
+  context.lineWidth = 2.5
+  for (const [color, outline] of pieces) {
+    const path = new Path2D(outline)
+    context.fillStyle = color
+    context.fill(path)
+    context.stroke(path)
+  }
+  context.strokeStyle = '#957044'
+  context.lineWidth = 1.5
+  context.stroke(new Path2D('M137 211 L150 225 L163 211 M150 225 L150 353 M81 288 L101 296 M203 290 L220 283'))
+  for (const y of [238, 257, 276, 295]) {
+    context.beginPath()
+    context.arc(155, y, 2.8, 0, Math.PI * 2)
+    context.fillStyle = '#d9ab51'
+    context.fill()
+    context.stroke()
+  }
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
   if (outfit.chef === LI_WEN_OUTFIT.chef) {
     drawLiWenSamfu(context, outfit.handSign)
+    return
+  }
+  if (outfit.chef === KAVITHA_OUTFIT.chef) {
+    drawKavithaKurta(context, outfit.handSign)
     return
   }
   if (outfit.garment === 'bajuMelayu') {

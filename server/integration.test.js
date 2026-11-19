@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
-import { AYU_OUTFIT, CHEFS, ECO_OUTFIT, LI_WEN_OUTFIT } from '../shared/profile.mjs'
+import { AYU_OUTFIT, CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT } from '../shared/profile.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
@@ -175,6 +175,13 @@ test('sign-in, language and outfit survive a server restart', async () => {
     })
     assert.equal(locked.status, 200)
     assert.deepEqual((await locked.json()).outfit, ayu)
+    const kavitha = { ...KAVITHA_OUTFIT, accessory: 'flower', expression: 'wink', handSign: 'wave' }
+    const kavithaSaved = await fetch(first + '/api/account/me', {
+      method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Mei', language: 'zh', outfit: { ...kavitha, garment: 'saree', fabric: 2, trim: 4, hairStyle: 'bun' } })
+    })
+    assert.equal(kavithaSaved.status, 200)
+    assert.deepEqual((await kavithaSaved.json()).outfit, kavitha)
     const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2, expression: 'happy', handSign: 'okay' } }
     assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {

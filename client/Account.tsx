@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, FIXED_OUTFITS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, LI_WEN_OUTFIT, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, FIXED_OUTFITS, GARMENTS, HAIRSTYLES, HAND_SIGNS, hasFixedFabric, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -153,7 +153,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     <label>{t('Hand sign')}<select value={draft.outfit.handSign} onChange={event => outfit('handSign', event.target.value)}>
       {Object.entries(HAND_SIGNS).filter(([id]) => !eco || id !== 'relaxed').map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
-    {draft.outfit.chef !== LI_WEN_OUTFIT.chef && ([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
+    {!hasFixedFabric(draft.outfit.chef) && ([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
       <fieldset className="palette" key={part}><legend>{t(label)}</legend>{PALETTE.map((color, index) =>
         <button type="button" className="swatch" style={{ background: color }} aria-label={t(label) + ' ' + (index + 1)}
           aria-pressed={draft.outfit[part] === index} onClick={() => outfit(part, index)} key={color} />)}</fieldset>)}

@@ -25,13 +25,18 @@ export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, garment: 'none', accessory: 'non
 export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7, hairStyle: 'braids' }
 export const AYU_OUTFIT = { ...DEFAULT_OUTFIT, accessory: 'none', fabric: 9, trim: 1, handSign: 'relaxed', hairStyle: 'short' }
 export const LI_WEN_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'liWei', garment: 'samfu', accessory: 'none', trim: 3, hairStyle: 'short', handSign: 'relaxed' }
-export const FIXED_OUTFITS = { [ECO_OUTFIT.chef]: ECO_OUTFIT, [AYU_OUTFIT.chef]: AYU_OUTFIT, [LI_WEN_OUTFIT.chef]: LI_WEN_OUTFIT }
+export const KAVITHA_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'kavitha', garment: 'kurta', accessory: 'none', fabric: 9, trim: 0, hairStyle: 'short', handSign: 'relaxed' }
+export const FIXED_OUTFITS = { [ECO_OUTFIT.chef]: ECO_OUTFIT, [AYU_OUTFIT.chef]: AYU_OUTFIT, [LI_WEN_OUTFIT.chef]: LI_WEN_OUTFIT, [KAVITHA_OUTFIT.chef]: KAVITHA_OUTFIT }
+
+export function hasFixedFabric(chef) {
+  return chef === LI_WEN_OUTFIT.chef || chef === KAVITHA_OUTFIT.chef
+}
 
 export function lockSignatureOutfit(outfit) {
   if (!Object.hasOwn(FIXED_OUTFITS, outfit.chef)) return outfit
   const { garment, trim, hairStyle, fabric } = FIXED_OUTFITS[outfit.chef]
   const eco = outfit.chef === ECO_OUTFIT.chef
-  return { ...outfit, garment, trim, hairStyle, fabric: outfit.chef === LI_WEN_OUTFIT.chef ? fabric : outfit.fabric,
+  return { ...outfit, garment, trim, hairStyle, fabric: hasFixedFabric(outfit.chef) ? fabric : outfit.fabric,
     expression: eco && outfit.expression === 'none' ? ECO_OUTFIT.expression : outfit.expression,
     handSign: eco && outfit.handSign === 'relaxed' ? ECO_OUTFIT.handSign : outfit.handSign }
 }
