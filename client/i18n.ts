@@ -21,6 +21,12 @@ Save and continue|Simpan dan teruskan|保存并继续|சேமித்து�
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
 Facial expression|Ekspresi muka|面部表情|முகபாவனை
+Hairstyle|Gaya rambut|发型|சிகை அலங்காரம்
+No hair|Tiada rambut|无头发|முடி இல்லை
+Short hair|Rambut pendek|短发|குட்டை முடி
+Bob|Rambut bob|波波头|பாப் முடி
+Bun|Sanggul|发髻|கொண்டை
+Braids|Rambut tocang|辫子|ஜடை
 No clothing|Tanpa pakaian|未穿服装|உடை இல்லை
 Blank face|Muka kosong|无表情五官|முக அம்சங்கள் இல்லை
 Relaxed hands|Tangan santai|双手放松|தளர்ந்த கைகள்

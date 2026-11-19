@@ -18,14 +18,15 @@ export const GARMENTS = {
 export const ACCESSORIES = { chef: 'Chef hat', songkok: 'Songkok', flower: 'Flower', sprout: 'Sprout', none: 'No headwear' }
 export const EXPRESSIONS = { none: 'Blank face', calm: 'Calm', happy: 'Happy', wink: 'Wink', worried: 'Worried', determined: 'Determined', sleepy: 'Sleepy' }
 export const HAND_SIGNS = { relaxed: 'Relaxed hands', peace: 'Peace sign', wave: 'Wave', fist: 'Fist', point: 'Point', okay: 'OK sign' }
+export const HAIRSTYLES = { none: 'No hair', short: 'Short hair', bob: 'Bob', bun: 'Bun', braids: 'Braids' }
 export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029']
-export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace' }
+export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace', hairStyle: 'none' }
 export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
-export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7 }
+export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7, hairStyle: 'braids' }
 
 export function lockEcoOutfit(outfit) {
   return outfit.chef === ECO_OUTFIT.chef
-    ? { ...outfit, garment: ECO_OUTFIT.garment, trim: ECO_OUTFIT.trim,
+    ? { ...outfit, garment: ECO_OUTFIT.garment, trim: ECO_OUTFIT.trim, hairStyle: ECO_OUTFIT.hairStyle,
         expression: outfit.expression === 'none' ? ECO_OUTFIT.expression : outfit.expression,
         handSign: outfit.handSign === 'relaxed' ? ECO_OUTFIT.handSign : outfit.handSign }
     : outfit

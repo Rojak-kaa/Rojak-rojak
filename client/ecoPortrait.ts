@@ -117,6 +117,39 @@ function drawBaseBody(context: CanvasRenderingContext2D, skin: string, handSign:
   context.stroke(head)
 }
 
+function drawHairstyle(context: CanvasRenderingContext2D, outfit: Outfit) {
+  if (outfit.hairStyle === 'none') return
+  const hair = '#' + CHEFS[outfit.chef].hair.toString(16).padStart(6, '0')
+  context.fillStyle = hair
+  context.strokeStyle = '#261c26'
+  context.lineWidth = 2.5
+  const cap = new Path2D('M74 140 Q60 114 81 78 Q105 42 148 42 Q196 41 220 75 Q238 103 225 141 L214 130 Q209 113 203 105 Q177 124 142 122 Q115 134 86 126 L78 145 Z')
+  context.fill(cap)
+  context.stroke(cap)
+
+  if (outfit.hairStyle === 'bun') {
+    context.beginPath()
+    context.ellipse(169, 40, 27, 21, -0.23, 0, Math.PI * 2)
+    context.fill()
+    context.stroke()
+  } else if (outfit.hairStyle === 'bob') {
+    for (const path of ['M77 117 Q66 127 67 172 Q69 193 92 202 Q79 176 91 128 Z', 'M219 114 Q236 126 234 170 Q232 193 208 202 Q220 171 209 132 Z']) {
+      const side = new Path2D(path)
+      context.fill(side)
+      context.stroke(side)
+    }
+  } else if (outfit.hairStyle === 'braids') {
+    for (const side of [-1, 1]) {
+      for (let segment = 0; segment < 5; segment++) {
+        context.beginPath()
+        context.ellipse(150 + side * (75 + segment * 2), 137 + segment * 14, 12 - segment, 12, side * 0.25, 0, Math.PI * 2)
+        context.fill()
+        context.stroke()
+      }
+    }
+  }
+}
+
 export function garmentHem(garment: string) {
   return ({ cheongsam: 388, saree: 399, bajuKurung: 390, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
 }
@@ -272,6 +305,7 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   if (blankBase) {
     const skin = '#' + CHEFS[outfit.chef].skin.toString(16).padStart(6, '0')
     drawBaseBody(context, skin, outfit.handSign)
+    drawHairstyle(context, outfit)
   } else {
     context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
     drawHandSign(context, outfit.handSign)

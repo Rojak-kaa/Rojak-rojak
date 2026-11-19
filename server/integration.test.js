@@ -50,7 +50,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const send = (socket, event, data) => socket.timeout(1500).emitWithAck(event, data)
   assert.match((await send(guest, 'enter', { name: 'Guest', create: true })).error, /Sign in/)
   const cookies = await Promise.all(Array.from({ length: 5 }, (_, index) => register(address, 'chef_' + index)))
-  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8, expression: 'wink', handSign: 'wave' }
+  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8, expression: 'wink', handSign: 'wave', hairStyle: 'bob' }
   const updated = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Pip', language: 'ta', outfit })
@@ -171,7 +171,7 @@ test('sign-in, language and outfit survive a server restart', async () => {
     assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {
       method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...profile, outfit: { ...profile.outfit, garment: 'cheongsam', trim: 4 } })
+      body: JSON.stringify({ ...profile, outfit: { ...profile.outfit, garment: 'cheongsam', trim: 4, hairStyle: 'bun' } })
     })
     assert.equal(updated.status, 200)
     await instance.io.close()

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -138,6 +138,9 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
         {garments.map(id => <option key={id} value={id}>{t(GARMENTS[id])}</option>)}
       </optgroup>)}
     </select>}
+    {!fixedClothing && <label>{t('Hairstyle')}<select value={draft.outfit.hairStyle} onChange={event => outfit('hairStyle', event.target.value)}>
+      {Object.entries(HAIRSTYLES).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
+    </select></label>}
     <label>{t('Headwear')}<select value={draft.outfit.accessory} onChange={event => outfit('accessory', event.target.value)}>
       {Object.entries(ACCESSORIES).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
