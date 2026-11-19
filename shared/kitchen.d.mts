@@ -18,3 +18,4 @@ export const DIFFICULTIES: Record<'Easy' | 'Normal' | 'Hard', {
   duration: number; orderLife: number; interval: number; cook: number; burn: number; plates: number; pool: string[]; category: string
 }>
 export function nearestStation(x: number, y: number, stations?: Station[]): Station | undefined
+export function serviceStars(served: number, missed: number): number

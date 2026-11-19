@@ -50,7 +50,7 @@ Create a private room and share its code or invite link. Select aprons, have eve
 | Char Kway Teow | Stove | Flat rice noodles, prawns, bean sprouts |
 | Chicken Satay | Grill | Chopped chicken, peanut sauce |
 
-The game uses simplified recipes. Quick service and streaks earn bonus points. Expired orders cost 20 points and break the streak. Difficulty changes the menu and the stations and ingredients available in the kitchen.
+The game uses simplified recipes. The final score is orders served on time minus orders missed, with a minimum of zero. Orders still open at closing count as missed. The six-star rating reflects the share of orders served on time, with all six awarded for completing every order. Two-ingredient recipes with a station time under five seconds have shorter ticket deadlines. Difficulty changes the menu and the stations and ingredients available in the kitchen.
 
 - **Easy · Rice & dessert** serves nasi lemak and ais kacang. The stove provides sambal, and the ice station provides rose syrup. Fry ikan bilis separately before adding it to nasi lemak.
 - **Normal · Hot favourites** serves nasi lemak, char kway teow, and chicken satay.

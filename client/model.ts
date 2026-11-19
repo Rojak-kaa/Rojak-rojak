@@ -11,7 +11,7 @@ export type Player = {
 export type StationState = {
   item: Item | null; ingredients: string[]; status: string; until: number; recipe?: string
 }
-export type Order = { id: number; recipe: string; expiresAt: number }
+export type Order = { id: number; recipe: string; expiresAt: number; easy: boolean; timeLimit: number }
 export type Match = {
   solo: boolean; duration: number; orderLife: number
   endsAt: number; score: number; served: number; missed: number; streak: number; bestStreak: number

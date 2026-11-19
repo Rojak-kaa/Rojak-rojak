@@ -80,23 +80,27 @@ function advanceStation(room, state, now) {
 function addOrder(room, now) {
   const game = room.game
   const rules = room.matchRules
-  const id = ++game.sequence
-  game.orders.push({ id, recipe: rules.pool[(id - 1) % rules.pool.length], expiresAt: room.training ? Number.MAX_SAFE_INTEGER : now + rules.orderLife })
+  const recipe = rules.pool[game.sequence % rules.pool.length]
+  const details = recipeFor(room.difficulty, recipe)
+  const easy = details.ingredients.length === 2 && Math.round(rules.cook * METHODS[details.station].scale) < 5000
+  const timeLimit = Math.min(rules.orderLife - (easy ? 26000 : 0), game.endsAt - now)
+  if (!room.training && timeLimit < 30000) return
+  game.orders.push({ id: ++game.sequence, recipe, easy, timeLimit, expiresAt: room.training ? Number.MAX_SAFE_INTEGER : now + timeLimit })
 }
 
 export function tickMatch(room, now, delta) {
   const game = room.game
-  if (!room.training && now >= game.endsAt) {
-    room.phase = 'results'
-    return
-  }
   const remaining = game.orders.filter(order => order.expiresAt > now)
   const missed = game.orders.length - remaining.length
   if (missed) {
     game.missed += missed
     game.streak = 0
-    game.score = Math.max(0, game.score - missed * 20)
+    game.score = Math.max(0, game.served - game.missed)
     game.orders = remaining
+  }
+  if (!room.training && now >= game.endsAt) {
+    room.phase = 'results'
+    return
   }
   if (!room.training && now >= game.nextOrder) {
     if (game.orders.length < (game.solo ? 2 : 5)) addOrder(room, now)
@@ -300,12 +304,12 @@ export function interact(room, player, start, now) {
       if (start || item?.kind !== 'dish') return 'Bring a plated dish and serve with E.'
       const index = game.orders.findIndex(order => order.recipe === item.name && order.expiresAt > now)
       if (index < 0) return 'There is no open ticket for this dish.'
-      const [order] = game.orders.splice(index, 1)
+      game.orders.splice(index, 1)
       game.streak++
       game.bestStreak = Math.max(game.bestStreak, game.streak)
-      game.score += RECIPES[item.name].points + (room.training ? 0 : Math.floor((order.expiresAt - now) / 3000) + Math.min(game.streak - 1, 5) * 5)
       returnDishware(game, item)
       game.served++
+      game.score = Math.max(0, game.served - game.missed)
       player.served++
       if (room.training) room.phase = 'results'
       return take(null)

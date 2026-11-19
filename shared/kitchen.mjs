@@ -133,3 +133,8 @@ export function nearestStation(x, y, stations = STATIONS) {
   }
   return nearest
 }
+
+export function serviceStars(served, missed) {
+  const total = served + missed
+  return total ? Math.floor(6 * served / total) : 0
+}

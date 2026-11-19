@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, SHOPS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, serviceStars, SHOPS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 import type { Difficulty, Player, Room } from './model'
 import type { Profile } from './model'
 import { LANGUAGES } from '../shared/profile.mjs'
@@ -83,6 +83,35 @@ function RecipeIngredients({ ingredients }: { ingredients: string[] }) {
     const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name
     return <li key={id} style={{ borderInlineStartColor: ingredient.color }}><span className="ingredient-icon" aria-hidden="true">{ingredientIcon(id)}</span>{t(name)}</li>
   })}</ul>
+}
+
+function ServiceScore({ score, served, missed }: { score: number; served: number; missed: number }) {
+  const [shown, setShown] = useState(0)
+  const stars = serviceStars(served, missed)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || score === 0) {
+      setShown(score)
+      return
+    }
+    let frame = 0
+    const start = performance.now()
+    function count(now: number) {
+      const progress = Math.min(1, (now - start) / 1150)
+      setShown(Math.floor(score * progress))
+      if (progress < 1) frame = requestAnimationFrame(count)
+    }
+    frame = requestAnimationFrame(count)
+    return () => cancelAnimationFrame(frame)
+  }, [score])
+
+  return <div className="result-tally">
+    <div className="result-score" aria-label={t('Total score') + ' ' + score}><span>{t('Total score')}</span><strong aria-hidden="true">{shown}</strong></div>
+    <p className="score-breakdown">{served} {t('Orders served')} − {missed} {t('Orders missed')}</p>
+    <div className="result-stars" role="img" aria-label={stars + ' / 6 ' + t('Stars')}>
+      {Array.from({ length: 6 }, (_, index) => <span aria-hidden="true" className={index < stars ? 'star-filled' : ''} key={index}>{index < stars ? '★' : '☆'}</span>)}
+    </div>
+    <p>{stars} / 6 {t('Stars')}</p>
+  </div>
 }
 
 function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
@@ -497,8 +526,8 @@ export default function App() {
             <RecipeIngredients ingredients={recipe.ingredients} />
             <div className="recipe-method">{t(recipe.method)}</div>
             {recipe.vessel === 'cup' && <div>{t('Serve in a cup')}</div>}
-            {!room.training && <div className="receipt-time"><span>{t("TIME LEFT")}</span><span className="ticket-clock" role="timer">{formatTime(remaining)}</span></div>}
-            {!room.training && <progress value={Math.max(0, remaining)} max={room.game!.orderLife} aria-label={recipe.name + ' time remaining'} />}
+            {!room.training && <div className="receipt-time"><span>{t("TIME LEFT")}{order.easy && <small className="quick-order">{t('Quick order')}</small>}</span><span className="ticket-clock" role="timer">{formatTime(remaining)}</span></div>}
+            {!room.training && <progress value={Math.max(0, remaining)} max={order.timeLimit} aria-label={recipe.name + ' time remaining'} />}
           </article>
         })}
         </div>
@@ -526,7 +555,8 @@ export default function App() {
         <span className="step-icon">🏆</span>
         <span className="eyebrow">{room.training ? 'PRACTICE' : room.difficulty.toUpperCase() + ' SERVICE'}</span>
         <h1>{t(room.training ? 'Training complete!' : 'Service complete!')}</h1>
-        <p>{room.training ? 'You served ' + RECIPES[room.training].name + '.' : <>{room.game.solo ? 'You' : 'Your crew'} earned <strong>{room.game.score} points</strong>.</>}</p>
+        {room.training ? <p>{'You served ' + RECIPES[room.training].name + '.'}</p> :
+          <ServiceScore score={room.game.score} served={room.game.served} missed={room.game.missed} />}
         <div className="result-stats">
           <div><strong>{room.game.served}</strong><span>{t("Served")}</span></div>
           <div><strong>{room.game.missed}</strong><span>{t("Expired")}</span></div>

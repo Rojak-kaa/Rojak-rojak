@@ -234,3 +234,10 @@ form .button { margin-top: 9px; }
   .player-page-panel { align-items: start; }
 }
 .ingredient-icon { display: inline-block; margin-inline-end: .4em; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }
+.result-tally { display: grid; justify-items: center; gap: 5px; margin-block: 14px 17px; }
+.result-score { display: grid; justify-items: center; gap: 2px; }
+.result-score strong { font-size: clamp(2.4rem, 7vw, 4.25rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.score-breakdown { font-size: .92rem; }
+.result-stars { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; font-size: clamp(1.6rem, 5vw, 2.5rem); line-height: 1; color: #775e52; }
+.result-stars .star-filled { color: #a85812; }
+.quick-order { display: block; margin-top: 2px; color: var(--muted); }

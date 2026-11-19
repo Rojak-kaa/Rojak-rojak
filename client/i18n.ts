@@ -78,6 +78,11 @@ Untimed practice|Latihan tanpa had masa|不限时练习|நேர வரம்�
 Round left|Baki masa|回合剩余|மீதமுள்ள நேரம்
 TIME LEFT|BAKI MASA|剩余时间|மீதமுள்ள நேரம்
 Score|Markah|得分|மதிப்பெண்
+Total score|Jumlah markah|总分|மொத்த மதிப்பெண்
+Orders served|pesanan disaji|份订单已上菜|ஆர்டர்கள் பரிமாறப்பட்டன
+Orders missed|pesanan terlepas|份订单未完成|ஆர்டர்கள் தவறின
+Stars|bintang|星|நட்சத்திரங்கள்
+Quick order|Pesanan ringkas|快捷订单|விரைவு ஆர்டர்
 Clean plates|Pinggan bersih|干净餐盘|சுத்தமான தட்டுகள்
 Returned|Dipulangkan|退回餐盘|திரும்பிய தட்டுகள்
 Ingredients|Bahan|食材|பொருட்கள்

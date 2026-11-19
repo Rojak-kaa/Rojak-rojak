@@ -7,7 +7,7 @@ import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
 import { interact, startMatch, tickMatch } from './kitchen.js'
-import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
+import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
 const { http, io } = createKitchenServer({ database: ':memory:' })
 const sockets = []
@@ -311,7 +311,7 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
     if (training) {
       assert.equal(room.phase, 'results')
       assert.equal(game.served, 1)
-      assert.equal(game.score, recipe.points)
+      assert.equal(game.score, 1)
       return
     }
     assert.equal(game.dirtyCups, drink ? 1 : 0)
@@ -325,7 +325,7 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
   }
   assert.equal(game.served, rules.pool.length)
   assert.equal(game.bestStreak, rules.pool.length)
-  assert.ok(game.score >= rules.pool.reduce((score, id) => score + recipeFor(difficulty, id).points, 0))
+  assert.equal(game.score, game.served)
   advance(game.nextOrder - now)
   const next = game.orders[0]
   advance(next.expiresAt - now)
@@ -352,6 +352,28 @@ test('a hot dish burns at its deadline even if a player acts before the next tic
   assert.equal(pot.status, 'burned')
   assert.equal(interact(room, player, true, deadline + 200), '')
   assert.equal(pot.status, 'empty')
+})
+
+test('quick two-ingredient orders expire sooner and closing counts missed orders for the score and stars', () => {
+  const chef = { color: 0, socketId: 'chef' }
+  const room = { difficulty: 'Easy', players: new Map([['a', chef], ['b', { color: 1, socketId: 'b' }]]) }
+  startMatch(room, 1000)
+  const { game } = room
+  const [rice, ice] = game.orders
+  assert.equal(rice.easy, false)
+  assert.equal(ice.easy, true)
+  assert.ok(ice.timeLimit < rice.timeLimit)
+  Object.assign(chef, { x: 12.5, y: 4.5, item: { kind: 'dish', name: rice.recipe } })
+  assert.equal(interact(room, chef, false, 2000), '')
+  assert.equal(game.score, 1)
+  assert.equal(serviceStars(game.served, game.missed), 6)
+  tickMatch(room, game.endsAt, 0)
+  assert.equal(game.missed, 1)
+  assert.equal(game.score, 0)
+  assert.equal(serviceStars(game.served, game.missed), 3)
+  assert.equal(serviceStars(0, 0), 0)
+  assert.equal(serviceStars(50, 1), 5)
+  assert.equal(room.phase, 'results')
 })
 
 test('the use action drops items on open floor and picks them up even near a station', () => {
