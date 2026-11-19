@@ -4,7 +4,7 @@ import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
 import { interact, startMatch, tickMatch } from './kitchen.js'
-import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SPAWNS, stationsFor, WIDTH } from '../shared/kitchen.mjs'
+import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
 const { http, io } = createKitchenServer()
 const sockets = []
@@ -106,6 +106,14 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   assert.match((await send(d, 'enter', { name: 'Guest', code: solo.room.code })).error, /started/)
   await outsider.timeout(1500).emitWithAck('leave')
 
+  const lesson = await send(outsider, 'enter', { name: 'Solo Chef', training: 'laksa' })
+  assert.equal(lesson.room.training, 'laksa')
+  assert.equal(lesson.room.phase, 'briefing')
+  const lessonStarted = waitFor(outsider, state => state.phase === 'playing')
+  assert.equal((await command(outsider, 'briefed')).ok, true)
+  assert.deepEqual((await lessonStarted).game.orders.map(order => order.recipe), ['laksa'])
+  await outsider.timeout(1500).emitWithAck('leave')
+
   const pair = await send(d, 'enter', { name: 'Basil', create: true })
   await send(outsider, 'enter', { name: 'Guest', code: pair.room.code })
   await Promise.all([d, outsider].map(socket => command(socket, 'ready')))
@@ -145,11 +153,17 @@ for (const [difficulty, rules] of Object.entries(DIFFICULTIES)) {
   })
 }
 
-function verifyMenu(difficulty, rules) {
-  const stations = stationsFor(difficulty)
+for (const recipe of TRAINING_RECIPES) {
+  test(recipe + ' training stays untimed and completes after one served order', () => {
+    verifyMenu('Hard', { ...DIFFICULTIES.Hard, pool: [recipe] }, recipe)
+  })
+}
+
+function verifyMenu(difficulty, rules, training = null) {
+  const stations = stationsFor(difficulty, training)
   const paths = stationPaths(stations)
-  const chefs = [0, 1, 2].map(color => ({ color, socketId: String(color) }))
-  const room = { difficulty, players: new Map(chefs.map(chef => [chef.color, chef])) }
+  const chefs = (training ? [0] : [0, 1, 2]).map(color => ({ color, socketId: String(color) }))
+  const room = { difficulty, training, players: new Map(chefs.map(chef => [chef.color, chef])) }
   let now = 1000
   startMatch(room, now)
   const { game } = room
@@ -164,13 +178,18 @@ function verifyMenu(difficulty, rules) {
     now += ms
     tickMatch(room, now, 0)
   }
+  if (training) {
+    advance(game.duration + game.orderLife)
+    assert.equal(room.phase, 'playing')
+    assert.equal(game.orders.length, 1)
+  }
   for (const key of rules.pool) {
     const recipe = recipeFor(difficulty, key)
     if (!game.orders.some(order => order.recipe === key)) advance(game.nextOrder - now)
     assert.ok(game.orders.some(order => order.recipe === key), recipe.name + ' ticket should arrive')
     const station = stations.find(({ kind }) => kind === recipe.station).id
     for (const [i, ingredient] of recipe.ingredients.entries()) {
-      const chef = chefs[i]
+      const chef = chefs[i % chefs.length]
       use(chef, ingredient)
       if (INGREDIENTS[ingredient].chop) {
         assert.match(act(chef, station), /Chop/)
@@ -185,11 +204,18 @@ function verifyMenu(difficulty, rules) {
     assert.equal(game.stations[station].recipe, key)
     advance(Math.ceil(rules.cook * METHODS[recipe.station].scale))
     assert.equal(game.stations[station].status, 'cooked')
-    assert.equal(Boolean(game.stations[station].until), METHODS[recipe.station].hot)
-    use(chefs[1], 'plates')
-    use(chefs[1], station)
-    assert.equal(chefs[1].item.name, key)
-    use(chefs[1], 'serve')
+    assert.equal(Boolean(game.stations[station].until), !training && METHODS[recipe.station].hot)
+    const platingChef = chefs[1] ?? chefs[0]
+    use(platingChef, 'plates')
+    use(platingChef, station)
+    assert.equal(platingChef.item.name, key)
+    use(platingChef, 'serve')
+    if (training) {
+      assert.equal(room.phase, 'results')
+      assert.equal(game.served, 1)
+      assert.equal(game.score, recipe.points)
+      return
+    }
     use(chefs[2], 'dirty')
     use(chefs[2], 'sink')
     use(chefs[2], 'sink', true)

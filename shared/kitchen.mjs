@@ -8,6 +8,7 @@ export const STATIONS = [
   ['boardA', 'board', 7, 1], ['boardB', 'board', 8, 1],
   ['potA', 'pot', 9, 1], ['potB', 'pot', 10, 1], ['grill', 'grill', 11, 1],
   ['noodles', 'crate', 8, 3], ['prawn', 'crate', 9, 3], ['sprouts', 'crate', 10, 3],
+  ['broth', 'crate', 7, 3],
   ['chicken', 'crate', 12, 1], ['peanut', 'crate', 13, 1],
   ['mix', 'mix', 5, 4], ['shave', 'shave', 9, 5],
   ['plates', 'plates', 13, 3], ['serve', 'serve', 13, 4],
@@ -23,6 +24,7 @@ export const INGREDIENTS = {
   pineapple: { name: 'Pineapple', label: 'PINEAPPLE', color: '#e9b747', chop: true },
   dressing: { name: 'Rojak sauce', label: 'ROJAK SAUCE', color: '#884827' },
   noodles: { name: 'Flat rice noodles', label: 'NOODLES', color: '#eed498' },
+  broth: { name: 'Curry broth', label: 'CURRY BROTH', color: '#de783b' },
   prawn: { name: 'Prawns', label: 'PRAWNS', color: '#fb8c79' },
   sprouts: { name: 'Bean sprouts', label: 'SPROUTS', color: '#d2dc8c' },
   chicken: { name: 'Chicken', label: 'CHICKEN', color: '#eea48a', chop: true },
@@ -42,8 +44,10 @@ export const RECIPES = {
   rojak: { name: 'Fruit Rojak', station: 'mix', ingredients: ['cucumber', 'pineapple', 'dressing'], method: 'Toss in the mixing bowl', color: '#b76538', points: 110 },
   aisKacang: { name: 'Ais Kacang', station: 'shave', ingredients: ['ice', 'beans', 'syrup'], method: 'Shave and top at the ice station', color: '#db659a', points: 90 },
   charKwayTeow: { name: 'Char Kway Teow', station: 'pot', ingredients: ['noodles', 'prawn', 'sprouts'], method: 'Stir-fry at the stove', color: '#bd6a3c', points: 110 },
-  satay: { name: 'Chicken Satay', station: 'grill', ingredients: ['chicken', 'peanut'], method: 'Cook on the grill', color: '#d49542', points: 90 }
+  satay: { name: 'Chicken Satay', station: 'grill', ingredients: ['chicken', 'peanut'], method: 'Cook on the grill', color: '#d49542', points: 90 },
+  laksa: { name: 'Curry Laksa', station: 'pot', ingredients: ['broth', 'noodles', 'prawn'], method: 'Simmer at the stove', color: '#ce6442', points: 110 }
 }
+export const TRAINING_RECIPES = ['rojak', 'nasiLemak', 'laksa', 'aisKacang']
 const service = { duration: 210000, orderLife: 78000, interval: 23000, cook: 4200, burn: 23000, plates: 6 }
 export const DIFFICULTIES = {
   Easy: { ...service, category: 'Rice & dessert', pool: ['nasiLemak', 'aisKacang'] },
@@ -58,8 +62,8 @@ export function recipeFor(difficulty, id) {
   return recipe
 }
 
-function buildStations(difficulty) {
-  const recipes = DIFFICULTIES[difficulty].pool.map(id => recipeFor(difficulty, id))
+function buildStations(difficulty, pool) {
+  const recipes = pool.map(id => recipeFor(difficulty, id))
   const ingredients = new Set(recipes.flatMap(recipe => recipe.ingredients))
   const methods = new Set(recipes.map(recipe => recipe.station))
   return STATIONS.filter(station => {
@@ -68,10 +72,11 @@ function buildStations(difficulty) {
   })
 }
 
-const stationLayouts = Object.fromEntries(Object.keys(DIFFICULTIES).map(level => [level, buildStations(level)]))
+const stationLayouts = Object.fromEntries(Object.entries(DIFFICULTIES).map(([level, rules]) => [level, buildStations(level, rules.pool)]))
+const trainingLayouts = Object.fromEntries(TRAINING_RECIPES.map(id => [id, buildStations('Hard', [id])]))
 
-export function stationsFor(difficulty) {
-  return stationLayouts[difficulty]
+export function stationsFor(difficulty, training) {
+  return training ? trainingLayouts[training] : stationLayouts[difficulty]
 }
 
 export function nearestStation(x, y, stations = STATIONS) {

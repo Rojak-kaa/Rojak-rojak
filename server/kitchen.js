@@ -26,10 +26,10 @@ export function startMatch(room, now) {
     interval: difficulty.interval + 16000,
     burn: difficulty.burn + 10000
   } : difficulty
-  room.matchRules = rules
-  room.stations = stationsFor(room.difficulty)
+  room.matchRules = room.training ? { ...rules, pool: [room.training] } : rules
+  room.stations = stationsFor(room.difficulty, room.training)
   room.blocked = new Set(room.stations.map(({ x, y }) => y * WIDTH + x))
-  room.recipes = rules.pool.map(id => [id, recipeFor(room.difficulty, id)])
+  room.recipes = room.matchRules.pool.map(id => [id, recipeFor(room.difficulty, id)])
   room.phase = 'playing'
   for (const player of room.players.values()) {
     const [x, y] = SPAWNS[player.color]
@@ -48,12 +48,12 @@ function addOrder(room, now) {
   const game = room.game
   const rules = room.matchRules
   const id = ++game.sequence
-  game.orders.push({ id, recipe: rules.pool[(id - 1) % rules.pool.length], expiresAt: now + rules.orderLife })
+  game.orders.push({ id, recipe: rules.pool[(id - 1) % rules.pool.length], expiresAt: room.training ? Number.MAX_SAFE_INTEGER : now + rules.orderLife })
 }
 
 export function tickMatch(room, now, delta) {
   const game = room.game
-  if (now >= game.endsAt) {
+  if (!room.training && now >= game.endsAt) {
     room.phase = 'results'
     return
   }
@@ -65,7 +65,7 @@ export function tickMatch(room, now, delta) {
     game.score = Math.max(0, game.score - missed * 20)
     game.orders = remaining
   }
-  if (now >= game.nextOrder) {
+  if (!room.training && now >= game.nextOrder) {
     if (game.orders.length < (game.solo ? 2 : 5)) addOrder(room, now)
     game.nextOrder = now + room.matchRules.interval
   }
@@ -80,7 +80,7 @@ export function tickMatch(room, now, delta) {
       state.status = 'empty'
     } else if (state.status === 'cooking') {
       state.status = 'cooked'
-      if (METHODS[RECIPES[state.recipe].station].hot) state.until = now + room.matchRules.burn
+      if (!room.training && METHODS[RECIPES[state.recipe].station].hot) state.until = now + room.matchRules.burn
     } else if (state.status === 'cooked') {
       state.status = 'burned'
     }
@@ -99,7 +99,7 @@ export function tickMatch(room, now, delta) {
 
 export function interact(room, player, start, now) {
   const game = room.game
-  if (now >= game.endsAt) return 'Time is up.'
+  if (!room.training && now >= game.endsAt) return 'Time is up.'
   if (now - player.actionAt < 180) return ''
   player.actionAt = now
   const station = nearestStation(player.x, player.y, room.stations)
@@ -207,10 +207,11 @@ export function interact(room, player, start, now) {
       const [order] = game.orders.splice(index, 1)
       game.streak++
       game.bestStreak = Math.max(game.bestStreak, game.streak)
-      game.score += RECIPES[item.name].points + Math.floor((order.expiresAt - now) / 3000) + Math.min(game.streak - 1, 5) * 5
+      game.score += RECIPES[item.name].points + (room.training ? 0 : Math.floor((order.expiresAt - now) / 3000) + Math.min(game.streak - 1, 5) * 5)
       game.dirty++
       game.served++
       player.served++
+      if (room.training) room.phase = 'results'
       return take(null)
     }
     case 'bin':

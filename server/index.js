@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Server } from 'socket.io'
-import { COLORS, DIFFICULTIES } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, TRAINING_RECIPES } from '../shared/kitchen.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 
 const GRACE = 30000
@@ -23,7 +23,7 @@ export function createKitchenServer() {
 
   function snapshot(room, now = Date.now()) {
     return {
-      code: room.code, host: room.host, phase: room.phase, difficulty: room.difficulty, solo: room.solo, now,
+      code: room.code, host: room.host, phase: room.phase, difficulty: room.difficulty, solo: room.solo, training: room.training, now,
       players: [...room.players.values()].map(({ id, name, color, ready, socketId, x, y, facing, item, served }) =>
         ({ id, name, color, ready, connected: Boolean(socketId), x, y, facing, item, served })),
       game: room.game
@@ -85,11 +85,13 @@ export function createKitchenServer() {
       const name = typeof data?.name === 'string' ? data.name.trim().slice(0, 20) : ''
       if (!name) return respond(ack, { error: 'Enter a chef nickname.' })
       let room
-      const solo = data.solo === true
+      const training = typeof data.training === 'string' && TRAINING_RECIPES.includes(data.training) ? data.training : null
+      if (data.training != null && !training) return respond(ack, { error: 'That training recipe is unavailable.' })
+      const solo = data.solo === true || Boolean(training)
       if (data.create === true || solo) {
         let code
         do { code = Array.from({ length: 6 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('') } while (rooms.has(code))
-        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: 'Easy', solo, game: null }
+        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: training ? 'Hard' : 'Easy', solo, training, game: null }
         rooms.set(code, room)
       } else {
         const code = typeof data.code === 'string' ? data.code.trim().toUpperCase() : ''

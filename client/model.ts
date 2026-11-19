@@ -15,5 +15,5 @@ export type Match = {
 }
 export type Room = {
   code: string; host: string; phase: 'lobby' | 'briefing' | 'playing' | 'results'
-  difficulty: Difficulty; solo: boolean; now: number; players: Player[]; game: Match | null
+  difficulty: Difficulty; solo: boolean; training: string | null; now: number; players: Player[]; game: Match | null
 }

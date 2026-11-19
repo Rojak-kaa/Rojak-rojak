@@ -9,6 +9,12 @@ const GameCanvas = lazy(() => import('./GameCanvas'))
 const socket = io({ autoConnect: false })
 const SESSION_KEY = 'kitchen-rush-session'
 const APRONS = ['Paprika', 'Basil', 'Ube', 'Saffron']
+const TRAINING_SPOTS = [
+  { id: 'rojak', label: 'Rojak', x: 17, y: 72 },
+  { id: 'nasiLemak', label: 'Nasi Lemak', x: 52, y: 77 },
+  { id: 'laksa', label: 'Laksa', x: 63, y: 26 },
+  { id: 'aisKacang', label: 'Ais Kacang', x: 85, y: 71 }
+]
 const STEPS = [
   ['🥒', 'Prep the ingredients', 'Grab the ingredients listed on a ticket. Chop cucumber, pineapple, and chicken on a cutting board.'],
   ['🍳', 'Use the right station', 'Load the station shown on the ticket. Press Space to cook, grill, toss the rojak, or shave and top the ice.'],
@@ -88,16 +94,16 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
   const connected = room.players.filter(player => player.connected)
   const ready = connected.filter(player => player.ready).length
   return <main className="shell inner briefing">
-    <div className="room-heading"><div><span className="eyebrow">PRE-GAME GUIDE</span><h1>Before service</h1></div><Status online={online} /></div>
+    <div className="room-heading"><div><span className="eyebrow">{room.training ? 'UNTIMED PRACTICE' : 'PRE-GAME GUIDE'}</span><h1>{room.training ? RECIPES[room.training].name + ' training' : 'Before service'}</h1></div><Status online={online} /></div>
     <section className="panel briefing-controls" aria-label="Kitchen instructions">
       <p><kbd>WASD</kbd> or arrow keys <strong>Move</strong></p>
       <p><kbd>E</kbd> <strong>Pick up, place, plate, or serve</strong></p>
       <p><kbd>Space</kbd> <strong>Work at the highlighted station</strong></p>
     </section>
     <p className="briefing-tip">Chop marked ingredients at a cutting board. Load the recipe station with <kbd>E</kbd>, then press <kbd>Space</kbd>. Bring clean dishware to collect the finished dish and deliver it to Serve. Wash returns at the sink.</p>
-    <h2 className="briefing-menu-title">{room.difficulty} · {DIFFICULTIES[room.difficulty].category}</h2>
+    <h2 className="briefing-menu-title">{room.training ? 'Practice recipe' : room.difficulty + ' · ' + DIFFICULTIES[room.difficulty].category}</h2>
     <ul className="briefing-menu">
-      {DIFFICULTIES[room.difficulty].pool.map(id => {
+      {(room.training ? [room.training] : DIFFICULTIES[room.difficulty].pool).map(id => {
         const recipe = recipeFor(room.difficulty, id)
         return <li className="panel briefing-recipe" key={id} style={{ borderTopColor: recipe.color }}>
           <h3>{recipe.name}</h3>
@@ -109,7 +115,7 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
     </ul>
     <div className="briefing-actions">
       <button className="button primary" disabled={!online || !chef || chef.ready} onClick={onReady}>{chef?.ready ? 'Ready' : 'Ready to cook'}</button>
-      <p role="status">{connected.length > 1 ? ready + ' of ' + connected.length + ' chefs ready. The timer starts when everyone is ready.' : 'The timer starts when you’re ready.'}</p>
+      <p role="status">{room.training ? 'Follow the recipe and serve one dish to complete the lesson.' : connected.length > 1 ? ready + ' of ' + connected.length + ' chefs ready. The timer starts when everyone is ready.' : 'The timer starts when you’re ready.'}</p>
       <button className="back" onClick={onLeave}>Leave room</button>
     </div>
     {error && <p className="error" role="alert">{error}</p>}
@@ -132,13 +138,13 @@ function KitchenPreview() {
 
 function guidance(room: Room, player?: Player) {
   if (!player) return 'Waiting for your chef…'
-  const station = nearestStation(player.x, player.y, stationsFor(room.difficulty))
+  const station = nearestStation(player.x, player.y, stationsFor(room.difficulty, room.training))
   if (!station) return 'Walk up to a station to interact.'
   const state = room.game!.stations[station.id]
   const remaining = state.until ? Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's' : ''
   const method = METHODS[station.kind]
   if (method) {
-    if (state.status === 'cooked') return method.hot ? 'E · Plate now · Burns in ' + remaining : 'E · Pick up the dish with clean dishware'
+    if (state.status === 'cooked') return method.hot && state.until ? 'E · Plate now · Burns in ' + remaining : 'E · Pick up the dish with clean dishware'
     if (state.status === 'cooking') return method.busy + ' · ' + remaining
     if (state.status === 'burned') return 'Space · Clear the burned batch'
     if (state.status === 'loaded') return 'E · Add or take back an ingredient   /   Space · ' + method.action
@@ -238,7 +244,7 @@ export default function App() {
     ping(!sound)
   }
 
-  function enter(create: boolean, solo = false) {
+  function enter(create: boolean, solo = false, training?: string) {
     const nickname = name.trim() || (solo ? 'Solo Chef' : '')
     if (!nickname) return setError('Enter a chef nickname.')
     if (!create && !solo && !/^[a-z0-9]{6}$/i.test(code)) return setError('Enter the six-character room code.')
@@ -246,12 +252,17 @@ export default function App() {
     setError('')
     ping(sound)
     if (name.trim()) sessionStorage.setItem('kitchen-rush-name', name.trim())
-    socket.timeout(5000).emit('enter', { name: nickname, create, solo, code }, (failure: Error | null, reply?: Reply) => {
+    socket.timeout(5000).emit('enter', { name: nickname, create, solo, training, code }, (failure: Error | null, reply?: Reply) => {
       setPending(false)
       if (failure || reply?.error) return setError(reply?.error ?? 'The kitchen server did not respond. Try again.')
       accept(reply)
       if (solo) window.scrollTo(0, 0)
     })
+  }
+
+  function startSolo(training?: string) {
+    if (!online) return setError('The kitchen server is connecting. Try again in a moment.')
+    enter(true, true, training)
   }
 
   function lobby(type: string, value?: string | number) {
@@ -265,6 +276,7 @@ export default function App() {
   function leave() {
     socket.emit('leave')
     sessionStorage.removeItem(SESSION_KEY)
+    if (room?.training) setPage('home')
     setRoom(undefined)
     setMe(undefined)
     setError('')
@@ -306,7 +318,7 @@ export default function App() {
   const roundLeft = room?.game ? Math.max(0, room.game.endsAt - room.now) : 0
 
   return <div className="site">
-    <header className="topbar">
+    {phase !== 'playing' && <header className="topbar">
       <div className="shell nav">
         <button className="brand" onClick={() => { if (!room) { setPage('home'); window.scrollTo(0, 0) } }} aria-label="Rojak-rojak home">
           <span className="brand-icon">♨</span><span>Rojak-rojak</span>
@@ -317,35 +329,28 @@ export default function App() {
           <button className="icon-btn gear" aria-label="Settings" onClick={() => setSettings(true)}>⚙</button>
         </div>
       </div>
-    </header>
+    </header>}
 
-    {!room && page === 'home' && <main className="shell home">
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">MALAYSIAN COOKING GAME</span>
-          <h1 aria-label="Rojak-rojak">Rojak-<br /><em>rojak</em></h1>
-          <p>Run a Malaysian hawker stall on your own or with friends. Cook nasi lemak, toss fruit rojak, and serve ais kacang before the tickets expire.</p>
-          <div className="hero-actions">
-            <button className="button primary" disabled={pending} onClick={() => online ? enter(true, true) : setError('The kitchen server is connecting. Try again in a moment.')}><span className="play-icon" aria-hidden="true">▶</span> {pending ? 'Starting…' : 'Play Solo'}</button>
-            <button className="button secondary" disabled={pending} onClick={openLobby}>Play with Friends</button>
-            <button className="button secondary" onClick={showRules}>How to Play</button>
+    {!room && page === 'home' && <main className="landing">
+      <section className="landing-hero" aria-labelledby="landing-title">
+        <div className="landing-play">
+          <h1 id="landing-title">Rojak-rojak</h1>
+          <div className="landing-buttons">
+            <button className="button primary" disabled={pending} onClick={() => startSolo()}>Play Solo</button>
+            <button className="button secondary" disabled={pending} onClick={openLobby}>Play Team</button>
           </div>
+          <p className="landing-tip">Select a dish to start training.</p>
           {error && <p className="error" role="alert">{error}</p>}
-          <ul className="hero-meta" aria-label="Game details"><li>1–4 players</li><li>3½–4 min rounds</li><li>Keyboard controls</li></ul>
         </div>
-        <figure className="hero-art">
-          <img src={kitchenCrew} alt="Three cooks prepare nasi lemak, fruit rojak, and ais kacang at a Malaysian hawker stall." width="1440" height="960" fetchPriority="high" />
-        </figure>
+        <div className="landing-scene">
+          <img src={kitchenCrew} alt="A Malaysian hawker stall with three cooks preparing rojak, nasi lemak, and ais kacang." width="1536" height="1024" fetchPriority="high" />
+          {TRAINING_SPOTS.map(spot => <button key={spot.id} type="button" className="food-hotspot" disabled={pending}
+            style={{ left: spot.x + '%', top: spot.y + '%' }} aria-label={'Train: ' + spot.label} onClick={() => startSolo(spot.id)}>
+            <span>{spot.label}</span>
+          </button>)}
+        </div>
       </section>
-      <section className="rules" aria-labelledby="menu-title">
-        <div className="section-head"><div><span className="eyebrow">HAWKER MENU</span><h2 id="menu-title">On the menu</h2></div></div>
-        <ul className="dish-menu">
-          {Object.entries(RECIPES).map(([id, recipe]) => <li key={id} style={{ borderTopColor: recipe.color }}>
-            <strong>{recipe.name}</strong><span>{METHODS[recipe.station]?.label}</span>
-          </li>)}
-        </ul>
-      </section>
-      <section id="rules" className="rules" tabIndex={-1} aria-labelledby="rules-title">
+      <section id="rules" className="shell rules landing-rules" tabIndex={-1} aria-labelledby="rules-title">
         <div className="section-head"><div><span className="eyebrow">GAME RULES</span><h2 id="rules-title">From prep to plate</h2></div><p>Fill the tickets together. Quick service earns bonus points, and expired orders cost points.</p></div>
         <div className="step-grid">
           {STEPS.map(([icon, title, body]) => <article className="step" key={title}>
@@ -417,33 +422,38 @@ export default function App() {
 
     {room?.phase === 'briefing' && <ServiceBriefing online={online} chef={chef} room={room} onReady={() => lobby('briefed')} onLeave={leave} error={error} />}
 
-    {room?.phase === 'playing' && room.game && <main className="shell match">
-      <div className="match-head">
-        <div><span className="eyebrow">{room.game.solo ? 'SOLO · ' : ''}{room.difficulty.toUpperCase()} SERVICE</span><h1>Order up!</h1></div>
-        <div className="match-stats"><span>Score <strong>{room.game.score}</strong></span><Status online={online} /></div>
-      </div>
-      <section className="order-rail" aria-labelledby="order-rail-title">
+    {room?.phase === 'playing' && room.game && <main className="match">
+      <aside className="order-rail" aria-labelledby="order-rail-title">
         <div className="order-rail-heading">
-          <div><h2 id="order-rail-title">Customer orders</h2><span>{room.game.orders.length} open</span></div>
-          <div className={'round-clock' + (roundLeft <= 20000 ? ' clock-urgent' : '')}>
+          <h1 id="order-rail-title">{room.training ? 'Training order' : 'Customer orders'}</h1>
+          {room.training ? <span className="practice-mode">Untimed practice</span> : <div className={'round-clock' + (roundLeft <= 20000 ? ' clock-urgent' : '')}>
             <span>Round left</span><strong role="timer">{formatTime(roundLeft)}</strong>
             <progress value={roundLeft} max={room.game.duration} aria-label="Round time remaining" />
-          </div>
+          </div>}
         </div>
         <div className="tickets" tabIndex={0} aria-label="Order tickets">
         {room.game.orders.length === 0 && <div className="empty-slot">Waiting for the next order…</div>}
         {room.game.orders.map(order => {
           const recipe = recipeFor(room.difficulty, order.recipe)
           const remaining = order.expiresAt - room.now
-          return <article className={'ticket ' + (remaining <= 15000 ? 'ticket-urgent' : '')} key={order.id} style={{ borderTopColor: recipe.color }}>
-            <div className="ticket-heading"><strong>{recipe.name}</strong><span className="ticket-clock" role="timer">{formatTime(remaining)}</span></div>
-            <div className="recipe-method">{recipe.method}</div>
+          return <article className={'ticket ' + (remaining <= 15000 ? 'ticket-urgent' : '')} key={order.id}>
+            <div className="receipt-header"><span>ROJAK-ROJAK</span><span>ORDER #{String(order.id).padStart(3, '0')}</span></div>
+            <div className="ticket-heading"><strong>1 × {recipe.name}</strong></div>
             <RecipeIngredients ingredients={recipe.ingredients} />
-            <progress value={Math.max(0, remaining)} max={room.game!.orderLife} aria-label={recipe.name + ' time remaining'} />
+            <div className="recipe-method">{recipe.method}</div>
+            {!room.training && <div className="receipt-time"><span>TIME LEFT</span><span className="ticket-clock" role="timer">{formatTime(remaining)}</span></div>}
+            {!room.training && <progress value={Math.max(0, remaining)} max={room.game!.orderLife} aria-label={recipe.name + ' time remaining'} />}
           </article>
         })}
         </div>
-      </section>
+        {room.training && <ol className="practice-steps">
+          <li>Collect the listed ingredients. Chop any marked ingredients at a cutting board.</li>
+          <li>Load the recipe station with <kbd>E</kbd> and press <kbd>Space</kbd> to prepare the dish.</li>
+          <li>Use a clean plate to collect the finished dish, then bring it to Serve.</li>
+        </ol>}
+        {!room.training && <div className="service-score">Score <strong>{room.game.score}</strong></div>}
+      </aside>
+      <section className="play-kitchen" aria-label="Kitchen">
       <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} onMove={(x, y) => { if (socket.connected) socket.volatile.emit('move', { x, y }) }} onAct={action => {
         if (!socket.connected || settings) return
         socket.emit('act', action)
@@ -451,14 +461,15 @@ export default function App() {
       }} /></Suspense></div>
       <div className="match-under"><span role="status">{!online ? 'Connection lost. Reconnecting…' : notice || guidance(room, chef)}</span><span>Clean plates <b>{room.game.clean}</b> · Returned <b>{room.game.dirty}</b></span></div>
       <div className="control-strip"><span><kbd>WASD</kbd> / arrows · Move</span><span><kbd>E</kbd> · Pick up, place, serve</span><span><kbd>Space</kbd> · Work at a station</span><button className="back ml-auto" onClick={() => { if (window.confirm('Leave the match?')) leave() }}>Leave room</button></div>
+      </section>
     </main>}
 
     {room?.phase === 'results' && room.game && <main className="shell inner">
       <section className="panel results">
         <span className="step-icon">🏆</span>
-        <span className="eyebrow">{room.difficulty.toUpperCase()} SERVICE</span>
-        <h1>Service complete!</h1>
-        <p>{room.game.solo ? 'You' : 'Your crew'} earned <strong>{room.game.score} points</strong>.</p>
+        <span className="eyebrow">{room.training ? 'PRACTICE' : room.difficulty.toUpperCase() + ' SERVICE'}</span>
+        <h1>{room.training ? 'Training complete!' : 'Service complete!'}</h1>
+        <p>{room.training ? 'You served ' + RECIPES[room.training].name + '.' : <>{room.game.solo ? 'You' : 'Your crew'} earned <strong>{room.game.score} points</strong>.</>}</p>
         <div className="result-stats">
           <div><strong>{room.game.served}</strong><span>Served</span></div>
           <div><strong>{room.game.missed}</strong><span>Expired</span></div>
@@ -473,7 +484,7 @@ export default function App() {
       </section>
     </main>}
 
-    <footer className="site-footer"><div className="shell"><span>Rojak-rojak</span><span>Solo or with up to 4 chefs.</span></div></footer>
+    {phase !== 'playing' && <footer className="site-footer"><div className="shell"><span>Rojak-rojak</span><span>Solo or with up to 4 chefs.</span></div></footer>}
     {settings && <Dialog title="Settings" close={() => setSettings(false)}><div className="setting-row"><div><strong>Sound effects</strong><p>Play cues for actions and successful orders.</p></div><button className="button secondary compact" aria-pressed={sound} onClick={toggleSound}>{sound ? 'On' : 'Off'}</button></div></Dialog>}
   </div>
 }

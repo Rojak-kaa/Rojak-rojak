@@ -13,7 +13,9 @@ npm run dev
 
 Open http://localhost:5173. Vite forwards Socket.IO to the Express server on port 3001. Choose **Play Solo** for a one-player match with a slower order pace, longer tickets, and more time to plate hot food. Choose **Play with Friends** to create or join a room for up to four players. You can also start a room by yourself if you want to select a different difficulty.
 
-Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and order tickets stay above the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
+Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
+
+Select a dish in the landing illustration to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Each lesson supplies the relevant ingredients, runs without order or burn timers, and ends when you serve the dish.
 
 For a one-computer multiplayer test, open two or more separate tabs and enter a different nickname in each. Each tab uses a separate room session unless it inherited one from a duplicated tab.
 
