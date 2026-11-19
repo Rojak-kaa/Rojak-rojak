@@ -16,6 +16,7 @@ export type Match = {
   solo: boolean; duration: number; orderLife: number
   endsAt: number; score: number; served: number; missed: number; streak: number; bestStreak: number
   clean: number; dirty: number; cleanCups: number; dirtyCups: number; orders: Order[]; stations: Record<string, StationState>
+  floorItems: Record<number, { x: number; y: number; item: Item }>
 }
 export type Room = {
   code: string; host: string; phase: 'lobby' | 'briefing' | 'playing' | 'results'

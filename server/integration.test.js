@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
-import { interact, startMatch, tickMatch } from './kitchen.js'
+import { dropOrPickUp, interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
 const { http, io } = createKitchenServer({ database: ':memory:' })
@@ -344,4 +344,25 @@ test('a hot dish burns at its deadline even if a player acts before the next tic
   assert.equal(pot.status, 'burned')
   assert.equal(interact(room, player, true, deadline + 200), '')
   assert.equal(pot.status, 'empty')
+})
+
+test('chefs can drop items by a station and another chef can pick them up', () => {
+  const first = { color: 0, socketId: 'first' }
+  const second = { color: 1, socketId: 'second' }
+  const room = { difficulty: 'Easy', players: new Map([['first', first], ['second', second]]) }
+  startMatch(room, 1000)
+  Object.assign(first, { x: 9.5, y: 2.4, item: { kind: 'dish', name: 'nasiLemak' } })
+  Object.assign(second, { x: 9.5, y: 2.4, item: { kind: 'cup' } })
+  assert.equal(dropOrPickUp(room, first, 1200), '')
+  assert.equal(first.item, null)
+  assert.match(dropOrPickUp(room, second, 1200), /already an item/)
+  assert.equal(second.item.kind, 'cup')
+  assert.equal(dropOrPickUp(room, first, 1400), '')
+  assert.equal(first.item.name, 'nasiLemak')
+  assert.deepEqual(room.game.floorItems, {})
+  assert.equal(dropOrPickUp(room, first, 1600), '')
+  second.item = null
+  assert.equal(dropOrPickUp(room, second, 1600), '')
+  assert.deepEqual(second.item, { kind: 'dish', name: 'nasiLemak' })
+  assert.deepEqual(room.game.floorItems, {})
 })

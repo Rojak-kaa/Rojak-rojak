@@ -40,7 +40,7 @@ export function startMatch(room, now) {
     solo, duration: rules.duration, orderLife: rules.orderLife, endsAt: now + rules.duration, nextOrder: now + rules.interval, sequence: 0,
     score: 0, served: 0, missed: 0, streak: 0, bestStreak: 0, clean: rules.plates, dirty: 0,
     cleanCups: room.stations.some(station => station.kind === 'cups') ? rules.plates : 0, dirtyCups: 0,
-    orders: [], stations: Object.fromEntries(room.stations.map(({ id }) => [id, { item: null, ingredients: [], status: 'empty', until: 0 }]))
+    orders: [], floorItems: {}, stations: Object.fromEntries(room.stations.map(({ id }) => [id, { item: null, ingredients: [], status: 'empty', until: 0 }]))
   }
   addOrder(room, now)
   if (!solo) addOrder(room, now)
@@ -113,11 +113,35 @@ export function tickMatch(room, now, delta) {
   }
 }
 
+function beginAction(player, now) {
+  if (now - player.actionAt < 180) return false
+  player.actionAt = now
+  return true
+}
+
+export function dropOrPickUp(room, player, now) {
+  const { floorItems, endsAt } = room.game
+  if (!room.training && now >= endsAt) return 'Time is up.'
+  if (!beginAction(player, now)) return ''
+  const x = Math.floor(player.x)
+  const y = Math.floor(player.y)
+  const key = y * WIDTH + x
+  if (player.item) {
+    if (floorItems[key]) return 'There’s already an item here. Move to a clear tile.'
+    floorItems[key] = { x, y, item: player.item }
+    player.item = null
+  } else {
+    if (!floorItems[key]) return 'Stand on a dropped item and press Q to pick it up.'
+    player.item = floorItems[key].item
+    delete floorItems[key]
+  }
+  return ''
+}
+
 export function interact(room, player, start, now) {
   const game = room.game
   if (!room.training && now >= game.endsAt) return 'Time is up.'
-  if (now - player.actionAt < 180) return ''
-  player.actionAt = now
+  if (!beginAction(player, now)) return ''
   const station = nearestStation(player.x, player.y, room.stations)
   if (!station) return 'Move closer to a station.'
   const state = game.stations[station.id]

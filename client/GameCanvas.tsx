@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
 import { INGREDIENTS, nearestStation, SPAWNS, stationsFor } from '../shared/kitchen.mjs'
-import { drawChef, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
+import { drawChef, drawItem, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
 import { t } from './i18n'
 import type { Player, Room } from './model'
 
@@ -9,7 +9,7 @@ type Props = {
   room?: Room
   me?: string
   onMove?: (x: number, y: number) => void
-  onAct?: (action: 'use' | 'work') => void
+  onAct?: (action: 'use' | 'work' | 'drop') => void
 }
 
 const names: Record<string, string> = {
@@ -50,9 +50,12 @@ class KitchenScene extends Phaser.Scene {
       }
     }
     if (!this.preview && this.input.keyboard) {
-      this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,LEFT,DOWN,RIGHT,E,SPACE') as typeof this.keys
+      this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,LEFT,DOWN,RIGHT,E,Q,SPACE') as typeof this.keys
       this.input.keyboard.on('keydown-E', (event: KeyboardEvent) => {
         if (!event.repeat) this.current().onAct?.('use')
+      })
+      this.input.keyboard.on('keydown-Q', (event: KeyboardEvent) => {
+        if (!event.repeat) this.current().onAct?.('drop')
       })
       this.input.keyboard.on('keydown-SPACE', (event: KeyboardEvent) => {
         if (!event.repeat && !(event.target instanceof HTMLButtonElement)) this.current().onAct?.('work')
@@ -87,6 +90,14 @@ class KitchenScene extends Phaser.Scene {
         label.setText(t('BURNED')).setBackgroundColor('#9e3829').setVisible(true)
       } else {
         label.setVisible(false)
+      }
+    }
+    if (room?.game) {
+      for (const { x, y, item } of Object.values(room.game.floorItems)) {
+        const cx = (x + 0.5) * TILE
+        const cy = (y + 0.6) * TILE
+        this.layer.fillStyle(0x52394d, 0.26).fillEllipse(cx, cy + 4, 38, 23)
+        drawItem(this.layer, cx, cy, item)
       }
     }
     const visible = new Set(players.map(player => player.id))

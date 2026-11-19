@@ -123,6 +123,9 @@ Full hawker menu|Menu penjaja penuh|完整小贩菜单|முழு தெரு
 Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe.|Potong bahan bertanda di papan pemotong. Goreng ikan bilis jika diperlukan.|在砧板上切好标注的食材。食谱需要时，用炸锅炸小鱼干。|குறிக்கப்பட்ட பொருட்களை வெட்டுப் பலகையில் நறுக்குங்கள். தேவைப்பட்டால் நெத்திலியைப் பொரியுங்கள்.
 Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.|Angkat makanan panas sebelum hangus. Gunakan pinggan bersih dan hantar ke kaunter sajian.|在烧焦倒计时结束前取出热菜。用干净餐盘装盘并送到出餐台。|கருகும் நேரம் முடியும் முன் சூடான உணவை எடுங்கள். சுத்தமான தட்டில் வைத்து பரிமாறும் இடத்தில் கொடுங்கள்.
 Work at a station|Gunakan stesen|操作工作台|நிலையத்தைப் பயன்படுத்து
+Drop or pick up a floor item|Letak atau ambil barang di lantai|放下或捡起地上的物品|தரையில் வை அல்லது தரையிலிருந்து எடு
+There’s already an item here. Move to a clear tile.|Sudah ada barang di sini. Pindah ke petak kosong.|这里已有物品。请移到空格。|இங்கே ஏற்கெனவே ஒரு பொருள் உள்ளது. காலியான கட்டத்திற்குச் செல்லுங்கள்.
+Stand on a dropped item and press Q to pick it up.|Berdiri di atas barang dan tekan Q untuk mengambilnya.|站到物品所在格，按 Q 捡起。|கீழே வைத்த பொருளின் மீது நின்று Q அழுத்தி எடுங்கள்.
 Pick up, place, serve|Ambil, letak, sajikan|拿取、放置、上菜|எடு, வை, பரிமாறு
 Arrow keys|Kekunci anak panah|方向键|அம்புக்குறி விசைகள்
 The timer starts when you’re ready.|Masa bermula apabila anda sedia.|准备好后开始计时。|நீங்கள் தயாரானதும் நேரம் தொடங்கும்.

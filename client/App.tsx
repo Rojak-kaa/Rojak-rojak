@@ -95,6 +95,7 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
     <section className="panel briefing-controls" aria-label="Kitchen instructions">
       <p><kbd>WASD</kbd> or arrow keys <strong>{t("Move")}</strong></p>
       <p><kbd>E</kbd> <strong>{t("Pick up, place, plate, or serve")}</strong></p>
+      <p><kbd>Q</kbd> <strong>{t('Drop or pick up a floor item')}</strong></p>
       <p><kbd>Space</kbd> <strong>{t("Work at the highlighted station")}</strong></p>
     </section>
     <p className="briefing-tip">{t('Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe.')} <kbd>E</kbd> {t('Pick up, place, serve')} · <kbd>Space</kbd> {t('Work at a station')}. {t('Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.')}</p>
@@ -508,7 +509,7 @@ export default function App() {
       <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
         {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
       </span></div>
-      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, place, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
+      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, place, serve')}</span><span><kbd>Q</kbd> · {t('Drop or pick up a floor item')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
       </section>
     </main>}
 

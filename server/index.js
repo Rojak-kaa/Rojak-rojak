@@ -4,7 +4,7 @@ import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Server } from 'socket.io'
 import { COLORS, DIFFICULTIES, SHOPS, TRAINING_RECIPES } from '../shared/kitchen.mjs'
-import { interact, returnDishware, startMatch, tickMatch } from './kitchen.js'
+import { dropOrPickUp, interact, returnDishware, startMatch, tickMatch } from './kitchen.js'
 import { createAccounts } from './accounts.js'
 
 const GRACE = 30000
@@ -185,9 +185,10 @@ export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data
 
     socket.on('act', action => {
       const { room, player } = membership()
-      if (room?.phase !== 'playing' || !['use', 'work'].includes(action)) return
+      if (room?.phase !== 'playing' || !['use', 'work', 'drop'].includes(action)) return
       const servedBefore = player.served
-      const notice = interact(room, player, action === 'work', Date.now())
+      const now = Date.now()
+      const notice = action === 'drop' ? dropOrPickUp(room, player, now) : interact(room, player, action === 'work', now)
       if (player.served > servedBefore) accounts.serve(player.accountId)
       if (notice) socket.emit('notice', notice)
       else publish(room)
