@@ -7,11 +7,13 @@ import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
 import { drawEcoWalk, ecoPortrait, garmentHem, tintEcoPortrait, usesEcoPortrait } from './ecoPortrait'
 import type { Player, Room } from './model'
+import type { Direction } from './TouchControls'
 
 type Props = {
   room?: Room
   me?: string
   onMove?: (x: number, y: number) => void
+  touchDirection?: () => Direction
   onAct?: (action: 'use' | 'work') => void
 }
 
@@ -105,10 +107,12 @@ class KitchenScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    const { room, me, onMove } = this.current()
-    if (this.keys && time - this.lastSent >= 45) {
+    const { room, me, onMove, touchDirection } = this.current()
+    if (onMove && time - this.lastSent >= 45) {
       const down = (a: string, b: string) => Number(Boolean(this.keys?.[a].isDown || this.keys?.[b].isDown))
-      onMove?.(down('D', 'RIGHT') - down('A', 'LEFT'), down('S', 'DOWN') - down('W', 'UP'))
+      const touch = touchDirection?.()
+      if (touch && (touch.x || touch.y)) onMove(touch.x, touch.y)
+      else onMove(down('D', 'RIGHT') - down('A', 'LEFT'), down('S', 'DOWN') - down('W', 'UP'))
       this.lastSent = time
     }
     const players = room?.players ?? demo

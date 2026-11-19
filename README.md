@@ -1,6 +1,6 @@
 # Rojak-rojak
 
-A real-time Malaysian hawker-stall game for one to four desktop players. The React lobby and Phaser kitchen share a Node.js and Socket.IO server. The game uses original landing art, procedural kitchen graphics, and synthesized sound cues.
+A real-time Malaysian hawker-stall game for one to four players in desktop or mobile browsers. The React lobby and Phaser kitchen share a Node.js and Socket.IO server. The game uses original landing art, procedural kitchen graphics, and synthesized sound cues.
 
 ## Run locally
 
@@ -36,6 +36,8 @@ Create a private room and share its code or invite link. Select aprons, have eve
 | WASD or arrow keys | Move |
 | E | Use a nearby station, drop a held item on open floor, or pick up a dropped item while standing on it with empty hands |
 | Space | Work at a station or clear a burned batch |
+
+Touchscreen devices show a direction pad and **Use** and **Work** buttons by default. Hold an arrow to move, tap **Use** for E actions, and tap **Work** for Space actions. In a match, select **On-screen controls** to show or hide the buttons on any device.
 
 1. Read the tickets and collect their ingredients. Chop cucumber, pineapple, and chicken on a cutting board. Other ingredients go straight to the recipe station.
 2. Add all the ingredients at the station shown on the ticket, then press Space. You can take back the last ingredient with E and empty hands before starting.

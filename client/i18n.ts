@@ -154,6 +154,13 @@ Full hawker menu|Menu penjaja penuh|完整小贩菜单|முழு தெரு
 Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe.|Potong bahan bertanda di papan pemotong. Goreng ikan bilis jika diperlukan.|在砧板上切好标注的食材。食谱需要时，用炸锅炸小鱼干。|குறிக்கப்பட்ட பொருட்களை வெட்டுப் பலகையில் நறுக்குங்கள். தேவைப்பட்டால் நெத்திலியைப் பொரியுங்கள்.
 Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.|Angkat makanan panas sebelum hangus. Gunakan pinggan bersih dan hantar ke kaunter sajian.|在烧焦倒计时结束前取出热菜。用干净餐盘装盘并送到出餐台。|கருகும் நேரம் முடியும் முன் சூடான உணவை எடுங்கள். சுத்தமான தட்டில் வைத்து பரிமாறும் இடத்தில் கொடுங்கள்.
 Work at a station|Gunakan stesen|操作工作台|நிலையத்தைப் பயன்படுத்து
+On-screen controls|Kawalan pada skrin|屏幕操控|திரைக் கட்டுப்பாடுகள்
+Move up|Gerak ke atas|向上移动|மேலே நகர்
+Move down|Gerak ke bawah|向下移动|கீழே நகர்
+Move left|Gerak ke kiri|向左移动|இடப்புறம் நகர்
+Move right|Gerak ke kanan|向右移动|வலப்புறம் நகர்
+Use|Guna|拿取或放下|பயன்படுத்து
+Work|Sediakan|操作工作台|சமை
 Drop or pick up a floor item|Letak atau ambil barang di lantai|放下或捡起地上的物品|தரையில் வை அல்லது தரையிலிருந்து எடு
 There’s already an item here. Move to a clear tile.|Sudah ada barang di sini. Pindah ke petak kosong.|这里已有物品。请移到空格。|இங்கே ஏற்கெனவே ஒரு பொருள் உள்ளது. காலியான கட்டத்திற்குச் செல்லுங்கள்.
 Stand on a dropped item and press E to pick it up.|Berdiri di atas barang dan tekan E untuk mengambilnya.|站到物品所在格，按 E 捡起。|கீழே வைத்த பொருளின் மீது நின்று E அழுத்தி எடுங்கள்.

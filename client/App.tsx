@@ -10,6 +10,8 @@ import { accountRequest, LanguagePicker, OutfitPreview, SignIn, Wardrobe } from 
 import { setLanguage, t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
+import TouchControls from './TouchControls'
+import type { Direction } from './TouchControls'
 import kitchenCrew from './assets/kitchen-crew.webp'
 import foodTown from './assets/food-town.webp'
 
@@ -214,6 +216,8 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const [copied, setCopied] = useState('')
   const [pending, setPending] = useState(false)
+  const [showTouchControls, setShowTouchControls] = useState(() => window.matchMedia('(any-pointer: coarse)').matches)
+  const touchMovement = useRef<Direction>({ x: 0, y: 0 })
   const [profile, setProfile] = useState<Profile | null>(null)
   const [checkingAccount, setCheckingAccount] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -384,6 +388,12 @@ export default function App() {
 
   const onLanding = !room && page === 'home'
 
+  function act(action: 'use' | 'work') {
+    if (!socket.connected || settings) return
+    socket.emit('act', action)
+    ping(sound, [380])
+  }
+
   function openProfile() {
     setProfileOpen(true)
     void accountRequest<Profile>('me').then(value => { if (value) setProfile(value) }).catch(() => {})
@@ -505,7 +515,7 @@ export default function App() {
 
     {room?.phase === 'briefing' && <ServiceBriefing online={online} chef={chef} room={room} onReady={() => lobby('briefed')} onLeave={leave} error={error} />}
 
-    {room?.phase === 'playing' && room.game && <main className="match">
+    {room?.phase === 'playing' && room.game && <main className={'match' + (showTouchControls ? ' match-with-touch' : '')}>
       <aside className="order-rail" aria-labelledby="order-rail-title">
         <div className="order-rail-heading">
           {room.shop && <span className="shop-service-name">{SHOPS[room.shop].name}</span>}
@@ -534,7 +544,7 @@ export default function App() {
         </div>
         {room.training && <ol className="practice-steps">
           <li>{t('Collect the listed ingredients. Chop marked ingredients at a board and fry ikan bilis when listed.')}</li>
-          <li>Load the recipe station with <kbd>E</kbd> and press <kbd>Space</kbd> to prepare the dish.</li>
+          <li>Load the recipe station with <kbd>{showTouchControls ? t('Use') : 'E'}</kbd> and press <kbd>{showTouchControls ? t('Work') : 'Space'}</kbd> to prepare the dish.</li>
           <li>{t('Use a clean plate to collect the finished dish before it burns, then bring it to Serve.')}</li>
         </ol>}
       </aside>
@@ -542,12 +552,14 @@ export default function App() {
       <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
         {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
       </span></div>
-      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, drop, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
-      <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} onMove={(x, y) => { if (socket.connected) socket.volatile.emit('move', { x, y }) }} onAct={action => {
-        if (!socket.connected || settings) return
-        socket.emit('act', action)
-        ping(sound, [380])
-      }} /></Suspense></div>
+      <div className="control-strip">
+        {!showTouchControls && <><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, drop, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span></>}
+        <button type="button" className="back" aria-pressed={showTouchControls} onClick={() => setShowTouchControls(enabled => !enabled)}>{t('On-screen controls')}</button>
+        <button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button>
+      </div>
+      <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} touchDirection={() => touchMovement.current}
+        onMove={(x, y) => { if (socket.connected) socket.volatile.emit('move', { x, y }) }} onAct={act} /></Suspense></div>
+      {showTouchControls && <TouchControls onDirection={direction => { touchMovement.current = direction }} onAction={act} />}
       </section>
     </main>}
 
