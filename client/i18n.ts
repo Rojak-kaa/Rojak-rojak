@@ -20,6 +20,9 @@ Design your chef|Reka cef anda|设计你的厨师|உங்கள் சமை�
 Save and continue|Simpan dan teruskan|保存并继续|சேமித்துத் தொடரவும்
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
+Chop first|Potong dahulu|先切好|முதலில் நறுக்கவும்
+Loaded|Dimasukkan|已加入|சேர்த்தவை
+Take this ingredient to a cutting board first.|Bawa bahan ini ke papan pemotong dahulu.|先把这种食材拿到砧板上。|இந்தப் பொருளை முதலில் வெட்டும் பலகைக்கு எடுத்துச் செல்லவும்.
 Customise|Sesuaikan|自定义|தனிப்பயனாக்கு
 Skin colour|Warna kulit|肤色|தோல் நிறம்
 Original skin colour|Warna kulit asal|原始肤色|அசல் தோல் நிறம்

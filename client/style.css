@@ -163,6 +163,7 @@ form .button { margin-top: 9px; }
 .receipt-time { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 7px; padding-top: 5px; border-top: 1px dashed #ad9c8b; font-size: .67rem; font-weight: 800; }
 .ticket .recipe-ingredients { display: grid; }
 .ticket .recipe-ingredients li { background: transparent; }
+.chop-first { display: inline-block; margin-inline-start: 4px; padding: 1px 4px; border-radius: 4px; color: #763014; background: #ffe1a9; font-size: .8em; }
 .ticket-urgent { background: #ffebe5; }
 .ticket-urgent::after { background-image: linear-gradient(135deg, #ffebe5 50%, transparent 0), linear-gradient(225deg, #ffebe5 50%, transparent 0); }
 .practice-mode { color: var(--muted); font-size: .81rem; }

@@ -265,10 +265,11 @@ for (const [id, shop] of Object.entries(SHOPS)) {
       for (const ingredient of drink.ingredients) assert.equal(layout.find(station => station.id === ingredient).x, 1)
     }
     verifyMenu('Easy', { ...DIFFICULTIES.Easy, pool: shop.pool }, null, id)
+    verifyMenu('Easy', { ...DIFFICULTIES.Easy, pool: shop.pool }, null, id, 'potB')
   })
 }
 
-function verifyMenu(difficulty, rules, training = null, shop = null) {
+function verifyMenu(difficulty, rules, training = null, shop = null, stove = 'potA') {
   const stations = stationsFor(difficulty, training, shop)
   const paths = stationPaths(stations)
   const chefs = (training ? [0] : [0, 1, 2]).map(color => ({ color, socketId: String(color) }))
@@ -296,7 +297,7 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
     const recipe = recipeFor(difficulty, key)
     if (!game.orders.some(order => order.recipe === key)) advance(game.nextOrder - now)
     assert.ok(game.orders.some(order => order.recipe === key), recipe.name + ' ticket should arrive')
-    const station = stations.find(({ kind }) => kind === recipe.station).id
+    const station = recipe.station === 'pot' ? stove : stations.find(({ kind }) => kind === recipe.station).id
     for (const [i, ingredient] of recipe.ingredients.entries()) {
       const chef = chefs[i % chefs.length]
       use(chef, ingredient === 'roastedChicken' ? 'chicken' : ingredient)
@@ -324,6 +325,11 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
         assert.equal(chef.item.kind, 'fried')
       }
       use(chef, station)
+      assert.deepEqual(game.stations[station].ingredients, recipe.ingredients.slice(0, i + 1))
+      if (i === 0 && recipe.ingredients.length > 1) {
+        assert.match(act(chef, station, true), /remaining ingredients/)
+        assert.equal(game.stations[station].status, 'loaded')
+      }
     }
     use(chefs[0], station, true)
     assert.equal(game.stations[station].recipe, key)

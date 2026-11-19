@@ -109,6 +109,12 @@ class KitchenScene extends Phaser.Scene {
         fontFamily: 'system-ui', fontSize: '8px', fontStyle: 'bold', color: '#5d3840',
         backgroundColor: '#fff2d8', padding: { x: 3, y: 1 }
       }).setOrigin(0.5)
+      if (!this.preview && station.kind === 'crate' && INGREDIENTS[station.id].chop) {
+        this.add.text((station.x + 0.5) * TILE, station.y * TILE + 2, t('Chop first'), {
+          fontFamily: 'system-ui', fontSize: '9px', fontStyle: 'bold', color: '#763014',
+          backgroundColor: '#ffe1a9', padding: { x: 3, y: 1 }
+        }).setOrigin(0.5).setDepth(3)
+      }
       if (!this.preview && !['crate', 'counter', 'serve', 'plates', 'dirty', 'cups', 'cupReturn', 'bin'].includes(station.kind)) {
         this.stationTimers.set(station.id, this.add.text((station.x + 0.5) * TILE, station.y * TILE + 3, '', {
           fontFamily: 'system-ui', fontSize: '12px', fontStyle: 'bold', color: '#fff8ee',
@@ -156,6 +162,8 @@ class KitchenScene extends Phaser.Scene {
         label.setText(state.until ? t('BURN') + ' ' + Math.max(1, seconds) + 's' : t('READY')).setBackgroundColor(state.until && seconds <= 6 ? '#9e3829' : '#266346').setVisible(true)
       } else if (state?.status === 'burned') {
         label.setText(t('BURNED')).setBackgroundColor('#9e3829').setVisible(true)
+      } else if (state?.status === 'loaded' && station.kind === 'pot') {
+        label.setText(t('Loaded') + ' ' + state.ingredients.length).setBackgroundColor('#392633').setVisible(true)
       } else {
         label.setVisible(false)
       }

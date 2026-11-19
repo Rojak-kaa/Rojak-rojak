@@ -84,8 +84,11 @@ function formatTime(ms: number) {
 function RecipeIngredients({ ingredients }: { ingredients: string[] }) {
   return <ul className="recipe-ingredients" aria-label={t('Ingredients')}>{ingredients.map(id => {
     const ingredient = INGREDIENTS[id]
-    const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name
-    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}><span className={'ingredient-icon' + (id === 'bread' ? ' bread-icon' : '')} aria-hidden="true">{id === 'bread' ? <img src={breadIcon} alt="" /> : ingredientIcon(id)}</span>{t(name)}</li>
+    const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.name
+    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}>
+      <span className={'ingredient-icon' + (id === 'bread' ? ' bread-icon' : '')} aria-hidden="true">{id === 'bread' ? <img src={breadIcon} alt="" /> : ingredientIcon(id)}</span>
+      {t(name)}{ingredient.chop && <strong className="chop-first">{t('Chop first')}</strong>}
+    </li>
   })}</ul>
 }
 
@@ -173,6 +176,13 @@ function guidance(room: Room, player?: Player) {
     }
     if (state.status === 'cooking') return method.busy + ' · ' + remaining
     if (state.status === 'burned') return 'Space · Clear the burned batch'
+    const held = player.item?.kind === 'raw' ? player.item.name : undefined
+    if (held && INGREDIENTS[held]?.chop && menuFor(room.difficulty, room.training, room.shop).some(id => {
+      const recipe = recipeFor(room.difficulty, id)
+      return recipe.station === station.kind && recipe.ingredients.includes(held)
+    })) {
+      return 'Take this ingredient to a cutting board first.'
+    }
     if (state.status === 'loaded') return 'E · Add or take back an ingredient   /   Space · ' + method.action
     return 'E · Add the ingredients listed on the ticket'
   }
