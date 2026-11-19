@@ -1,7 +1,7 @@
 export const LANGUAGES = { en: 'English', ms: 'Bahasa Melayu', zh: '简体中文（普通话）', ta: 'தமிழ்' }
 export const CHEFS = {
   ayu: { name: 'Ayu', culture: 'Malay', skin: 0xefc2a7, hair: 0x242024 },
-  liWei: { name: 'Li Wei', culture: 'Chinese', skin: 0xf9c59e, hair: 0x302831 },
+  liWei: { name: 'Li Wen', culture: 'Chinese', skin: 0xf9c59e, hair: 0x47302c },
   kavitha: { name: 'Kavitha', culture: 'Indian', skin: 0xc78761, hair: 0x322633 },
   eco: { name: '全村最环保的人', culture: 'Chinese', skin: 0xffdec9, hair: 0x20191c }
 }
@@ -24,13 +24,14 @@ export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: '
 export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
 export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7, hairStyle: 'braids' }
 export const AYU_OUTFIT = { ...DEFAULT_OUTFIT, accessory: 'none', fabric: 9, trim: 1, handSign: 'relaxed', hairStyle: 'short' }
-export const FIXED_OUTFITS = { [ECO_OUTFIT.chef]: ECO_OUTFIT, [AYU_OUTFIT.chef]: AYU_OUTFIT }
+export const LI_WEN_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'liWei', garment: 'samfu', accessory: 'none', trim: 3, hairStyle: 'short', handSign: 'relaxed' }
+export const FIXED_OUTFITS = { [ECO_OUTFIT.chef]: ECO_OUTFIT, [AYU_OUTFIT.chef]: AYU_OUTFIT, [LI_WEN_OUTFIT.chef]: LI_WEN_OUTFIT }
 
 export function lockSignatureOutfit(outfit) {
   if (!Object.hasOwn(FIXED_OUTFITS, outfit.chef)) return outfit
-  const { garment, trim, hairStyle } = FIXED_OUTFITS[outfit.chef]
+  const { garment, trim, hairStyle, fabric } = FIXED_OUTFITS[outfit.chef]
   const eco = outfit.chef === ECO_OUTFIT.chef
-  return { ...outfit, garment, trim, hairStyle,
+  return { ...outfit, garment, trim, hairStyle, fabric: outfit.chef === LI_WEN_OUTFIT.chef ? fabric : outfit.fabric,
     expression: eco && outfit.expression === 'none' ? ECO_OUTFIT.expression : outfit.expression,
     handSign: eco && outfit.handSign === 'relaxed' ? ECO_OUTFIT.handSign : outfit.handSign }
 }

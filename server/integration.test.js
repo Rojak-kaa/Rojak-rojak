@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
-import { AYU_OUTFIT, CHEFS, ECO_OUTFIT } from '../shared/profile.mjs'
+import { AYU_OUTFIT, CHEFS, ECO_OUTFIT, LI_WEN_OUTFIT } from '../shared/profile.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
@@ -50,12 +50,13 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const send = (socket, event, data) => socket.timeout(1500).emitWithAck(event, data)
   assert.match((await send(guest, 'enter', { name: 'Guest', create: true })).error, /Sign in/)
   const cookies = await Promise.all(Array.from({ length: 5 }, (_, index) => register(address, 'chef_' + index)))
-  const outfit = { chef: 'liWei', garment: 'cheongsam', accessory: 'chef', fabric: 0, trim: 8, expression: 'wink', handSign: 'wave', hairStyle: 'bob' }
+  const outfit = { ...LI_WEN_OUTFIT, accessory: 'chef', expression: 'wink', handSign: 'wave' }
   const updated = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Pip', language: 'ta', outfit })
+    body: JSON.stringify({ name: 'Pip', language: 'ta', outfit: { ...outfit, garment: 'cheongsam', fabric: 2, trim: 8, hairStyle: 'bob' } })
   })
   assert.equal(updated.status, 200)
+  assert.deepEqual((await updated.json()).outfit, outfit)
   const [a, b, c, d, outsider] = await Promise.all(cookies.map(open))
   const command = (socket, type, value) => send(socket, 'lobby', { type, value })
   const host = await send(a, 'enter', { name: 'Pip', create: true })

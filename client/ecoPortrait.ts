@@ -1,4 +1,4 @@
-import { CHEFS, ECO_OUTFIT, PALETTE } from '../shared/profile.mjs'
+import { CHEFS, ECO_OUTFIT, LI_WEN_OUTFIT, PALETTE } from '../shared/profile.mjs'
 import type { Outfit } from '../shared/profile.mjs'
 
 export { default as ecoPortrait } from './assets/eco-chef.webp'
@@ -123,7 +123,9 @@ function drawHairstyle(context: CanvasRenderingContext2D, outfit: Outfit) {
   context.fillStyle = hair
   context.strokeStyle = '#261c26'
   context.lineWidth = 2.5
-  const cap = new Path2D(outfit.chef === 'ayu' ?
+  const cap = new Path2D(outfit.chef === LI_WEN_OUTFIT.chef ?
+    'M77 150 Q64 135 67 107 Q69 80 90 67 Q108 43 150 43 Q194 42 215 67 Q234 77 233 111 Q234 131 222 150 L213 137 Q213 109 198 101 Q186 94 168 101 Q138 111 108 98 Q91 91 86 112 L85 137 Z' :
+    outfit.chef === 'ayu' ?
     'M77 151 Q62 133 64 109 Q64 84 91 66 Q113 47 137 46 Q151 36 166 46 Q192 49 217 70 Q240 89 232 118 Q231 136 219 151 L210 132 Q213 115 200 107 Q184 108 171 98 Q153 103 140 98 Q129 103 117 101 Q105 108 95 108 Q85 120 83 146 Z' :
     'M74 140 Q60 114 81 78 Q105 42 148 42 Q196 41 220 75 Q238 103 225 141 L214 130 Q209 113 203 105 Q177 124 142 122 Q115 134 86 126 L78 145 Z')
   context.fill(cap)
@@ -193,8 +195,42 @@ function drawBajuMelayu(context: CanvasRenderingContext2D, outfit: Outfit) {
   context.stroke(sampin)
 }
 
+function drawLiWenSamfu(context: CanvasRenderingContext2D, handSign: string) {
+  const relaxed = handSign === 'relaxed'
+  function piece(outline: string, color: string) {
+    const path = new Path2D(outline)
+    context.fillStyle = color
+    context.fill(path)
+    context.stroke(path)
+  }
+  context.lineJoin = 'round'
+  context.strokeStyle = '#682631'
+  context.lineWidth = 3
+  piece('M109 326 Q148 315 191 326 Q199 350 185 391 L188 449 Q170 459 153 449 L149 363 L141 449 Q119 458 103 448 L107 393 Q97 351 109 326 Z', '#a92b36')
+  piece('M103 448 Q121 454 141 449 L139 461 Q122 474 103 465 Z M153 449 Q171 455 188 449 Q196 467 180 468 Q164 468 154 460 Z', '#332832')
+  piece('M178 222 Q191 225 201 248 L225 293 Q214 301 201 301 L179 269 Z', '#d6373f')
+  piece(relaxed ? 'M119 219 Q103 222 94 246 L77 290 Q87 303 101 298 L122 265 Z'
+    : 'M120 223 L109 234 L96 214 L81 223 Q86 246 113 266 L123 260 Z', '#d6373f')
+  piece('M199 293 L219 282 L226 295 Q216 304 203 303 Z', '#f4c760')
+  piece(relaxed ? 'M82 279 L105 287 L100 299 Q86 303 77 291 Z'
+    : 'M81 222 L95 215 L103 228 L87 238 Z', '#f4c760')
+  piece('M112 222 Q126 209 135 210 L136 204 Q149 213 164 204 L165 211 Q178 212 187 224 L185 272 L196 338 Q179 347 154 346 L149 336 L143 346 Q118 346 103 338 L114 273 Z', '#df3c43')
+  context.strokeStyle = '#861e2c'
+  context.stroke(new Path2D('M135 211 Q141 221 150 222 Q159 219 166 211 M150 222 L149 336'))
+  context.strokeStyle = '#f4c760'
+  context.lineCap = 'round'
+  for (const y of [230, 254, 278, 302]) {
+    context.stroke(new Path2D(`M138 ${y} h22 m-22 0 q-4 -5 -6 0 q2 5 6 0 m22 0 q4 -5 6 0 q-2 5 -6 0`))
+  }
+  context.stroke(new Path2D('M113 329 Q117 316 130 318 Q126 309 119 314 M114 330 Q123 323 132 328 M184 329 Q180 316 167 318 Q171 309 178 314 M183 330 Q174 323 165 328'))
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
+  if (outfit.chef === LI_WEN_OUTFIT.chef) {
+    drawLiWenSamfu(context, outfit.handSign)
+    return
+  }
   if (outfit.garment === 'bajuMelayu') {
     drawBajuMelayu(context, outfit)
     return
