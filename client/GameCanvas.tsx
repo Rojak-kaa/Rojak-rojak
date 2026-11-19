@@ -81,7 +81,7 @@ class KitchenScene extends Phaser.Scene {
     bubble.clear().fillStyle(0x4a3043, 0.24).fillRoundedRect(x - width / 2, bottom - height + 3, width, height, 12)
     bubble.fillStyle(0xfff4df).fillRoundedRect(x - width / 2, bottom - height, width, height, 12)
     bubble.fillTriangle(tip - 8, bottom - 1, tip + 8, bottom - 1, chef.x * TILE, bottom + 10)
-    label.setPosition(x, bottom - height / 2)
+    label.setPosition(x, bottom - height / 2).setVisible(true)
   }
 
   create() {
@@ -178,11 +178,13 @@ class KitchenScene extends Phaser.Scene {
       this.removePortrait(id)
     }
     const ordered = [...players].sort((a, b) => a.y - b.y)
+    let localMoving = false
     for (const player of ordered) {
       const x = this.preview ? player.x + Math.sin(time / 1600 + player.color) * 0.7 : player.x
       const y = this.preview ? player.y + 0.7 + Math.cos(time / 1600 + player.color * 2) * 0.42 : player.y
       const pos = this.positions.get(player.id) ?? { x, y }
       const moving = Math.hypot(x - pos.x, y - pos.y) > 0.025
+      if (player.id === me) localMoving = moving
       const blend = 1 - Math.exp(-delta / 65)
       pos.x += (x - pos.x) * blend
       pos.y += (y - pos.y) * blend
@@ -232,10 +234,10 @@ class KitchenScene extends Phaser.Scene {
     for (let index = this.breadCount; index < this.breadSprites.length; index++) this.breadSprites[index].setVisible(false)
     const prompt = this.current().trainingPrompt
     const chef = me && this.positions.get(me)
-    if (prompt && chef) this.drawGuide(prompt, chef)
+    if (prompt && chef && !localMoving) this.drawGuide(prompt, chef)
     else {
       this.guideBubble?.clear()
-      this.guideText?.setText('')
+      this.guideText?.setVisible(false)
     }
   }
 }
