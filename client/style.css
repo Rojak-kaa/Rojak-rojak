@@ -26,8 +26,7 @@ button:disabled { cursor: not-allowed; opacity: .54; }
 .brand { display: flex; gap: 11px; align-items: center; text-align: left; font-weight: 1000; font-size: 1.13rem; line-height: 1.05; letter-spacing: -.04em; }
 .brand-icon { display: grid; place-items: center; background: #ef6c46; color: #fff8e9; border: 1px solid #c44b35; border-radius: 13px; width: 40px; height: 40px; font-size: 25px; box-shadow: inset 0 -3px #d85335; }
 .nav-actions { display: flex; align-items: center; gap: 10px; }
-.nav-link { font-size: .92rem; font-weight: 800; margin-right: 9px; }
-.nav-link:hover, .back:hover { color: var(--dark-red); }
+.back:hover { color: var(--dark-red); }
 .icon-btn { display: grid; place-items: center; height: 40px; min-width: 41px; background: #fffdf8; border: 1px solid var(--line); border-radius: 10px; font-weight: 900; }
 .icon-btn:hover { background: #ffebd7; }
 .gear { font-size: 21px; }
@@ -42,22 +41,11 @@ button:disabled { cursor: not-allowed; opacity: .54; }
 .canvas-wrap { width: 100%; aspect-ratio: 5 / 3; overflow: hidden; }
 .canvas-wrap canvas { display: block; }
 .canvas-fallback { display: grid; place-items: center; color: #f8e5d4; background: #2c2633; border-radius: 16px; }
-.rules { scroll-margin-top: 24px; margin-top: clamp(35px, 5vw, 64px); padding-top: 25px; border-top: 1px solid var(--line); }
-.rules:focus { outline: none; }
-.kitchen-preview { margin-top: 15px; border: 1px solid var(--line); border-radius: 11px; background: var(--paper); }
-.kitchen-preview summary { cursor: pointer; padding: 13px 15px; font-weight: 900; }
-.kitchen-preview summary:hover { color: var(--dark-red); }
-.preview-board { max-width: 840px; margin: 0 auto; padding: 0 12px 12px; }
-.section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 19px; }
-.section-head h2, .room-heading h1, .join-panel h1, .results h1 { font-size: clamp(2rem, 4.7vw, 3.1rem); line-height: 1; font-weight: 1000; letter-spacing: -.07em; margin-top: 7px; }
-.section-head p { color: var(--muted); max-width: 385px; }
-.step-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.step, .panel { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 19px; padding: 21px; box-shadow: 0 3px #eddfce; }
+.room-heading h1, .join-panel h1, .results h1 { font-size: clamp(2rem, 4.7vw, 3.1rem); line-height: 1; font-weight: 1000; letter-spacing: -.07em; margin-top: 7px; }
+.panel { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 19px; padding: 21px; box-shadow: 0 3px #eddfce; }
 .step-icon { display: inline-grid; place-items: center; width: 48px; height: 48px; font-size: 25px; background: #fee9cb; border-radius: 13px; }
-.step:nth-child(2) .step-icon { background: #ffe1d7; }
-.step:nth-child(3) .step-icon { background: #e2f1e4; }
-.step h3, .panel h3 { margin: 12px 0 4px; font-size: 1.13rem; font-weight: 1000; letter-spacing: -.03em; }
-.step p, .panel p, .dialog p { color: var(--muted); line-height: 1.5; }
+.panel h3 { margin: 12px 0 4px; font-size: 1.13rem; font-weight: 1000; letter-spacing: -.03em; }
+.panel p, .dialog p { color: var(--muted); line-height: 1.5; }
 .control-strip { display: flex; gap: 12px 22px; flex-wrap: wrap; align-items: center; padding: 12px 14px; margin-top: 14px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); font-size: .87rem; background: #fff1e0; }
 .control-strip strong { color: var(--ink); }
 kbd { display: inline-block; padding: 1px 5px; border: 1px solid #d8c6b4; border-bottom-width: 2px; border-radius: 4px; background: var(--paper); color: var(--ink); font: 800 .78rem ui-monospace, monospace; }
@@ -101,6 +89,7 @@ form .button { margin-top: 9px; }
 .round-clock strong { font-size: 1.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .round-clock progress { grid-column: 1 / -1; width: 100%; height: 5px; accent-color: #f4c16c; }
 .round-clock.clock-urgent { background: #9c352b; }
+.briefing-back { margin-bottom: 16px; }
 .briefing-controls { display: flex; flex-wrap: wrap; gap: 9px 24px; padding: 12px 16px; }
 .briefing-controls strong { color: var(--ink); }
 .briefing-tip { max-width: 760px; margin: 17px 0; color: var(--muted); line-height: 1.55; }
@@ -141,11 +130,8 @@ form .button { margin-top: 9px; }
   .shell { width: calc(100% - 38px); }
 }
 @media (max-width: 650px) {
-  .step-grid, .lobby-grid { grid-template-columns: 1fr; }
-  .section-head { align-items: start; flex-direction: column; gap: 8px; }
-  .rules { margin-top: 35px; }
+  .lobby-grid { grid-template-columns: 1fr; }
   .nav { min-height: 62px; }
-  .nav-link { display: none; }
   .room-heading { align-items: start; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -156,7 +142,6 @@ form .button { margin-top: 9px; }
 .landing-play { position: absolute; z-index: 2; top: 18px; left: max(18px, calc((100% - (100svh - 76px) * 1.5) / 2 + 18px)); padding: 12px 16px; border: 1px solid #eed6ad; border-radius: 14px; background: #fff6e7; box-shadow: 0 4px 16px #311d2870; }
 .landing-play h1 { font-size: clamp(1.65rem, 3vw, 2.8rem); font-weight: 1000; line-height: 1; letter-spacing: -.055em; margin-bottom: 9px; }
 .landing-buttons { display: flex; gap: 8px; }
-.landing-tip { margin-top: 8px; color: var(--muted); font-size: .88rem; }
 .landing-scene { position: relative; width: min(100%, calc((100svh - 76px) * 1.5)); min-width: min(620px, 100%); }
 .landing-scene img { display: block; width: 100%; height: auto; }
 .food-hotspot { position: absolute; display: grid; place-items: center; width: 22%; height: 23%; transform: translate(-50%, -50%); border: 2px solid transparent; border-radius: 50%; }
@@ -164,7 +149,6 @@ form .button { margin-top: 9px; }
 .food-hotspot:hover, .food-hotspot:focus-visible { border-color: #fff3b8; background: #ffe29622; }
 .food-hotspot:hover span, .food-hotspot:focus-visible span { background: #fff3cf; color: #432619; }
 .food-hotspot[aria-label="Train: Laksa"] { width: 14%; height: 20%; }
-.landing-rules { margin-bottom: 42px; }
 
 .match { display: grid; grid-template-columns: clamp(150px, 19vw, 240px) minmax(0, 1fr); gap: 10px; width: 100%; height: 100dvh; padding: 10px; background: #312932; }
 .order-rail { min-height: 0; display: flex; flex-direction: column; gap: 9px; padding: 11px; border-radius: 12px; background: #eee1ce; }

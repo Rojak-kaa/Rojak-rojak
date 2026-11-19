@@ -15,11 +15,6 @@ const TRAINING_SPOTS = [
   { id: 'laksa', label: 'Laksa', x: 63, y: 26 },
   { id: 'aisKacang', label: 'Ais Kacang', x: 85, y: 71 }
 ]
-const STEPS = [
-  ['🥒', 'Prep the ingredients', 'Grab the ingredients listed on a ticket. Chop cucumber, pineapple, and chicken on a cutting board.'],
-  ['🍳', 'Use the right station', 'Load the station shown on the ticket. Press Space to cook, grill, toss the rojak, or shave and top the ice.'],
-  ['🍽', 'Serve and reset', 'Collect clean dishware and use it to pick up the finished dish. Serve it before the ticket expires, then wash the returned dishware.']
-]
 type Reply = { ok?: boolean; error?: string; room?: Room; id?: string; token?: string }
 
 let audio: AudioContext | undefined
@@ -94,6 +89,7 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
   const connected = room.players.filter(player => player.connected)
   const ready = connected.filter(player => player.ready).length
   return <main className="shell inner briefing">
+    <button className="button secondary compact briefing-back" onClick={onLeave}>Back to main page</button>
     <div className="room-heading"><div><span className="eyebrow">{room.training ? 'UNTIMED PRACTICE' : 'PRE-GAME GUIDE'}</span><h1>{room.training ? RECIPES[room.training].name + ' training' : 'Before service'}</h1></div><Status online={online} /></div>
     <section className="panel briefing-controls" aria-label="Kitchen instructions">
       <p><kbd>WASD</kbd> or arrow keys <strong>Move</strong></p>
@@ -116,7 +112,6 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
     <div className="briefing-actions">
       <button className="button primary" disabled={!online || !chef || chef.ready} onClick={onReady}>{chef?.ready ? 'Ready' : 'Ready to cook'}</button>
       <p role="status">{room.training ? 'Follow the recipe and serve one dish to complete the lesson.' : connected.length > 1 ? ready + ' of ' + connected.length + ' chefs ready. The timer starts when everyone is ready.' : 'The timer starts when you’re ready.'}</p>
-      <button className="back" onClick={onLeave}>Leave room</button>
     </div>
     {error && <p className="error" role="alert">{error}</p>}
   </main>
@@ -124,16 +119,6 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
 
 function CanvasFallback() {
   return <div className="canvas-wrap canvas-fallback">Heating up the kitchen…</div>
-}
-
-function KitchenPreview() {
-  const [open, setOpen] = useState(false)
-  return <details className="kitchen-preview" onToggle={event => setOpen(event.currentTarget.open)}>
-    <summary>Preview the kitchen</summary>
-    {open && <div className="preview-board">
-      <Suspense fallback={<CanvasFallback />}><GameCanvas /></Suspense>
-    </div>}
-  </details>
 }
 
 function guidance(room: Room, player?: Player) {
@@ -276,13 +261,14 @@ export default function App() {
   function leave() {
     socket.emit('leave')
     sessionStorage.removeItem(SESSION_KEY)
-    if (room?.training) setPage('home')
+    setPage('home')
     setRoom(undefined)
     setMe(undefined)
     setError('')
     setNotice('')
     setCopied('')
     history.replaceState({}, '', location.pathname)
+    window.scrollTo(0, 0)
   }
 
   async function share(asLink: boolean) {
@@ -294,15 +280,6 @@ export default function App() {
       setCopied(asLink ? 'link' : 'code')
       setTimeout(() => setCopied(''), 1800)
     } catch { setError('Clipboard unavailable. You can select and copy the room code.') }
-  }
-
-  function showRules() {
-    setPage('home')
-    setTimeout(() => {
-      const rules = document.getElementById('rules')
-      rules?.focus({ preventScroll: true })
-      rules?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
-    }, 0)
   }
 
   function openLobby() {
@@ -324,7 +301,6 @@ export default function App() {
           <span className="brand-icon">♨</span><span>Rojak-rojak</span>
         </button>
         <div className="nav-actions">
-          {!room && <button className="nav-link" onClick={showRules}>How to play</button>}
           <button className="icon-btn" aria-label={sound ? 'Mute sound' : 'Unmute sound'} aria-pressed={sound} onClick={toggleSound}>{sound ? '◖))' : '◖×'}</button>
           <button className="icon-btn gear" aria-label="Settings" onClick={() => setSettings(true)}>⚙</button>
         </div>
@@ -339,7 +315,6 @@ export default function App() {
             <button className="button primary" disabled={pending} onClick={() => startSolo()}>Play Solo</button>
             <button className="button secondary" disabled={pending} onClick={openLobby}>Play Team</button>
           </div>
-          <p className="landing-tip">Select a dish to start training.</p>
           {error && <p className="error" role="alert">{error}</p>}
         </div>
         <div className="landing-scene">
@@ -350,20 +325,10 @@ export default function App() {
           </button>)}
         </div>
       </section>
-      <section id="rules" className="shell rules landing-rules" tabIndex={-1} aria-labelledby="rules-title">
-        <div className="section-head"><div><span className="eyebrow">GAME RULES</span><h2 id="rules-title">From prep to plate</h2></div><p>Fill the tickets together. Quick service earns bonus points, and expired orders cost points.</p></div>
-        <div className="step-grid">
-          {STEPS.map(([icon, title, body]) => <article className="step" key={title}>
-            <span className="step-icon">{icon}</span><h3>{title}</h3><p>{body}</p>
-          </article>)}
-        </div>
-        <div className="control-strip"><strong>Controls</strong><span><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to move</span><span><kbd>E</kbd> Pick up / place / serve</span><span><kbd>Space</kbd> Work at a station</span></div>
-        <KitchenPreview />
-      </section>
     </main>}
 
     {!room && page === 'join' && <main className="shell inner">
-      <button className="back" onClick={() => { setPage('home'); setError('') }}>Back to home</button>
+      <button className="back" disabled={pending} onClick={leave}>Back to main page</button>
       <div className="join-panel panel">
         <Status online={online} />
         <span className="step-icon">🧑‍🍳</span>
@@ -417,7 +382,7 @@ export default function App() {
           {error && <p className="error" role="alert">{error}</p>}
         </section>
       </div>
-      <button className="back leave" onClick={leave}>Leave room</button>
+      <button className="back leave" onClick={leave}>Back to main page</button>
     </main>}
 
     {room?.phase === 'briefing' && <ServiceBriefing online={online} chef={chef} room={room} onReady={() => lobby('briefed')} onLeave={leave} error={error} />}
@@ -460,7 +425,7 @@ export default function App() {
         ping(sound, [380])
       }} /></Suspense></div>
       <div className="match-under"><span role="status">{!online ? 'Connection lost. Reconnecting…' : notice || guidance(room, chef)}</span><span>Clean plates <b>{room.game.clean}</b> · Returned <b>{room.game.dirty}</b></span></div>
-      <div className="control-strip"><span><kbd>WASD</kbd> / arrows · Move</span><span><kbd>E</kbd> · Pick up, place, serve</span><span><kbd>Space</kbd> · Work at a station</span><button className="back ml-auto" onClick={() => { if (window.confirm('Leave the match?')) leave() }}>Leave room</button></div>
+      <div className="control-strip"><span><kbd>WASD</kbd> / arrows · Move</span><span><kbd>E</kbd> · Pick up, place, serve</span><span><kbd>Space</kbd> · Work at a station</span><button className="back ml-auto" onClick={() => { if (window.confirm('Leave the match and return to the main page?')) leave() }}>Back to main page</button></div>
       </section>
     </main>}
 
@@ -478,13 +443,13 @@ export default function App() {
         <div className="result-chefs">{room.players.map(player => <div className="player-row" key={player.id}><Apron color={player.color} /><strong className="player-name">{player.name}</strong><span>{player.served} served</span></div>)}</div>
         <div className="lobby-actions">
           {host ? <button className="button primary" disabled={!online} onClick={() => lobby('rematch')}>Play again</button> : <span>Waiting for the host to start a rematch.</span>}
-          <button className="button secondary" onClick={leave}>Leave room</button>
+          <button className="button secondary" onClick={leave}>Back to main page</button>
         </div>
         {error && <p className="error" role="alert">{error}</p>}
       </section>
     </main>}
 
-    {phase !== 'playing' && <footer className="site-footer"><div className="shell"><span>Rojak-rojak</span><span>Solo or with up to 4 chefs.</span></div></footer>}
+    {phase !== 'playing' && (room || page !== 'home') && <footer className="site-footer"><div className="shell"><span>Rojak-rojak</span><span>Solo or with up to 4 chefs.</span></div></footer>}
     {settings && <Dialog title="Settings" close={() => setSettings(false)}><div className="setting-row"><div><strong>Sound effects</strong><p>Play cues for actions and successful orders.</p></div><button className="button secondary compact" aria-pressed={sound} onClick={toggleSound}>{sound ? 'On' : 'Off'}</button></div></Dialog>}
   </div>
 }
