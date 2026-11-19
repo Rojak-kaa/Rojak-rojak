@@ -6,3 +6,4 @@ export const GARMENTS: Record<string, string>
 export const ACCESSORIES: Record<string, string>
 export const PALETTE: string[]
 export const DEFAULT_OUTFIT: Outfit
+export const ECO_OUTFIT: Outfit

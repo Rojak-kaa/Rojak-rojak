@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, CHEFS, GARMENTS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, CHEFS, ECO_OUTFIT, GARMENTS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -8,7 +8,8 @@ import { t } from './i18n'
 const clothingGroups = [
   ['Malay', 'bajuMelayu', 'bajuKurung'],
   ['Chinese', 'samfu', 'cheongsam'],
-  ['Indian', 'kurta', 'saree']
+  ['Indian', 'kurta', 'saree'],
+  ['Casual', 'striped']
 ]
 
 export async function accountRequest<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
@@ -54,14 +55,21 @@ export function SignIn({ language, onSignIn }: { language: Language; onSignIn: (
 }
 
 export function OutfitPreview({ outfit }: { outfit: Outfit }) {
-  return <span aria-hidden="true" className={'outfit-preview outfit-' + outfit.garment} style={{ background: PALETTE[outfit.fabric], borderColor: PALETTE[outfit.trim] }} />
+  const fabric = PALETTE[outfit.fabric]
+  const trim = PALETTE[outfit.trim]
+  const background = outfit.garment === 'striped' ? `repeating-linear-gradient(${fabric} 0 5px, ${trim} 5px 9px)` : fabric
+  return <span aria-hidden="true" className={'outfit-preview outfit-' + outfit.garment} style={{ background, borderColor: trim }} />
 }
 
 function ChefPreview({ outfit }: { outfit: Outfit }) {
   const chef = CHEFS[outfit.chef]
-  return <div className="chef-preview" aria-hidden="true">
-    <span className={'portrait-head portrait-' + outfit.accessory} style={{ backgroundColor: '#' + chef.skin.toString(16) }} />
+  return <div className={'chef-preview' + (outfit.chef === 'eco' ? ' chef-preview-eco' : '')} aria-hidden="true">
+    <span className={'portrait-head portrait-' + outfit.accessory} style={{ backgroundColor: '#' + chef.skin.toString(16) }}>
+      {outfit.chef === 'eco' && <><i className="portrait-braids" /><i className="portrait-clip">🦊</i></>}
+      {outfit.accessory === 'sprout' && <i className="portrait-leaves" />}
+    </span>
     <OutfitPreview outfit={outfit} />
+    {outfit.garment === 'striped' && <span className="portrait-shorts" />}
   </div>
 }
 
@@ -71,7 +79,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   function outfit(part: keyof Outfit, value: string | number) {
-    setDraft(previous => ({ ...previous, outfit: { ...previous.outfit, [part]: value } }))
+    setDraft(previous => ({ ...previous, outfit: part === 'chef' && value === ECO_OUTFIT.chef ? { ...ECO_OUTFIT } : { ...previous.outfit, [part]: value } }))
     setSaved(false)
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -95,12 +103,12 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     <label>{t('Chef nickname')}<input required maxLength={20} value={draft.name} onChange={event => { setDraft({ ...draft, name: event.target.value }); setSaved(false) }} /></label>
     <LanguagePicker value={draft.language} change={language => { setDraft({ ...draft, language }); setSaved(false) }} />
     <label>{t('Chef character')}<select value={draft.outfit.chef} onChange={event => outfit('chef', event.target.value)}>
-      {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>{chef.name} · {t(chef.culture)}</option>)}
+      {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>{id === ECO_OUTFIT.chef ? chef.name : chef.name + ' · ' + t(chef.culture)}</option>)}
     </select></label>
-    <div className="outfit-heading"><strong>{t('Traditional clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
-    <select aria-label={t('Traditional clothing')} value={draft.outfit.garment} onChange={event => outfit('garment', event.target.value)}>
+    <div className="outfit-heading"><strong>{t('Clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
+    <select aria-label={t('Clothing')} value={draft.outfit.garment} onChange={event => outfit('garment', event.target.value)}>
       {clothingGroups.map(([culture, ...garments]) => <optgroup key={culture} label={t(culture)}>
-        {garments.map(id => <option key={id} value={id}>{GARMENTS[id]}</option>)}
+        {garments.map(id => <option key={id} value={id}>{t(GARMENTS[id])}</option>)}
       </optgroup>)}
     </select>
     <label>{t('Headwear')}<select value={draft.outfit.accessory} onChange={event => outfit('accessory', event.target.value)}>

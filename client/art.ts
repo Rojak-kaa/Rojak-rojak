@@ -248,11 +248,26 @@ export function drawChef(g: Phaser.GameObjects.Graphics, player: Player, x: numb
     case 'saree':
       g.fillTriangle(x - 14, y - 6, x - 6, y - 6, x + 15, y + 15).fillTriangle(x - 14, y - 6, x + 6, y + 15, x + 15, y + 15)
       break
+    case 'striped':
+      for (const stripe of [-3, 2, 7]) g.fillRoundedRect(x - 14, y + stripe, 28, 2.5, 1)
+      g.fillStyle(0x334520, alpha).fillRoundedRect(x - 12, y + 9, 24, 7, 2)
+      g.fillStyle(0xed9b84, alpha).fillCircle(x - 8, y + 2, 2)
+      break
     default:
       g.fillRoundedRect(x - 9, y + 3, 18, 11, 4)
   }
   g.fillStyle(color, alpha).fillCircle(x + 12, y + 10, 3)
   g.fillStyle(skin, alpha).fillCircle(x - 16, y + 3, 5).fillCircle(x + 16, y + 3, 5).fillRoundedRect(x - 12, y - 22, 24, 23, 9)
+  if (outfit?.chef === 'eco' && character) {
+    g.fillStyle(character.hair, alpha).fillEllipse(x, y - 20, 30, 16).fillRoundedRect(x - 11, y - 20, 22, 7, 2)
+    for (const side of [-1, 1]) {
+      for (let braid = 0; braid < 4; braid++) g.fillEllipse(x + side * (14 + braid * 0.4), y - 16 + braid * 4, 7, 8)
+    }
+    g.fillStyle(0xe99d52, alpha).fillCircle(x - 8, y - 20, 3)
+      .fillTriangle(x - 11, y - 21, x - 11, y - 25, x - 8, y - 22)
+      .fillTriangle(x - 8, y - 22, x - 5, y - 25, x - 5, y - 21)
+    g.fillStyle(0xffe5ba, alpha).fillCircle(x - 8, y - 19, 1.5)
+  }
   const look = player.facing * 2
   g.fillStyle(0x3e292e, alpha).fillCircle(x - 5 + look, y - 9, 1.7).fillCircle(x + 5 + look, y - 9, 1.7)
   g.fillStyle(0xca7867, alpha).fillEllipse(x - 8, y - 5, 4, 2.5).fillEllipse(x + 8, y - 5, 4, 2.5)
@@ -261,8 +276,11 @@ export function drawChef(g: Phaser.GameObjects.Graphics, player: Player, x: numb
     g.fillStyle(0xfffbf2, alpha).fillCircle(x - 9, y - 25, 8).fillCircle(x + 8, y - 26, 8).fillCircle(x, y - 30, 10)
   } else if (outfit.accessory === 'songkok') {
     g.fillStyle(0x312735, alpha).fillRoundedRect(x - 13, y - 30, 26, 13, 3)
+  } else if (outfit.accessory === 'sprout') {
+    g.lineStyle(2, 0x608b3d, alpha).lineBetween(x, y - 26, x, y - 34)
+    g.fillStyle(0x88ad55, alpha).fillEllipse(x - 4, y - 33, 10, 5).fillEllipse(x + 5, y - 36, 11, 5)
   } else {
-    g.fillStyle(character?.hair ?? 0x493031, alpha).fillEllipse(x, y - 21, 24, 9)
+    if (outfit.chef !== 'eco') g.fillStyle(character?.hair ?? 0x493031, alpha).fillEllipse(x, y - 21, 24, 9)
     if (outfit.accessory === 'flower') g.fillStyle(0xffe4a3, alpha).fillCircle(x + 9, y - 22, 4)
   }
   if (player.item) drawItem(g, x + 20, y + 10, player.item)

@@ -20,6 +20,10 @@ Design your chef|Reka cef anda|设计你的厨师|உங்கள் சமை�
 Save and continue|Simpan dan teruskan|保存并继续|சேமித்துத் தொடரவும்
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
+Clothing|Pakaian|服装|உடை
+Casual|Kasual|休闲|சாதாரண உடை
+Striped shirt|Baju berjalur|条纹上衣|கோடிட்ட சட்டை
+Sprout|Pucuk|嫩芽|தளிர்
 Fabric colour|Warna kain|布料颜色|துணி நிறம்
 Trim colour|Warna hiasan|饰边颜色|கரை நிறம்
 Headwear|Penutup kepala|头饰|தலை அலங்காரம்

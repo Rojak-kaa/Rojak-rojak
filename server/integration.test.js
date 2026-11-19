@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
+import { CHEFS, ECO_OUTFIT } from '../shared/profile.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
@@ -165,7 +166,8 @@ test('sign-in, language and outfit survive a server restart', async () => {
     const cookie = await register(first, 'chef_persist')
     const initial = await fetch(first + '/api/account/me', { headers: { cookie } }).then(response => response.json())
     assert.equal(initial.outfitConfigured, false)
-    const profile = { name: 'Mei', language: 'zh', outfit: { chef: 'liWei', garment: 'samfu', accessory: 'flower', fabric: 2, trim: 4 } }
+    const profile = { name: 'Mei', language: 'zh', outfit: ECO_OUTFIT }
+    assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {
       method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(profile)
     })
