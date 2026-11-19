@@ -11,6 +11,7 @@ import { setLanguage, t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
 import TouchControls from './TouchControls'
+import { trainingGuide } from './trainingGuide'
 import type { Direction } from './TouchControls'
 import kitchenCrew from './assets/kitchen-crew.webp'
 import foodTown from './assets/food-town.webp'
@@ -380,6 +381,7 @@ export default function App() {
   }
 
   const chef = room?.players.find(player => player.id === me)
+  const trainingPrompt = room?.phase === 'playing' && chef ? trainingGuide(room, chef, showTouchControls) : ''
   const host = room?.host === me
   const canStart = Boolean(room?.players.length && room.players.every(player => player.ready && player.connected))
   const roundLeft = room?.game ? Math.max(0, room.game.endsAt - room.now) : 0
@@ -540,13 +542,6 @@ export default function App() {
           </article>
         })}
         </div>
-        {room.training && <ol className="practice-steps">
-          <li>{t('Collect the listed ingredients. Chop marked ingredients at a board and fry ikan bilis when listed.')}</li>
-          <li>Load the recipe station with <kbd>{showTouchControls ? t('Use') : 'E'}</kbd> and press <kbd>{showTouchControls ? t('Work') : 'Space'}</kbd> to prepare the dish.</li>
-          <li>{t(RECIPES[room.training].vessel === 'cup'
-            ? 'Fill a clean cup at the recipe station, then bring it to Serve.'
-            : 'Use a clean plate to collect the finished dish before it burns, then bring it to Serve.')}</li>
-        </ol>}
       </aside>
       <section className="play-kitchen" aria-label="Kitchen">
       <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
@@ -557,7 +552,8 @@ export default function App() {
         <button type="button" className="back" aria-pressed={showTouchControls} onClick={() => setShowTouchControls(enabled => !enabled)}>{t('On-screen controls')}</button>
         <button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button>
       </div>
-      <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} touchDirection={() => touchMovement.current}
+      {room.training && <span className="sr-only" role="status">{trainingPrompt}</span>}
+      <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} trainingPrompt={trainingPrompt} touchDirection={() => touchMovement.current}
         onMove={(x, y) => { if (socket.connected) socket.volatile.emit('move', { x, y }) }} onAct={act} /></Suspense></div>
       {showTouchControls && <TouchControls onDirection={direction => { touchMovement.current = direction }} onAction={act} />}
       </section>

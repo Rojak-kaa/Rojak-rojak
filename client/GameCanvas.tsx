@@ -14,6 +14,7 @@ type Props = {
   me?: string
   onMove?: (x: number, y: number) => void
   touchDirection?: () => Direction
+  trainingPrompt?: string
   onAct?: (action: 'use' | 'work') => void
 }
 
@@ -38,6 +39,8 @@ class KitchenScene extends Phaser.Scene {
   private lastSent = 0
   private breadSprites: Phaser.GameObjects.Image[] = []
   private breadCount = 0
+  private guideBubble?: Phaser.GameObjects.Graphics
+  private guideText?: Phaser.GameObjects.Text
   private chefPortraits = new Map<string, {
     image: Phaser.GameObjects.Image; texture: Phaser.Textures.CanvasTexture
     tinted: HTMLCanvasElement; stride: number; phase: number
@@ -61,6 +64,24 @@ class KitchenScene extends Phaser.Scene {
     const sprite = this.breadSprites[index] ?? this.add.image(x, y, 'bread-icon').setDepth(1)
     this.breadSprites[index] = sprite
     sprite.setPosition(x, y).setDisplaySize(size, size * 0.625).setVisible(true)
+  }
+
+  private drawGuide(prompt: string, chef: { x: number; y: number }) {
+    const bubble = this.guideBubble ??= this.add.graphics().setDepth(4)
+    const label = this.guideText ??= this.add.text(0, 0, '', {
+      fontFamily: 'system-ui', fontSize: '22px', fontStyle: 'bold', color: '#3d2635',
+      align: 'center', wordWrap: { width: 290 }
+    }).setDepth(5).setOrigin(0.5)
+    if (label.text !== prompt) label.setText(prompt)
+    const width = label.width + 24
+    const height = label.height + 14
+    const x = Phaser.Math.Clamp(chef.x * TILE, width / 2 + 8, WORLD_WIDTH - width / 2 - 8)
+    const bottom = Math.max(height + 6, chef.y * TILE - 52)
+    const tip = Phaser.Math.Clamp(chef.x * TILE, x - width / 2 + 18, x + width / 2 - 18)
+    bubble.clear().fillStyle(0x4a3043, 0.24).fillRoundedRect(x - width / 2, bottom - height + 3, width, height, 12)
+    bubble.fillStyle(0xfff4df).fillRoundedRect(x - width / 2, bottom - height, width, height, 12)
+    bubble.fillTriangle(tip - 8, bottom - 1, tip + 8, bottom - 1, chef.x * TILE, bottom + 10)
+    label.setPosition(x, bottom - height / 2)
   }
 
   create() {
@@ -209,6 +230,13 @@ class KitchenScene extends Phaser.Scene {
       label.setPosition(pos.x * TILE, pos.y * TILE + 26).setAlpha(player.connected ? 1 : 0.5)
     }
     for (let index = this.breadCount; index < this.breadSprites.length; index++) this.breadSprites[index].setVisible(false)
+    const prompt = this.current().trainingPrompt
+    const chef = me && this.positions.get(me)
+    if (prompt && chef) this.drawGuide(prompt, chef)
+    else {
+      this.guideBubble?.clear()
+      this.guideText?.setText('')
+    }
   }
 }
 

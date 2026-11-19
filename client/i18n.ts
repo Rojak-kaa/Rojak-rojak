@@ -156,7 +156,23 @@ Collect hot food before the burn countdown reaches zero. Use clean dishware to p
 Work at a station|Gunakan stesen|操作工作台|நிலையத்தைப் பயன்படுத்து
 On-screen controls|Kawalan pada skrin|屏幕操控|திரைக் கட்டுப்பாடுகள்
 Continue to shop|Teruskan ke kedai|继续前往店铺|கடைக்குச் செல்
-Fill a clean cup at the recipe station, then bring it to Serve.|Isi cawan bersih di stesen resipi, kemudian bawa ke kaunter hidangan.|在料理台用干净的杯子盛好饮品，再送到出餐台。|சமையல் நிலையத்தில் சுத்தமான கோப்பையை நிரப்பி, பரிமாறும் இடத்திற்குக் கொண்டு செல்லுங்கள்.
+Go to Serve and press {use} to complete the lesson.|Pergi ke kaunter hidangan dan tekan {use} untuk tamatkan latihan.|到出餐台按 {use}，完成练习。|பரிமாறும் இடத்திற்குச் சென்று {use} அழுத்திப் பயிற்சியை முடிக்கவும்.
+Return to {station} and press {use} to collect the order.|Kembali ke {station} dan tekan {use} untuk ambil pesanan.|回到{station}按 {use} 取餐。|{station} திரும்பிச் சென்று {use} அழுத்தி உணவை எடுக்கவும்.
+Wait at {station} until the order is ready.|Tunggu di {station} sehingga pesanan siap.|在{station}等餐点做好。|உணவு தயாராகும் வரை {station} அருகே காத்திருக்கவும்.
+Put down your item with {use} to free your hands.|Tekan {use} untuk letak barang dan kosongkan tangan.|按 {use} 放下手中的物品。|கையில் உள்ள பொருளை வைக்க {use} அழுத்தவும்.
+Go to Cups and press {use} for a clean cup.|Pergi ke stesen cawan dan tekan {use} untuk ambil cawan bersih.|到杯架按 {use} 取干净的杯子。|கோப்பை அலமாரியில் {use} அழுத்திச் சுத்தமான கோப்பையை எடுக்கவும்.
+Go to Plates and press {use} for a clean plate.|Pergi ke stesen pinggan dan tekan {use} untuk ambil pinggan bersih.|到盘架按 {use} 取干净的盘子。|தட்டு அலமாரியில் {use} அழுத்திச் சுத்தமான தட்டை எடுக்கவும்.
+Go to the burned batch and press {work} to clear it.|Pergi ke masakan hangus dan tekan {work} untuk membuangnya.|走到烧焦的餐点旁，按 {work} 清理。|கருகிய உணவின் அருகே சென்று {work} அழுத்தி அகற்றவும்.
+Go to Chop and press {use} to put down {ingredient}.|Pergi ke papan pemotong dan tekan {use} untuk letak {ingredient}.|到砧板按 {use} 放下{ingredient}。|வெட்டும் பலகையில் {ingredient} வைக்க {use} அழுத்தவும்.
+Go to the fryer and press {use} to load ikan bilis.|Pergi ke penggoreng dan tekan {use} untuk masukkan ikan bilis.|到炸锅按 {use} 放入江鱼仔。|பொரிப்பானில் நெத்திலியைப் போட {use} அழுத்தவும்.
+Go to {station} and press {use} to add {ingredient}.|Pergi ke {station} dan tekan {use} untuk masukkan {ingredient}.|到{station}按 {use} 加入{ingredient}。|{station} அருகே சென்று {ingredient} சேர்க்க {use} அழுத்தவும்.
+Press {work} at the fryer to fry the ikan bilis.|Tekan {work} di penggoreng untuk menggoreng ikan bilis.|在炸锅旁按 {work} 炸江鱼仔。|நெத்திலியைப் பொரிக்க {work} அழுத்தவும்.
+Press {work} at the cutting board to chop {ingredient}.|Tekan {work} di papan pemotong untuk potong {ingredient}.|在砧板旁按 {work} 切{ingredient}。|வெட்டும் பலகையில் {ingredient} வெட்ட {work} அழுத்தவும்.
+Wait for {ingredient} to finish.|Tunggu sehingga {ingredient} siap.|等待{ingredient}处理完成。|{ingredient} தயாராகும் வரை காத்திருக்கவும்.
+Press {use} to pick up the prepared {ingredient}.|Tekan {use} untuk ambil {ingredient} yang sudah disediakan.|按 {use} 拿起处理好的{ingredient}。|தயாரான {ingredient} எடுக்க {use} அழுத்தவும்.
+Press {work} at the fryer to clear the burned ikan bilis.|Tekan {work} di penggoreng untuk membuang ikan bilis hangus.|在炸锅旁按 {work} 清掉烧焦的江鱼仔。|கருகிய நெத்திலியை அகற்ற {work} அழுத்தவும்.
+Find {ingredient} and press {use} to pick it up.|Cari {ingredient} dan tekan {use} untuk mengambilnya.|找到{ingredient}，按 {use} 拿取。|{ingredient} எடுக்க அதன் அருகே சென்று {use} அழுத்தவும்.
+All ingredients are in. Press {work} at {station}.|Semua bahan sudah dimasukkan. Tekan {work} di {station}.|食材已放齐。在{station}按 {work} 开始制作。|எல்லாப் பொருட்களும் சேர்க்கப்பட்டன. {station} அருகே {work} அழுத்தவும்.
 Move up|Gerak ke atas|向上移动|மேலே நகர்
 Move down|Gerak ke bawah|向下移动|கீழே நகர்
 Move left|Gerak ke kiri|向左移动|இடப்புறம் நகர்

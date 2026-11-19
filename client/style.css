@@ -165,9 +165,7 @@ form .button { margin-top: 9px; }
 .ticket .recipe-ingredients li { background: transparent; }
 .ticket-urgent { background: #ffebe5; }
 .ticket-urgent::after { background-image: linear-gradient(135deg, #ffebe5 50%, transparent 0), linear-gradient(225deg, #ffebe5 50%, transparent 0); }
-.practice-mode, .practice-steps { color: var(--muted); font-size: .81rem; }
-.practice-steps { list-style: decimal; padding-left: 19px; overflow: auto; }
-.practice-steps li + li { margin-top: 5px; }
+.practice-mode { color: var(--muted); font-size: .81rem; }
 .service-score { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 6px; background: #fff5e5; font-size: .86rem; }
 .service-score strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
 .play-kitchen { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 6px; }
