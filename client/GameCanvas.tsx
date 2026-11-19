@@ -5,6 +5,7 @@ import { drawChef, drawnIngredients, drawItem, drawStation, floor, TILE, WORLD_H
 import { t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
+import { ecoPortrait, usesEcoPortrait } from './ecoPortrait'
 import type { Player, Room } from './model'
 
 type Props = {
@@ -35,9 +36,11 @@ class KitchenScene extends Phaser.Scene {
   private lastSent = 0
   private breadSprites: Phaser.GameObjects.Image[] = []
   private breadCount = 0
+  private chefPortraits = new Map<string, Phaser.GameObjects.Image>()
 
   preload() {
     this.load.image('bread-source', breadIcon)
+    this.load.image('eco-chef', ecoPortrait)
   }
 
   private drawBread(x: number, y: number, size: number) {
@@ -136,6 +139,8 @@ class KitchenScene extends Phaser.Scene {
       label.destroy()
       this.labels.delete(id)
       this.positions.delete(id)
+      this.chefPortraits.get(id)?.destroy()
+      this.chefPortraits.delete(id)
     }
     const ordered = [...players].sort((a, b) => a.y - b.y)
     for (const player of ordered) {
@@ -148,10 +153,28 @@ class KitchenScene extends Phaser.Scene {
       pos.y += (y - pos.y) * blend
       this.positions.set(player.id, pos)
       if (me === player.id) this.layer.lineStyle(2, 0xf16c3d).strokeEllipse(pos.x * TILE, pos.y * TILE + 14, 45, 17)
-      drawChef(this.layer, player, pos.x * TILE, pos.y * TILE, time, moving)
+      const px = pos.x * TILE
+      const py = pos.y * TILE
+      const bounce = moving ? Math.sin(time / 65) * 2 : 0
+      const illustrated = usesEcoPortrait(player.outfit)
+      let portrait = this.chefPortraits.get(player.id)
+      if (illustrated) {
+        if (!portrait) {
+          portrait = this.add.image(px, py, 'eco-chef').setOrigin(0.5, 1).setDisplaySize(37, 59).setDepth(1)
+          this.chefPortraits.set(player.id, portrait)
+        }
+        this.layer.fillStyle(0x3b2637, 0.19).fillEllipse(px, py + 17, 38, 11)
+        portrait.setPosition(px, py + 20 + bounce).setFlipX(player.facing < 0).setAlpha(player.connected ? 1 : 0.38)
+        if (player.item) drawItem(this.layer, px + 27, py + 10 + bounce, player.item)
+      } else {
+        if (portrait) {
+          portrait.destroy()
+          this.chefPortraits.delete(player.id)
+        }
+        drawChef(this.layer, player, px, py, time, moving)
+      }
       if (player.item?.name === 'bread') {
-        const bounce = moving ? Math.sin(time / 65) * 2 : 0
-        this.drawBread(pos.x * TILE + 20, pos.y * TILE + 10 + bounce, 25)
+        this.drawBread(px + (illustrated ? 27 : 20), py + 10 + bounce, 25)
       }
       if (this.preview) continue
       let label = this.labels.get(player.id)

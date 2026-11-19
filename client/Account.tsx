@@ -4,6 +4,7 @@ import { ACCESSORIES, CHEFS, ECO_OUTFIT, GARMENTS, LANGUAGES, PALETTE } from '..
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
+import { ecoPortrait, usesEcoPortrait } from './ecoPortrait'
 
 const clothingGroups = [
   ['Malay', 'bajuMelayu', 'bajuKurung'],
@@ -62,6 +63,7 @@ export function OutfitPreview({ outfit }: { outfit: Outfit }) {
 }
 
 function ChefPreview({ outfit }: { outfit: Outfit }) {
+  if (usesEcoPortrait(outfit)) return <img className="eco-chef-portrait" src={ecoPortrait} alt={CHEFS[outfit.chef].name} />
   const chef = CHEFS[outfit.chef]
   return <div className={'chef-preview' + (outfit.chef === 'eco' ? ' chef-preview-eco' : '')} aria-hidden="true">
     <span className={'portrait-head portrait-' + outfit.accessory} style={{ backgroundColor: '#' + chef.skin.toString(16) }}>
