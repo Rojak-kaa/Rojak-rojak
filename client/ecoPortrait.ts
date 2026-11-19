@@ -1,4 +1,4 @@
-import { CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT, PALETTE } from '../shared/profile.mjs'
+import { canChangeSkinTone, CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT, PALETTE, SKIN_TONES } from '../shared/profile.mjs'
 import type { Outfit } from '../shared/profile.mjs'
 
 export { default as ecoPortrait } from './assets/eco-chef.webp'
@@ -410,18 +410,39 @@ function drawHeadwear(context: CanvasRenderingContext2D, accessory: string, blan
   }
 }
 
+function tintIllustratedSkin(context: CanvasRenderingContext2D, tone: string) {
+  const pixels = context.getImageData(0, 0, ECO_WIDTH, ECO_HEIGHT)
+  const original = pixels.data.subarray((164 * ECO_WIDTH + 145) * 4, (164 * ECO_WIDTH + 145) * 4 + 3)
+  const shift = rgb(tone).map((value, channel) => value - original[channel])
+  for (let y = 140; y < 460; y++) {
+    for (let x = 65; x < 235; x++) {
+      // Exclude the striped shirt and hair accessory from skin recolouring.
+      const skinRegion = y <= 207 || (y <= 223 && x >= 123 && x <= 164) ||
+        (y <= 226 && x <= 102) || (y >= 295 && y <= 320 && x >= 190) || y >= 335
+      if (!skinRegion) continue
+      const offset = (y * ECO_WIDTH + x) * 4
+      const [r, g, b, alpha] = pixels.data.subarray(offset, offset + 4)
+      if (!alpha || r < 205 || r - g < 14 || g - b < 4) continue
+      for (let channel = 0; channel < 3; channel++) pixels.data[offset + channel] += shift[channel]
+    }
+  }
+  context.putImageData(pixels, 0, 0)
+}
+
 export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   const canvas = document.createElement('canvas')
   canvas.width = ECO_WIDTH
   canvas.height = ECO_HEIGHT
   const context = canvas.getContext('2d')!
   const blankBase = outfit.chef !== ECO_OUTFIT.chef
+  const tone = canChangeSkinTone(outfit.chef) && outfit.skinTone != null ? SKIN_TONES[outfit.skinTone] : undefined
   if (blankBase) {
-    const skin = '#' + CHEFS[outfit.chef].skin.toString(16).padStart(6, '0')
+    const skin = tone ?? '#' + CHEFS[outfit.chef].skin.toString(16).padStart(6, '0')
     drawBaseBody(context, skin, outfit.handSign)
     drawHairstyle(context, outfit)
   } else {
     context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
+    if (tone) tintIllustratedSkin(context, tone)
     drawHandSign(context, outfit.handSign)
   }
   drawHeadwear(context, outfit.accessory, blankBase)

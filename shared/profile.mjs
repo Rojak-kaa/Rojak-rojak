@@ -21,7 +21,8 @@ export const EXPRESSIONS = { none: 'Blank face', calm: 'Calm', happy: 'Happy', w
 export const HAND_SIGNS = { relaxed: 'Relaxed hands', peace: 'Peace sign', wave: 'Wave', fist: 'Fist', point: 'Point', okay: 'OK sign' }
 export const HAIRSTYLES = { none: 'No hair', short: 'Short hair', bob: 'Bob', bun: 'Bun', braids: 'Braids' }
 export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029', '#efd78b']
-export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace', hairStyle: 'none' }
+export const SKIN_TONES = ['#f8e5d9', '#edc4a5', '#d5a17e', '#b87a56', '#915638', '#643c2b']
+export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace', hairStyle: 'none', skinTone: null }
 export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'custom', garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
 export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7, hairStyle: 'braids' }
 export const AYU_OUTFIT = { ...DEFAULT_OUTFIT, accessory: 'none', fabric: 9, trim: 1, handSign: 'relaxed', hairStyle: 'short' }
@@ -33,7 +34,13 @@ export function hasFixedFabric(chef) {
   return chef === LI_WEN_OUTFIT.chef || chef === KAVITHA_OUTFIT.chef
 }
 
+export function canChangeSkinTone(chef) {
+  return chef === BASE_OUTFIT.chef || chef === ECO_OUTFIT.chef
+}
+
 export function lockSignatureOutfit(outfit) {
+  const skinTone = canChangeSkinTone(outfit.chef) && Number.isInteger(outfit.skinTone) && SKIN_TONES[outfit.skinTone] ? outfit.skinTone : null
+  outfit = { ...outfit, skinTone }
   if (!Object.hasOwn(FIXED_OUTFITS, outfit.chef)) return outfit
   const { garment, trim, hairStyle, fabric } = FIXED_OUTFITS[outfit.chef]
   const eco = outfit.chef === ECO_OUTFIT.chef

@@ -53,11 +53,11 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const outfit = { ...LI_WEN_OUTFIT, accessory: 'chef', expression: 'wink', handSign: 'wave' }
   const updated = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[0], 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Pip', language: 'ta', outfit: { ...outfit, garment: 'cheongsam', fabric: 2, trim: 8, hairStyle: 'bob' } })
+    body: JSON.stringify({ name: 'Pip', language: 'ta', outfit: { ...outfit, garment: 'cheongsam', fabric: 2, trim: 8, hairStyle: 'bob', skinTone: 5 } })
   })
   assert.equal(updated.status, 200)
   assert.deepEqual((await updated.json()).outfit, outfit)
-  const custom = { ...BASE_OUTFIT, garment: 'cheongsam', accessory: 'flower', fabric: 4, trim: 7, expression: 'happy', handSign: 'okay', hairStyle: 'bun' }
+  const custom = { ...BASE_OUTFIT, garment: 'cheongsam', accessory: 'flower', fabric: 4, trim: 7, expression: 'happy', handSign: 'okay', hairStyle: 'bun', skinTone: 3 }
   const customSaved = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[1], 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Bean', language: 'en', outfit: custom })
@@ -190,7 +190,7 @@ test('sign-in, language and outfit survive a server restart', async () => {
     })
     assert.equal(kavithaSaved.status, 200)
     assert.deepEqual((await kavithaSaved.json()).outfit, kavitha)
-    const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2, expression: 'happy', handSign: 'okay' } }
+    const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2, expression: 'happy', handSign: 'okay', skinTone: 4 } }
     assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {
       method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' },

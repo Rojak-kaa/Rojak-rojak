@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, FIXED_OUTFITS, GARMENTS, HAIRSTYLES, HAND_SIGNS, hasFixedFabric, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, BASE_OUTFIT, canChangeSkinTone, CHEFS, ECO_OUTFIT, EXPRESSIONS, FIXED_OUTFITS, GARMENTS, HAIRSTYLES, HAND_SIGNS, hasFixedFabric, LANGUAGES, PALETTE, SKIN_TONES } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -98,7 +98,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
   const [saved, setSaved] = useState(false)
   const fixedClothing = FIXED_OUTFITS[draft.outfit.chef]
   const eco = draft.outfit.chef === ECO_OUTFIT.chef
-  function outfit(part: keyof Outfit, value: string | number) {
+  function outfit(part: keyof Outfit, value: string | number | null) {
     setDraft(previous => {
       if (part === 'chef') {
         const chef = String(value)
@@ -153,6 +153,13 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     <label>{t('Hand sign')}<select value={draft.outfit.handSign} onChange={event => outfit('handSign', event.target.value)}>
       {Object.entries(HAND_SIGNS).filter(([id]) => !eco || id !== 'relaxed').map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
+    {canChangeSkinTone(draft.outfit.chef) && <fieldset className="palette">
+      <legend>{t('Skin colour')}</legend>
+      <button type="button" className="back" aria-pressed={draft.outfit.skinTone === null} onClick={() => outfit('skinTone', null)}>{t('Original skin colour')}</button>
+      {SKIN_TONES.map((color, index) => <button type="button" className="swatch" key={color}
+        style={{ background: color }} aria-label={t('Skin colour') + ' ' + (index + 1)}
+        aria-pressed={draft.outfit.skinTone === index} onClick={() => outfit('skinTone', index)} />)}
+    </fieldset>}
     {!hasFixedFabric(draft.outfit.chef) && ([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
       <fieldset className="palette" key={part}><legend>{t(label)}</legend>{PALETTE.map((color, index) =>
         <button type="button" className="swatch" style={{ background: color }} aria-label={t(label) + ' ' + (index + 1)}

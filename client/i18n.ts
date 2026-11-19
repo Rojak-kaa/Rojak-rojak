@@ -21,6 +21,8 @@ Save and continue|Simpan dan teruskan|保存并继续|சேமித்து�
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
 Customise|Sesuaikan|自定义|தனிப்பயனாக்கு
+Skin colour|Warna kulit|肤色|தோல் நிறம்
+Original skin colour|Warna kulit asal|原始肤色|அசல் தோல் நிறம்
 Facial expression|Ekspresi muka|面部表情|முகபாவனை
 Hairstyle|Gaya rambut|发型|சிகை அலங்காரம்
 No hair|Tiada rambut|无头发|முடி இல்லை

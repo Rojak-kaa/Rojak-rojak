@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { promisify } from 'node:util'
 import express from 'express'
-import { ACCESSORIES, AYU_OUTFIT, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, lockSignatureOutfit, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, AYU_OUTFIT, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, lockSignatureOutfit, PALETTE, SKIN_TONES } from '../shared/profile.mjs'
 
 const derive = promisify(scrypt)
 const COOKIE = 'rojak_account'
@@ -90,15 +90,17 @@ export function createAccounts(path) {
     const expression = outfit?.expression ?? DEFAULT_OUTFIT.expression
     const handSign = outfit?.handSign ?? DEFAULT_OUTFIT.handSign
     const hairStyle = outfit?.hairStyle ?? DEFAULT_OUTFIT.hairStyle
+    const skinTone = outfit?.skinTone ?? null
     if (typeof name !== 'string' || !name.trim() || name.length > 20 || !Object.hasOwn(LANGUAGES, language) ||
       !outfit || !Object.hasOwn(CHEFS, outfit.chef) || !Object.hasOwn(GARMENTS, outfit.garment) || !Object.hasOwn(ACCESSORIES, outfit.accessory) ||
       typeof expression !== 'string' || !Object.hasOwn(EXPRESSIONS, expression) ||
       typeof handSign !== 'string' || !Object.hasOwn(HAND_SIGNS, handSign) ||
       typeof hairStyle !== 'string' || !Object.hasOwn(HAIRSTYLES, hairStyle) ||
+      (skinTone !== null && !(Number.isInteger(skinTone) && SKIN_TONES[skinTone])) ||
       ![outfit.fabric, outfit.trim].every(value => Number.isInteger(value) && PALETTE[value])) {
       return res.status(400).json({ error: 'Check your profile details.' })
     }
-    const cleanOutfit = lockSignatureOutfit({ chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim, expression, handSign, hairStyle })
+    const cleanOutfit = lockSignatureOutfit({ chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim, expression, handSign, hairStyle, skinTone })
     db.prepare('UPDATE users SET name = ?, language = ?, outfit = ?, outfit_configured = 1 WHERE id = ?').run(name.trim(), language, JSON.stringify(cleanOutfit), user.id)
     res.json(publicProfile(userById.get(user.id)))
   })
