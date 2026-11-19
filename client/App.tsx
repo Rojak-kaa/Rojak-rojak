@@ -9,6 +9,7 @@ import type { Language } from '../shared/profile.mjs'
 import { accountRequest, LanguagePicker, OutfitPreview, SignIn, Wardrobe } from './Account'
 import { setLanguage, t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
+import breadIcon from './assets/bread-icon.png'
 import kitchenCrew from './assets/kitchen-crew.webp'
 import foodTown from './assets/food-town.webp'
 
@@ -81,7 +82,7 @@ function RecipeIngredients({ ingredients }: { ingredients: string[] }) {
   return <ul className="recipe-ingredients" aria-label={t('Ingredients')}>{ingredients.map(id => {
     const ingredient = INGREDIENTS[id]
     const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name
-    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}><span className="ingredient-icon" aria-hidden="true">{ingredientIcon(id)}</span>{t(name)}</li>
+    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}><span className={'ingredient-icon' + (id === 'bread' ? ' bread-icon' : '')} aria-hidden="true">{id === 'bread' ? <img src={breadIcon} alt="" /> : ingredientIcon(id)}</span>{t(name)}</li>
   })}</ul>
 }
 

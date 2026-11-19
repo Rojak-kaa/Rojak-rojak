@@ -234,6 +234,8 @@ form .button { margin-top: 9px; }
   .player-page-panel { align-items: start; }
 }
 .ingredient-icon { display: inline-block; margin-inline-end: .4em; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }
+.bread-icon { position: relative; width: 1.35em; height: .86em; overflow: hidden; vertical-align: -.08em; mix-blend-mode: multiply; }
+.bread-icon img { position: absolute; top: 50%; left: 50%; width: 154%; max-width: none; transform: translate(-50%, -50%); }
 .result-tally { display: grid; justify-items: center; gap: 5px; margin-block: 14px 17px; }
 .result-score { display: grid; justify-items: center; gap: 2px; }
 .result-score strong { font-size: clamp(2.4rem, 7vw, 4.25rem); line-height: 1; font-variant-numeric: tabular-nums; }

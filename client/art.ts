@@ -47,10 +47,6 @@ function ingredient(g: Phaser.GameObjects.Graphics, x: number, y: number, name: 
   g.fillStyle(color)
   if (chopped) {
     g.fillRoundedRect(x - 9, y - 6, 8, 7, 2).fillRoundedRect(x + 2, y - 8, 7, 7, 2).fillRoundedRect(x - 2, y + 2, 8, 7, 2)
-  } else if (name === 'bread') {
-    g.fillStyle(0xa56338).fillRoundedRect(x - 10, y - 3, 20, 15, 4).fillEllipse(x, y - 4, 25, 15)
-    g.fillStyle(0xf8d699).fillRoundedRect(x - 7, y - 3, 14, 12, 3).fillEllipse(x, y - 4, 18, 10)
-    g.fillStyle(0xc89153).fillCircle(x - 3, y + 1, 1).fillCircle(x + 4, y - 4, 1)
   } else if (name === 'kaya') {
     g.fillStyle(0x507742).fillRoundedRect(x - 8, y - 7, 16, 18, 4)
     g.fillStyle(0xf1cb83).fillRoundedRect(x - 9, y - 10, 18, 5, 2)
@@ -92,6 +88,7 @@ function ingredient(g: Phaser.GameObjects.Graphics, x: number, y: number, name: 
 }
 
 export function drawItem(g: Phaser.GameObjects.Graphics, x: number, y: number, item: Item) {
+  if (item.name === 'bread') return
   const drink = item.kind === 'dish' && item.name && RECIPES[item.name]?.vessel === 'cup' ? RECIPES[item.name] : undefined
   if (item.kind === 'cup' || item.kind === 'dirtyCup' || drink) {
     cup(g, x, y, drink?.color ?? (item.kind === 'dirtyCup' ? '#936e53' : undefined))
@@ -138,7 +135,7 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
   switch (station.kind) {
     case 'crate':
       g.fillStyle(0xa46a4c).fillRoundedRect(x + 7, y + 11, 42, 27, 5)
-      if (drawnIngredients.has(station.id)) ingredient(g, cx, cy, station.id)
+      if (station.id !== 'bread' && drawnIngredients.has(station.id)) ingredient(g, cx, cy, station.id)
       break
     case 'oven':
       g.fillStyle(0x635360).fillRoundedRect(cx - 21, cy - 16, 42, 32, 4)
