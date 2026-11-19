@@ -11,13 +11,15 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. Vite forwards account requests and Socket.IO to the Express server on port 3001. Create an account or sign in to play. Choose **Play Solo** for a one-player match or **Play Team** to create or join a room for up to four players.
+Open http://localhost:5173. Vite forwards account requests and Socket.IO to the Express server on port 3001. Create an account or sign in to play. Select a shop on the town map, then choose **Play Solo** or **Play Team**. Use **Join room** when you already have a code. Guests use the host’s shop and menu.
 
 On your first sign-in, design your chef and choose **Save and continue** to reach the landing page. Returning players go straight to the landing page. Open **Profile & outfit** to view your dishes served or edit your nickname, chef, and wardrobe. Choose Ayu, Li Wei, or Kavitha and dress them in Malay baju Melayu or baju kurung, Chinese samfu or cheongsam, or Indian kurta or sari, with custom colours and headwear. Choose Bahasa Melayu, Mandarin Chinese (Simplified), Tamil, or English.
 
 Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
 
-Select a dish in the landing illustration to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Lessons have no round or order deadline, but hot stations still have a burn timer so players can practise taking food off the heat.
+Select **Training** on the town map to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Lessons have no round or order deadline, but hot stations still have a burn timer so players can practise taking food off the heat.
+
+Each shop stocks only the ingredients needed for its own menu. Chicken Rice Shop serves chicken rice dishes, barley water, and iced liang teh. Mamak serves roti, mee goreng, teh tarik, nasi kandar, and ayam paprik. Hawker Centre serves ban mee, chicken rice, char kway teow, curry laksa, and fruit rojak. Kopitiam serves kaya butter toast, black coffee, white coffee, and half-boiled eggs.
 
 For a one-computer multiplayer test, open two or more separate tabs and enter a different nickname in each. Each tab uses a separate room session unless it inherited one from a duplicated tab.
 

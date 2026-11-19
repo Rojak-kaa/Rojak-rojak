@@ -7,7 +7,7 @@ import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
 import { interact, startMatch, tickMatch } from './kitchen.js'
-import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
+import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
 const { http, io } = createKitchenServer({ database: ':memory:' })
 const sockets = []
@@ -127,15 +127,18 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   assert.deepEqual((await lessonStarted).game.orders.map(order => order.recipe), ['laksa'])
   await outsider.timeout(1500).emitWithAck('leave')
 
-  const pair = await send(d, 'enter', { name: 'Basil', create: true })
-  await send(outsider, 'enter', { name: 'Guest', code: pair.room.code })
+  const pair = await send(d, 'enter', { name: 'Basil', create: true, shop: 'kopitiam' })
+  const guestAtShop = await send(outsider, 'enter', { name: 'Guest', code: pair.room.code, shop: 'mamak' })
+  assert.equal(guestAtShop.room.shop, 'kopitiam')
   await Promise.all([d, outsider].map(socket => command(socket, 'ready')))
   const pairBriefing = waitFor(outsider, state => state.phase === 'briefing')
   assert.equal((await command(d, 'start')).ok, true)
   await pairBriefing
   const pairStarted = waitFor(outsider, state => state.phase === 'playing')
   await Promise.all([d, outsider].map(socket => command(socket, 'briefed')))
-  assert.equal((await pairStarted).game.solo, false)
+  const pairMatch = await pairStarted
+  assert.equal(pairMatch.game.solo, false)
+  assert.equal(pairMatch.game.orders[0].recipe, 'kayaToast')
 })
 
 async function register(address, username) {
@@ -220,11 +223,17 @@ for (const recipe of TRAINING_RECIPES) {
   })
 }
 
-function verifyMenu(difficulty, rules, training = null) {
-  const stations = stationsFor(difficulty, training)
+for (const [id, shop] of Object.entries(SHOPS)) {
+  test(shop.name + ' stocks and serves its own menu', () => {
+    verifyMenu('Easy', { ...DIFFICULTIES.Easy, pool: shop.pool }, null, id)
+  })
+}
+
+function verifyMenu(difficulty, rules, training = null, shop = null) {
+  const stations = stationsFor(difficulty, training, shop)
   const paths = stationPaths(stations)
   const chefs = (training ? [0] : [0, 1, 2]).map(color => ({ color, socketId: String(color) }))
-  const room = { difficulty, training, players: new Map(chefs.map(chef => [chef.color, chef])) }
+  const room = { difficulty, training, shop, players: new Map(chefs.map(chef => [chef.color, chef])) }
   let now = 1000
   startMatch(room, now)
   const { game } = room

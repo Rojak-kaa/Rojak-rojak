@@ -36,7 +36,7 @@ class KitchenScene extends Phaser.Scene {
     floor(this.add.graphics())
     this.layer = this.add.graphics()
     const room = this.current().room
-    for (const station of stationsFor(room?.difficulty ?? 'Hard', room?.training)) {
+    for (const station of stationsFor(room?.difficulty ?? 'Hard', room?.training, room?.shop)) {
       const caption = station.kind === 'crate' ? INGREDIENTS[station.id].label : names[station.kind]
       if (caption) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 48, t(caption), {
         fontFamily: 'system-ui', fontSize: '8px', fontStyle: 'bold', color: '#5d3840',
@@ -69,7 +69,7 @@ class KitchenScene extends Phaser.Scene {
     }
     const players = room?.players ?? demo
     const local = players.find(player => player.id === me)
-    const stations = stationsFor(room?.difficulty ?? 'Hard', room?.training)
+    const stations = stationsFor(room?.difficulty ?? 'Hard', room?.training, room?.shop)
     const active = local && nearestStation(local.x, local.y, stations)?.id
     this.layer.clear()
     for (const station of stations) {

@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { Server } from 'socket.io'
-import { COLORS, DIFFICULTIES, TRAINING_RECIPES } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, SHOPS, TRAINING_RECIPES } from '../shared/kitchen.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { createAccounts } from './accounts.js'
 
@@ -26,7 +26,7 @@ export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data
 
   function snapshot(room, now = Date.now()) {
     return {
-      code: room.code, host: room.host, phase: room.phase, difficulty: room.difficulty, solo: room.solo, training: room.training, now,
+      code: room.code, host: room.host, phase: room.phase, difficulty: room.difficulty, solo: room.solo, training: room.training, shop: room.shop, now,
       players: [...room.players.values()].map(({ id, name, color, outfit, ready, socketId, x, y, facing, item, served }) =>
         ({ id, name, color, outfit, ready, connected: Boolean(socketId), x, y, facing, item, served })),
       game: room.game
@@ -92,11 +92,13 @@ export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data
       let room
       const training = typeof data.training === 'string' && TRAINING_RECIPES.includes(data.training) ? data.training : null
       if (data.training != null && !training) return respond(ack, { error: 'That training recipe is unavailable.' })
+      const shop = typeof data.shop === 'string' && Object.hasOwn(SHOPS, data.shop) ? data.shop : null
+      if (data.shop != null && !shop) return respond(ack, { error: 'That shop is unavailable.' })
       const solo = data.solo === true || Boolean(training)
       if (data.create === true || solo) {
         let code
         do { code = Array.from({ length: 6 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('') } while (rooms.has(code))
-        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: training ? 'Hard' : 'Easy', solo, training, game: null }
+        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: training ? 'Hard' : 'Easy', solo, training, shop: training ? null : shop, game: null }
         rooms.set(code, room)
       } else {
         const code = typeof data.code === 'string' ? data.code.trim().toUpperCase() : ''

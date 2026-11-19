@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, nearestStation, recipeFor, RECIPES, stationsFor } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, SHOPS, stationsFor, TRAINING_RECIPES } from '../shared/kitchen.mjs'
 import type { Difficulty, Player, Room } from './model'
 import type { Profile } from './model'
 import { LANGUAGES } from '../shared/profile.mjs'
@@ -9,17 +9,12 @@ import type { Language } from '../shared/profile.mjs'
 import { accountRequest, LanguagePicker, OutfitPreview, SignIn, Wardrobe } from './Account'
 import { setLanguage, t } from './i18n'
 import kitchenCrew from './assets/kitchen-crew.webp'
+import foodTown from './assets/food-town.webp'
 
 const GameCanvas = lazy(() => import('./GameCanvas'))
 const socket = io({ autoConnect: false })
 const SESSION_KEY = 'kitchen-rush-session'
 const APRONS = ['Paprika', 'Basil', 'Ube', 'Saffron']
-const TRAINING_SPOTS = [
-  { id: 'rojak', label: 'Rojak', x: 17, y: 72 },
-  { id: 'nasiLemak', label: 'Nasi Lemak', x: 52, y: 77 },
-  { id: 'laksa', label: 'Laksa', x: 63, y: 26 },
-  { id: 'aisKacang', label: 'Ais Kacang', x: 85, y: 71 }
-]
 type Reply = { ok?: boolean; error?: string; room?: Room; id?: string; token?: string }
 
 let audio: AudioContext | undefined
@@ -103,9 +98,9 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
       <p><kbd>Space</kbd> <strong>{t("Work at the highlighted station")}</strong></p>
     </section>
     <p className="briefing-tip">{t('Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe.')} <kbd>E</kbd> {t('Pick up, place, serve')} · <kbd>Space</kbd> {t('Work at a station')}. {t('Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.')}</p>
-    <h2 className="briefing-menu-title">{room.training ? t('Practice recipe') : t(room.difficulty) + ' · ' + t(DIFFICULTIES[room.difficulty].category)}</h2>
+    <h2 className="briefing-menu-title">{room.training ? t('Practice recipe') : room.shop ? SHOPS[room.shop].name : t(room.difficulty) + ' · ' + t(DIFFICULTIES[room.difficulty].category)}</h2>
     <ul className="briefing-menu">
-      {(room.training ? [room.training] : DIFFICULTIES[room.difficulty].pool).map(id => {
+      {menuFor(room.difficulty, room.training, room.shop).map(id => {
         const recipe = recipeFor(room.difficulty, id)
         return <li className="panel briefing-recipe" key={id} style={{ borderTopColor: recipe.color }}>
           <h3>{recipe.name}</h3>
@@ -129,7 +124,7 @@ function CanvasFallback() {
 
 function guidance(room: Room, player?: Player) {
   if (!player) return 'Waiting for your chef…'
-  const station = nearestStation(player.x, player.y, stationsFor(room.difficulty, room.training))
+  const station = nearestStation(player.x, player.y, stationsFor(room.difficulty, room.training, room.shop))
   if (!station) return 'Walk up to a station to interact.'
   const state = room.game!.stations[station.id]
   const remaining = state.until ? Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's' : ''
@@ -178,6 +173,9 @@ export default function App() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [checkingAccount, setCheckingAccount] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [shopMenu, setShopMenu] = useState<string>()
+  const [selectedShop, setSelectedShop] = useState<string>()
+  const [trainingMenu, setTrainingMenu] = useState(false)
   const [language, setLocale] = useState<Language>(() => {
     const stored = localStorage.getItem('rojak-language')
     return stored && Object.hasOwn(LANGUAGES, stored) ? stored as Language : 'en'
@@ -269,7 +267,7 @@ export default function App() {
     ping(!sound)
   }
 
-  function enter(create: boolean, solo = false, training?: string) {
+  function enter(create: boolean, solo = false, training?: string, shop?: string) {
     const nickname = name.trim() || (solo ? 'Solo Chef' : '')
     if (!nickname) return setError('Enter a chef nickname.')
     if (!create && !solo && !/^[a-z0-9]{6}$/i.test(code)) return setError('Enter the six-character room code.')
@@ -277,17 +275,19 @@ export default function App() {
     setError('')
     ping(sound)
     if (name.trim()) sessionStorage.setItem('kitchen-rush-name', name.trim())
-    socket.timeout(5000).emit('enter', { name: nickname, create, solo, training, code }, (failure: Error | null, reply?: Reply) => {
+    socket.timeout(5000).emit('enter', { name: nickname, create, solo, training, shop, code }, (failure: Error | null, reply?: Reply) => {
       setPending(false)
       if (failure || reply?.error) return setError(reply?.error ?? 'The kitchen server did not respond. Try again.')
       accept(reply)
+      setShopMenu(undefined)
+      setTrainingMenu(false)
       if (solo) window.scrollTo(0, 0)
     })
   }
 
-  function startSolo(training?: string) {
+  function startSolo(training?: string, shop?: string) {
     if (!online) return setError('The kitchen server is connecting. Try again in a moment.')
-    enter(true, true, training)
+    enter(true, true, training, shop)
   }
 
   function lobby(type: string, value?: string | number) {
@@ -307,6 +307,7 @@ export default function App() {
     setError('')
     setNotice('')
     setCopied('')
+    setSelectedShop(undefined)
     history.replaceState({}, '', location.pathname)
     window.scrollTo(0, 0)
   }
@@ -322,10 +323,13 @@ export default function App() {
     } catch { setError('Clipboard unavailable. You can select and copy the room code.') }
   }
 
-  function openLobby() {
+  function openLobby(shop?: string) {
     ping(sound)
     setError('')
     setPage('join')
+    setCode('')
+    setSelectedShop(shop)
+    setShopMenu(undefined)
     window.scrollTo(0, 0)
   }
 
@@ -335,6 +339,11 @@ export default function App() {
   const roundLeft = room?.game ? Math.max(0, room.game.endsAt - room.now) : 0
 
   const onLanding = !room && page === 'home'
+
+  function openProfile() {
+    setProfileOpen(true)
+    void accountRequest<Profile>('me').then(value => { if (value) setProfile(value) }).catch(() => {})
+  }
 
   async function signOut() {
     await accountRequest('logout', 'POST')
@@ -371,10 +380,7 @@ export default function App() {
           <span className="brand-icon">♨</span><span>Rojak-rojak</span>
         </button>
         <div className="nav-actions">
-          {!room && <button className="button secondary compact" onClick={() => {
-            setProfileOpen(true)
-            void accountRequest<Profile>('me').then(value => { if (value) setProfile(value) }).catch(() => {})
-          }}>{t('Profile & outfit')}</button>}
+          {!room && <button className="button secondary compact" onClick={openProfile}>{t('Profile & outfit')}</button>}
           <button className="icon-btn" aria-label={sound ? 'Mute sound' : 'Unmute sound'} aria-pressed={sound} onClick={toggleSound}>{sound ? '◖))' : '◖×'}</button>
           <button className="icon-btn gear" aria-label="Settings" onClick={() => setSettings(true)}>⚙</button>
         </div>
@@ -382,21 +388,22 @@ export default function App() {
     </header>}
 
     {onLanding && <main className="landing">
-      <section className="landing-hero" aria-labelledby="landing-title" style={{ backgroundImage: `url("${kitchenCrew}")` }}>
-        <div className="landing-play">
-          <h1 id="landing-title">Rojak-rojak</h1>
+      <section className="landing-hero town-hero" aria-labelledby="landing-title" style={{ backgroundImage: `url("${foodTown}")` }}>
+        <div className="landing-play town-actions">
+          <h1 id="landing-title">Malaysian Food Town</h1>
           <div className="landing-buttons">
-            <button className="button primary" disabled={pending} onClick={() => startSolo()}>{t("Play Solo")}</button>
-            <button className="button secondary" disabled={pending} onClick={openLobby}>{t("Play Team")}</button>
+            <button className="button secondary compact" onClick={() => openLobby()}>{t('Join room')}</button>
+            <button className="button secondary compact" onClick={() => { setError(''); setTrainingMenu(true) }}>{t('Training')}</button>
           </div>
           {error && <p className="error" role="alert">{t(error)}</p>}
         </div>
         <div className="landing-scene">
-          <img src={kitchenCrew} alt="A Malaysian hawker stall with three cooks preparing rojak, nasi lemak, and ais kacang." width="1536" height="1024" fetchPriority="high" />
-          {TRAINING_SPOTS.map(spot => <button key={spot.id} type="button" className="food-hotspot" disabled={pending}
-            style={{ left: spot.x + '%', top: spot.y + '%' }} aria-label={'Train: ' + spot.label} onClick={() => startSolo(spot.id)}>
-            <span>{spot.label}</span>
+          <img src={foodTown} alt="An illustrated Malaysian town map with four food shops and a traditional house." width="1536" height="1024" fetchPriority="high" />
+          {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className="food-hotspot town-shop" disabled={pending}
+            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setShopMenu(id) }}>
+            <span>{shop.name}</span>
           </button>)}
+          <button type="button" className="food-hotspot town-shop" style={{ left: '50%', top: '37%' }} onClick={openProfile}><span>{t('Your profile')}</span></button>
         </div>
       </section>
     </main>}
@@ -406,13 +413,13 @@ export default function App() {
       <div className="join-panel panel">
         <Status online={online} />
         <span className="step-icon">🧑‍🍳</span>
-        <h1>{t("Find your kitchen")}</h1>
+        <h1>{selectedShop ? SHOPS[selectedShop].name : t("Find your kitchen")}</h1>
         <p>{t("Choose a nickname, then host a private room or join your friends.")}</p>
-        <form onSubmit={(event: FormEvent) => { event.preventDefault(); enter(Boolean(!code.trim())) }}>
+        <form onSubmit={(event: FormEvent) => { event.preventDefault(); enter(Boolean(selectedShop && !code.trim()), false, undefined, selectedShop) }}>
           <label htmlFor="nickname">{t("Chef nickname")}</label>
           <input id="nickname" value={name} maxLength={20} onChange={event => setName(event.target.value)} placeholder="e.g. Chef Miso" autoComplete="nickname" />
-          <button className="button primary w-full" type="button" disabled={!online || pending} onClick={() => enter(true)}>{t("Create private room")}</button>
-          <div className="divider"><span>{t("or join a friend")}</span></div>
+          {selectedShop && <><button className="button primary w-full" type="button" disabled={!online || pending} onClick={() => enter(true, false, undefined, selectedShop)}>{t("Create private room")}</button>
+          <div className="divider"><span>{t("or join a friend")}</span></div></>}
           <label htmlFor="room-code">{t("Room code")}</label>
           <input id="room-code" value={code} maxLength={6} onChange={event => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="ABC123" autoComplete="off" />
           <button className="button secondary w-full" type="button" disabled={!online || pending} onClick={() => enter(false)}>{t("Join room")}</button>
@@ -422,7 +429,7 @@ export default function App() {
     </main>}
 
     {room?.phase === 'lobby' && <main className="shell inner">
-      <div className="room-heading"><div><span className="eyebrow">{t("PRIVATE ROOM")}</span><h1>{t("Kitchen lobby")}</h1></div><Status online={online} /></div>
+      <div className="room-heading"><div><span className="eyebrow">{t("PRIVATE ROOM")}</span><h1>{room.shop ? SHOPS[room.shop].name : t("Kitchen lobby")}</h1></div><Status online={online} /></div>
       <div className="lobby-grid">
         <section className="panel">
           <div className="flex items-center justify-between gap-3"><h2>{t("Chef crew")}</h2><span className="pill">{room.players.length} / 4 chefs</span></div>
@@ -443,11 +450,11 @@ export default function App() {
             <button className="button secondary compact" onClick={() => void share(false)}>{copied === 'code' ? t('Copied!') : t('Copy code')}</button>
             <button className="button secondary compact" onClick={() => void share(true)}>{copied === 'link' ? t('Copied!') : t('Copy invite link')}</button>
           </div>
-          <label htmlFor="difficulty">{t("Difficulty")}</label>
+          {!room.shop && <><label htmlFor="difficulty">{t("Difficulty")}</label>
           <select id="difficulty" disabled={!host || !online} value={room.difficulty} onChange={event => lobby('difficulty', event.target.value)}>
             {Object.keys(DIFFICULTIES).map(level => <option key={level} value={level}>{t(level)}</option>)}
           </select>
-          <p>{difficultyText[room.difficulty]}</p>
+          <p>{difficultyText[room.difficulty]}</p></>}
           <div className="lobby-actions">
             <button className={'button ' + (chef?.ready ? 'secondary' : 'primary')} disabled={!online} onClick={() => lobby('ready')}>{t(chef?.ready ? 'Mark not ready' : 'I’m ready')}</button>
             {host && <button className="button primary" disabled={!online || !canStart} onClick={() => lobby('start')}>{t("Start game")}</button>}
@@ -464,6 +471,7 @@ export default function App() {
     {room?.phase === 'playing' && room.game && <main className="match">
       <aside className="order-rail" aria-labelledby="order-rail-title">
         <div className="order-rail-heading">
+          {room.shop && <span className="shop-service-name">{SHOPS[room.shop].name}</span>}
           <h1 id="order-rail-title">{t(room.training ? 'Training order' : 'Customer orders')}</h1>
           {room.training ? <span className="practice-mode">{t("Untimed practice")}</span> : <div className={'round-clock' + (roundLeft <= 20000 ? ' clock-urgent' : '')}>
             <span>{t("Round left")}</span><strong role="timer">{formatTime(roundLeft)}</strong>
@@ -529,6 +537,22 @@ export default function App() {
         selectLanguage(value)
         if (profile) void accountRequest<Profile>('me', 'PATCH', { ...profile, language: value }).then(setProfile).catch(() => {})
       }} />
+    </Dialog>}
+    {shopMenu && !room && <Dialog title={SHOPS[shopMenu].name} close={() => setShopMenu(undefined)}>
+      <ul className="shop-menu">{SHOPS[shopMenu].pool.map(id => <li key={id}>
+        <strong>{RECIPES[id].name}</strong><span>{t(RECIPES[id].method)}</span>
+      </li>)}</ul>
+      {error && <p className="error" role="alert">{t(error)}</p>}
+      <div className="account-actions">
+        <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
+        <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
+      </div>
+    </Dialog>}
+    {trainingMenu && !room && <Dialog title={t('Training')} close={() => setTrainingMenu(false)}>
+      <div className="account-actions">{TRAINING_RECIPES.map(id =>
+        <button className="button secondary compact" key={id} disabled={pending} onClick={() => startSolo(id)}>{RECIPES[id].name}</button>)}
+      </div>
+      {error && <p className="error" role="alert">{t(error)}</p>}
     </Dialog>}
   </div>
 }

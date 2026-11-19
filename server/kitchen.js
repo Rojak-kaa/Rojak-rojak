@@ -1,4 +1,4 @@
-import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, nearestStation, recipeFor, RECIPES, SPAWNS, stationsFor, WIDTH } from '../shared/kitchen.mjs'
+import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, SPAWNS, stationsFor, WIDTH } from '../shared/kitchen.mjs'
 
 const CHOP_TIME = 1500
 const WASH_TIME = 2200
@@ -27,8 +27,8 @@ export function startMatch(room, now) {
     interval: difficulty.interval + 16000,
     burn: difficulty.burn + 10000
   } : difficulty
-  room.matchRules = room.training ? { ...rules, pool: [room.training] } : rules
-  room.stations = stationsFor(room.difficulty, room.training)
+  room.matchRules = { ...rules, pool: menuFor(room.difficulty, room.training, room.shop) }
+  room.stations = stationsFor(room.difficulty, room.training, room.shop)
   room.blocked = new Set(room.stations.map(({ x, y }) => y * WIDTH + x))
   room.recipes = room.matchRules.pool.map(id => [id, recipeFor(room.difficulty, id)])
   room.phase = 'playing'
@@ -148,7 +148,7 @@ export function interact(room, player, start, now) {
         Object.assign(state, { item, status: 'raw' })
         return take(null)
       }
-      return 'Use E to place cucumber, pineapple, or chicken, then press Space to chop.'
+      return 'Use E to place an ingredient marked for chopping, then press Space.'
     case 'fryer':
       if (state.status === 'burned') {
         if (!start) return 'Press Space to clear the burned ikan bilis.'

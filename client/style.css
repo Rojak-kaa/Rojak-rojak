@@ -224,6 +224,18 @@ form .button { margin-top: 9px; }
 .portrait-chef::before { inset: -5px 1px auto; height: 12px; background: #fff9ea; box-shadow: 0 -3px 0 -1px #fff9ea; }
 .portrait-songkok::before { inset: -4px 0 auto; height: 11px; border-radius: 3px; }
 .portrait-flower::before { box-shadow: 7px -3px #f6b35c; }
+.town-hero .landing-scene { width: min(100%, 185dvh); }
+.town-actions { left: 50%; transform: translateX(-50%); text-align: center; width: max-content; max-width: calc(100% - 28px); }
+.town-actions h1 { font-size: clamp(1.3rem, 2.6vw, 2.2rem); }
+.town-actions .landing-buttons { justify-content: center; }
+.town-shop { width: 25%; height: 28%; }
+.town-shop span { background: #392719ec; }
+.shop-menu { display: grid; gap: 0; margin-top: 9px; }
+.shop-menu li { display: grid; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.shop-menu li span, .shop-service-name { color: var(--muted); font-size: .85rem; }
+@media (max-width: 500px) {
+  .town-shop span { padding-inline: 6px; font-size: .68rem; }
+}
 @media (max-width: 720px) {
   .player-page { grid-template-columns: 1fr; grid-template-rows: minmax(130px, 28dvh) 1fr; }
   .player-page-art { background-position: center 42%; }

@@ -1,3 +1,6 @@
+import { SHOPS, SHOP_INGREDIENTS, SHOP_RECIPES } from './shops.mjs'
+export { SHOPS }
+
 export const WIDTH = 15
 export const HEIGHT = 9
 export const COLORS = ['#f36a47', '#3d9d89', '#8266c4', '#eca73d']
@@ -19,6 +22,7 @@ export const STATIONS = [
   ['counterE', 'counter', 7, 7]
 ].map(([id, kind, x, y]) => ({ id, kind, x, y }))
 export const INGREDIENTS = {
+  ...SHOP_INGREDIENTS,
   bilis: { name: 'Ikan bilis', label: 'IKAN BILIS', color: '#aa7650' },
   rice: { name: 'Coconut rice', label: 'RICE', color: '#fff0cc' },
   sambal: { name: 'Sambal', label: 'SAMBAL', color: '#cf482d' },
@@ -42,6 +46,7 @@ export const METHODS = {
   shave: { label: 'Ice station', action: 'Shave and top', busy: 'Shaving and topping', hot: false, scale: 0.6 }
 }
 export const RECIPES = {
+  ...SHOP_RECIPES,
   nasiLemak: { name: 'Nasi Lemak', station: 'pot', ingredients: ['rice', 'sambal', 'cucumber', 'bilis'], method: 'Cook at the stove', color: '#5a955d', points: 110 },
   rojak: { name: 'Fruit Rojak', station: 'mix', ingredients: ['cucumber', 'pineapple', 'dressing'], method: 'Toss in the mixing bowl', color: '#b76538', points: 110 },
   aisKacang: { name: 'Ais Kacang', station: 'shave', ingredients: ['ice', 'beans', 'syrup'], method: 'Shave and top at the ice station', color: '#db659a', points: 90 },
@@ -64,22 +69,41 @@ export function recipeFor(difficulty, id) {
   return recipe
 }
 
-function buildStations(difficulty, pool) {
+export function menuFor(difficulty, training, shop) {
+  if (training) return [training]
+  return shop ? SHOPS[shop].pool : DIFFICULTIES[difficulty].pool
+}
+
+const SHOP_CRATE_SLOTS = [
+  [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [12, 1], [13, 1],
+  [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [4, 7], [5, 7], [6, 7]
+]
+
+function buildStations(difficulty, pool, shop = false) {
   const recipes = pool.map(id => recipeFor(difficulty, id))
   const ingredients = new Set(recipes.flatMap(recipe => recipe.ingredients))
   const methods = new Set(recipes.map(recipe => recipe.station))
-  return STATIONS.filter(station => {
-    if (station.kind === 'crate') return ingredients.has(station.id)
+  const stations = STATIONS.filter(station => {
+    if (station.kind === 'crate') return !shop && ingredients.has(station.id)
     if (station.kind === 'fryer') return ingredients.has('bilis')
     return !Object.hasOwn(METHODS, station.kind) || methods.has(station.kind)
   })
+  if (shop) {
+    for (const [index, id] of [...ingredients].entries()) {
+      const [x, y] = SHOP_CRATE_SLOTS[index]
+      stations.push({ id, kind: 'crate', x, y })
+    }
+  }
+  return stations
 }
 
 const stationLayouts = Object.fromEntries(Object.entries(DIFFICULTIES).map(([level, rules]) => [level, buildStations(level, rules.pool)]))
 const trainingLayouts = Object.fromEntries(TRAINING_RECIPES.map(id => [id, buildStations('Hard', [id])]))
+const shopLayouts = Object.fromEntries(Object.entries(SHOPS).map(([id, shop]) => [id, buildStations('Hard', shop.pool, true)]))
 
-export function stationsFor(difficulty, training) {
-  return training ? trainingLayouts[training] : stationLayouts[difficulty]
+export function stationsFor(difficulty, training, shop) {
+  if (training) return trainingLayouts[training]
+  return shop ? shopLayouts[shop] : stationLayouts[difficulty]
 }
 
 export function nearestStation(x, y, stations = STATIONS) {
