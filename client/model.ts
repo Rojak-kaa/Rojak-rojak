@@ -2,7 +2,7 @@ import type { Language, Outfit } from '../shared/profile.mjs'
 
 export type Profile = { id: string; username: string; name: string; language: Language; outfit: Outfit; served: number; outfitConfigured: boolean }
 export type Difficulty = 'Easy' | 'Normal' | 'Hard'
-export type Item = { kind: 'raw' | 'chopped' | 'fried' | 'plate' | 'cup' | 'dirty' | 'dirtyCup' | 'dish'; name?: string }
+export type Item = { kind: 'raw' | 'chopped' | 'fried' | 'roasted' | 'plate' | 'cup' | 'dirty' | 'dirtyCup' | 'dish'; name?: string }
 export type Player = {
   id: string; name: string; color: number; ready: boolean; connected: boolean
   outfit?: Outfit

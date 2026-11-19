@@ -3,6 +3,7 @@ import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, menuFor, nearestStation, re
 const CHOP_TIME = 1500
 const WASH_TIME = 2200
 const FRY_TIME = 2600
+const ROAST_TIME = 4600
 const SPEED = 3.75
 const RADIUS = 0.22
 
@@ -48,6 +49,7 @@ export function startMatch(room, now) {
 
 function ingredientKind(name) {
   if (name === 'bilis') return 'fried'
+  if (name === 'roastedChicken') return 'roasted'
   return INGREDIENTS[name].chop ? 'chopped' : 'raw'
 }
 
@@ -62,10 +64,10 @@ function advanceStation(room, state, now) {
     room.game[state.item?.kind === 'dirtyCup' ? 'cleanCups' : 'clean']++
     state.item = null
     state.status = 'empty'
-  } else if (state.status === 'frying' || state.status === 'cooking') {
-    const frying = state.status === 'frying'
-    if (frying) state.item = { kind: 'fried', name: 'bilis' }
-    const hot = frying || METHODS[RECIPES[state.recipe].station].hot
+  } else if (['frying', 'roasting', 'cooking'].includes(state.status)) {
+    if (state.status === 'frying') state.item = { kind: 'fried', name: 'bilis' }
+    if (state.status === 'roasting') state.item = { kind: 'roasted', name: 'roastedChicken' }
+    const hot = state.status !== 'cooking' || METHODS[RECIPES[state.recipe].station].hot
     const burnsAt = finishedAt + room.matchRules.burn
     state.status = hot && now >= burnsAt ? 'burned' : 'cooked'
     if (hot && state.status === 'cooked') state.until = burnsAt
@@ -197,6 +199,27 @@ export function interact(room, player, start, now) {
         return take(null)
       }
       return 'Load raw ikan bilis with E, press Space to fry, then collect it with E.'
+    case 'oven':
+      if (state.status === 'burned') {
+        if (!start) return 'Press Space to clear the burned chicken.'
+        reset()
+        return ''
+      }
+      if (state.status === 'roasting') return 'Roasting chicken…'
+      if (start && state.status === 'raw') {
+        Object.assign(state, { status: 'roasting', until: now + ROAST_TIME })
+        return ''
+      }
+      if (!start && !item && state.item) {
+        const chicken = state.item
+        reset()
+        return take(chicken)
+      }
+      if (!start && item?.kind === 'raw' && item.name === 'chicken' && state.status === 'empty') {
+        Object.assign(state, { item, status: 'raw' })
+        return take(null)
+      }
+      return 'Load raw chicken with E, press Space to roast, then collect it with E.'
     case 'pot':
     case 'grill':
     case 'mix':
@@ -223,7 +246,8 @@ export function interact(room, player, start, now) {
         if (!state.ingredients.length) reset()
         return take({ name, kind: ingredientKind(name) })
       }
-      if (!start && item?.name && INGREDIENTS[item.name] && ['raw', 'chopped', 'fried'].includes(item.kind) && ['empty', 'loaded'].includes(state.status)) {
+      if (!start && item?.name && INGREDIENTS[item.name] && ['raw', 'chopped', 'fried', 'roasted'].includes(item.kind) && ['empty', 'loaded'].includes(state.status)) {
+        if (item.name === 'chicken' && recipes.some(([, recipe]) => recipe.ingredients.includes('roastedChicken'))) return 'Roast the raw chicken in the oven first.'
         const needed = ingredientKind(item.name)
         if (item.kind !== needed) return needed === 'fried' ? 'Fry the ikan bilis first.' : 'Chop this ingredient first.'
         if (state.ingredients.includes(item.name)) return 'That ingredient is already in this batch.'

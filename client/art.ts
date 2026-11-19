@@ -70,6 +70,9 @@ export function drawItem(g: Phaser.GameObjects.Graphics, x: number, y: number, i
   }
   if (item.kind === 'fried') {
     g.fillStyle(0xaf6836).fillEllipse(x - 3, y - 3, 14, 4).fillEllipse(x + 2, y + 3, 14, 4)
+  } else if (item.kind === 'roasted') {
+    g.fillStyle(0xb66b39).fillEllipse(x - 3, y - 2, 18, 13)
+    g.fillStyle(0xffe4bb).fillRoundedRect(x + 4, y - 2, 10, 4, 2)
   } else if (item.kind === 'raw' || item.kind === 'chopped') ingredient(g, x, y, item.name ?? '', item.kind === 'chopped')
   else {
     plate(g, x, y, item.kind === 'dirty')
@@ -106,8 +109,11 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
   switch (station.kind) {
     case 'crate':
       g.fillStyle(0xa46a4c).fillRoundedRect(x + 7, y + 11, 42, 27, 5)
-      ingredient(g, cx - 9, cy - 4, station.id)
-      ingredient(g, cx + 9, cy + 3, station.id)
+      break
+    case 'oven':
+      g.fillStyle(0x635360).fillRoundedRect(cx - 21, cy - 16, 42, 32, 4)
+      g.fillStyle(state?.status === 'roasting' ? 0xffb15a : 0x382e3e).fillRoundedRect(cx - 16, cy - 10, 32, 21, 4)
+      g.fillStyle(0xffe4bb).fillRoundedRect(cx - 10, cy - 13, 20, 3, 1)
       break
     case 'board':
       g.fillStyle(0xc48c54).fillRoundedRect(cx - 19, cy - 12, 38, 26, 5)
@@ -176,7 +182,7 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
       break
   }
   if (state?.item) drawItem(g, cx, cy, state.item)
-  if (state && ['chopping', 'cooking', 'frying', 'cooked', 'washing', 'burned'].includes(state.status)) {
+  if (state && ['chopping', 'cooking', 'frying', 'roasting', 'cooked', 'washing', 'burned'].includes(state.status)) {
     const tint = state.status === 'cooked' ? 0x52b985 : state.status === 'burned' ? 0xfa7155 : 0xffc95e
     g.fillStyle(tint).fillCircle(x + 45, y + 10, 5)
   }

@@ -266,7 +266,15 @@ function verifyMenu(difficulty, rules, training = null, shop = null) {
     const station = stations.find(({ kind }) => kind === recipe.station).id
     for (const [i, ingredient] of recipe.ingredients.entries()) {
       const chef = chefs[i % chefs.length]
-      use(chef, ingredient)
+      use(chef, ingredient === 'roastedChicken' ? 'chicken' : ingredient)
+      if (ingredient === 'roastedChicken') {
+        assert.match(act(chef, station), /Roast the raw chicken/)
+        use(chef, 'oven')
+        use(chef, 'oven', true)
+        advance(4600)
+        use(chef, 'oven')
+        assert.deepEqual(chef.item, { kind: 'roasted', name: 'roastedChicken' })
+      }
       if (INGREDIENTS[ingredient].chop) {
         assert.match(act(chef, station), /Chop/)
         use(chef, 'boardA')

@@ -232,3 +232,4 @@ form .button { margin-top: 9px; }
   .player-page-art { background-position: center 42%; }
   .player-page-panel { align-items: start; }
 }
+.ingredient-icon { display: inline-block; margin-inline-end: .4em; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }

@@ -8,6 +8,7 @@ import { LANGUAGES } from '../shared/profile.mjs'
 import type { Language } from '../shared/profile.mjs'
 import { accountRequest, LanguagePicker, OutfitPreview, SignIn, Wardrobe } from './Account'
 import { setLanguage, t } from './i18n'
+import { ingredientIcon } from './ingredientIcons'
 import kitchenCrew from './assets/kitchen-crew.webp'
 import foodTown from './assets/food-town.webp'
 
@@ -80,7 +81,7 @@ function RecipeIngredients({ ingredients }: { ingredients: string[] }) {
   return <ul className="recipe-ingredients" aria-label={t('Ingredients')}>{ingredients.map(id => {
     const ingredient = INGREDIENTS[id]
     const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name
-    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}>{t(name)}</li>
+    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}><span className="ingredient-icon" aria-hidden="true">{ingredientIcon(id)}</span>{t(name)}</li>
   })}</ul>
 }
 
@@ -148,6 +149,11 @@ function guidance(room: Room, player?: Player) {
       if (state.status === 'cooked') return 'E · Collect fried ikan bilis · Burns in ' + remaining
       if (state.status === 'burned') return 'Space · Clear burned ikan bilis'
       return state.status === 'raw' ? 'Space · Fry ikan bilis' : 'E · Put raw ikan bilis in the fryer'
+    case 'oven':
+      if (state.status === 'roasting') return 'Roasting chicken · ' + remaining
+      if (state.status === 'cooked') return 'E · Collect roasted chicken · Burns in ' + remaining
+      if (state.status === 'burned') return 'Space · Clear burned chicken'
+      return state.status === 'raw' ? 'Space · Roast chicken' : 'E · Put raw chicken in the oven'
     case 'crate': return 'E · Pick up ' + INGREDIENTS[station.id].name.toLowerCase()
     case 'counter': return 'E · Place or pick up an item'
     case 'board':

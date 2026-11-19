@@ -23,6 +23,8 @@ Each shop stocks only the ingredients needed for its own menu. Chicken Rice Shop
 
 Drink ingredients are along the left wall, with stoves and prep tables along the bottom. Fill drinks using a clean cup from **Cups**. Collect used cups at **Cup Return** and wash them at the sink. Food uses the separate plate stock.
 
+For **Roasted Chicken Rice**, put raw chicken in the Chicken Rice Shop’s **Oven** and press **Space**. Take out the roasted chicken before it burns, then combine it with roast glaze and fragrant rice at **Mix**.
+
 For a one-computer multiplayer test, open two or more separate tabs and enter a different nickname in each. Each tab uses a separate room session unless it inherited one from a duplicated tab.
 
 Create a private room and share its code or invite link. Select aprons, have every chef mark ready, and start from the host's screen. For LAN play, use the host computer's LAN IP and port 5173 in every browser. Allow port 5173 through the host firewall if required.

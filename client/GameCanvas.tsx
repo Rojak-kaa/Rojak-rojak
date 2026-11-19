@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import { INGREDIENTS, nearestStation, SPAWNS, stationsFor } from '../shared/kitchen.mjs'
 import { drawChef, drawItem, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
 import { t } from './i18n'
+import { ingredientIcon } from './ingredientIcons'
 import type { Player, Room } from './model'
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
 
 const names: Record<string, string> = {
   board: 'CHOP', pot: 'STOVE', grill: 'GRILL', mix: 'MIX', shave: 'ICE STATION', sink: 'WASH', serve: 'SERVE',
-  plates: 'PLATES', dirty: 'RETURN', cups: 'CUPS', cupReturn: 'CUP RETURN', counter: 'TABLE', bin: 'BIN', fryer: 'FRYER'
+  plates: 'PLATES', dirty: 'RETURN', cups: 'CUPS', cupReturn: 'CUP RETURN', counter: 'TABLE', bin: 'BIN', fryer: 'FRYER', oven: 'OVEN'
 }
 
 const demo: Player[] = SPAWNS.map(([x, y], color) => ({
@@ -38,6 +39,9 @@ class KitchenScene extends Phaser.Scene {
     const room = this.current().room
     for (const station of stationsFor(room?.difficulty ?? 'Hard', room?.training, room?.shop)) {
       const caption = station.kind === 'crate' ? INGREDIENTS[station.id].label : names[station.kind]
+      if (station.kind === 'crate') this.add.text((station.x + 0.5) * TILE, station.y * TILE + 25, ingredientIcon(station.id), {
+        fontFamily: 'Segoe UI Emoji, Apple Color Emoji, sans-serif', fontSize: '21px'
+      }).setOrigin(0.5)
       if (caption) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 48, t(caption), {
         fontFamily: 'system-ui', fontSize: '8px', fontStyle: 'bold', color: '#5d3840',
         backgroundColor: '#fff2d8', padding: { x: 3, y: 1 }

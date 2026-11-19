@@ -83,6 +83,8 @@ const DRINK_CRATE_SLOTS = [[1, 3], [1, 4], [1, 5], [1, 6], [1, 7]]
 function buildStations(difficulty, pool, shop = false) {
   const recipes = pool.map(id => recipeFor(difficulty, id))
   const ingredients = new Set(recipes.flatMap(recipe => recipe.ingredients))
+  const needsOven = ingredients.delete('roastedChicken')
+  if (needsOven) ingredients.add('chicken')
   const methods = new Set(recipes.map(recipe => recipe.station))
   const stations = STATIONS.filter(station => {
     if (station.kind === 'crate') return !shop && ingredients.has(station.id)
@@ -90,6 +92,7 @@ function buildStations(difficulty, pool, shop = false) {
     return !Object.hasOwn(METHODS, station.kind) || methods.has(station.kind)
   })
   if (shop) {
+    if (needsOven) stations.push({ id: 'oven', kind: 'oven', x: 10, y: 1 })
     const drinkIngredients = new Set(recipes.filter(recipe => recipe.vessel === 'cup').flatMap(recipe => recipe.ingredients))
     const foodIngredients = [...ingredients].filter(id => !drinkIngredients.has(id))
     const foodSlots = [...SHOP_CRATE_SLOTS, ...DRINK_CRATE_SLOTS.slice(drinkIngredients.size)]
