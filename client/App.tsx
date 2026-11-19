@@ -389,14 +389,7 @@ export default function App() {
 
     {onLanding && <main className="landing">
       <section className="landing-hero town-hero" aria-labelledby="landing-title" style={{ backgroundImage: `url("${foodTown}")` }}>
-        <div className="landing-play town-actions">
-          <h1 id="landing-title">Malaysian Food Town</h1>
-          <div className="landing-buttons">
-            <button className="button secondary compact" onClick={() => openLobby()}>{t('Join room')}</button>
-            <button className="button secondary compact" onClick={() => { setError(''); setTrainingMenu(true) }}>{t('Training')}</button>
-          </div>
-          {error && <p className="error" role="alert">{t(error)}</p>}
-        </div>
+        <h1 id="landing-title" className="sr-only">Malaysian Food Town</h1>
         <div className="landing-scene">
           <img src={foodTown} alt="An illustrated Malaysian town map with four food shops and a traditional house." width="1536" height="1024" fetchPriority="high" />
           {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className="food-hotspot town-shop" disabled={pending}
@@ -546,6 +539,11 @@ export default function App() {
       <div className="account-actions">
         <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
         <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
+        {shopMenu === 'hawker' && <button className="button secondary" disabled={pending} onClick={() => {
+          setError('')
+          setShopMenu(undefined)
+          setTrainingMenu(true)
+        }}>{t('Training')}</button>}
       </div>
     </Dialog>}
     {trainingMenu && !room && <Dialog title={t('Training')} close={() => setTrainingMenu(false)}>

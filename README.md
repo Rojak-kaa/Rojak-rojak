@@ -17,7 +17,7 @@ On your first sign-in, design your chef and choose **Save and continue** to reac
 
 Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
 
-Select **Training** on the town map to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Lessons have no round or order deadline, but hot stations still have a burn timer so players can practise taking food off the heat.
+Open **Hawker Centre** and select **Training** to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Lessons have no round or order deadline, but hot stations still have a burn timer so players can practise taking food off the heat.
 
 Each shop stocks only the ingredients needed for its own menu. Chicken Rice Shop serves chicken rice dishes, barley water, and iced liang teh. Mamak serves roti, mee goreng, teh tarik, nasi kandar, and ayam paprik. Hawker Centre serves ban mee, chicken rice, char kway teow, curry laksa, and fruit rojak. Kopitiam serves kaya butter toast, black coffee, white coffee, and half-boiled eggs.
 

@@ -142,9 +142,6 @@ form .button { margin-top: 9px; }
 .landing-topbar .brand { color: #fff8ed; text-shadow: 0 2px 5px #21151a; }
 .landing-hero { position: relative; height: 100dvh; overflow: hidden; isolation: isolate; background: #241d23 center / cover no-repeat; }
 .landing-hero::before { content: ""; position: absolute; z-index: -1; inset: 0; backdrop-filter: blur(18px) brightness(.66); }
-.landing-play { position: absolute; z-index: 2; top: 86px; left: clamp(14px, 4vw, 60px); padding: 12px 16px; border: 1px solid #eed6ad; border-radius: 14px; background: #fff6e7; box-shadow: 0 4px 16px #311d2870; }
-.landing-play h1 { font-size: clamp(1.65rem, 3vw, 2.8rem); font-weight: 1000; line-height: 1; letter-spacing: -.055em; margin-bottom: 9px; }
-.landing-buttons { display: flex; gap: 8px; }
 .landing-scene { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(150dvh, 100%, 250dvh); }
 .landing-scene img { display: block; width: 100%; height: auto; }
 .food-hotspot { position: absolute; display: grid; place-items: center; width: 22%; height: 23%; transform: translate(-50%, -50%); border: 2px solid transparent; border-radius: 50%; }
@@ -178,7 +175,6 @@ form .button { margin-top: 9px; }
 .play-kitchen .match-under { padding: 3px 6px; color: #fff4e5; }
 .play-kitchen .control-strip { margin: 0; padding: 5px 8px; gap: 5px 10px; }
 @media (max-width: 650px) {
-  .landing-play { top: 68px; }
   .match { grid-template-columns: clamp(105px, 31vw, 156px) minmax(0, 1fr); padding: 5px; gap: 5px; }
   .order-rail { padding: 6px; }
   .round-clock { min-width: 0; gap: 2px 4px; padding: 5px; }
@@ -191,8 +187,6 @@ form .button { margin-top: 9px; }
 }
 
 @media (orientation: portrait) {
-  .landing-play { left: 50%; transform: translateX(-50%); width: max-content; text-align: center; }
-  .landing-buttons { justify-content: center; }
   .landing-scene { top: max(56%, min(calc(175px + 100vw / 3), 100% - 100vw / 3)); }
 }
 .account-form { min-width: 0; }
@@ -225,9 +219,6 @@ form .button { margin-top: 9px; }
 .portrait-songkok::before { inset: -4px 0 auto; height: 11px; border-radius: 3px; }
 .portrait-flower::before { box-shadow: 7px -3px #f6b35c; }
 .town-hero .landing-scene { width: min(100%, 185dvh); }
-.town-actions { left: 50%; transform: translateX(-50%); text-align: center; width: max-content; max-width: calc(100% - 28px); }
-.town-actions h1 { font-size: clamp(1.3rem, 2.6vw, 2.2rem); }
-.town-actions .landing-buttons { justify-content: center; }
 .town-shop { width: 25%; height: 28%; }
 .town-shop span { background: #392719ec; }
 .shop-menu { display: grid; gap: 0; margin-top: 9px; }
