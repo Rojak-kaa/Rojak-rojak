@@ -1,6 +1,6 @@
 import type { Language, Outfit } from '../shared/profile.mjs'
 
-export type Profile = { id: string; username: string; name: string; language: Language; outfit: Outfit; served: number }
+export type Profile = { id: string; username: string; name: string; language: Language; outfit: Outfit; served: number; outfitConfigured: boolean }
 export type Difficulty = 'Easy' | 'Normal' | 'Hard'
 export type Item = { kind: 'raw' | 'chopped' | 'fried' | 'plate' | 'dirty' | 'dish'; name?: string }
 export type Player = {

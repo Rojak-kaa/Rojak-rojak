@@ -160,6 +160,8 @@ test('sign-in, language and outfit survive a server restart', async () => {
     }
     const first = await boot()
     const cookie = await register(first, 'chef_persist')
+    const initial = await fetch(first + '/api/account/me', { headers: { cookie } }).then(response => response.json())
+    assert.equal(initial.outfitConfigured, false)
     const profile = { name: 'Mei', language: 'zh', outfit: { chef: 'liWei', garment: 'samfu', accessory: 'flower', fabric: 2, trim: 4 } }
     const updated = await fetch(first + '/api/account/me', {
       method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(profile)
@@ -175,6 +177,7 @@ test('sign-in, language and outfit survive a server restart', async () => {
     assert.equal(response.status, 200)
     assert.equal(restored.name, profile.name)
     assert.equal(restored.language, profile.language)
+    assert.equal(restored.outfitConfigured, true)
     assert.deepEqual(restored.outfit, profile.outfit)
     assert.equal(restored.password, undefined)
   } finally {

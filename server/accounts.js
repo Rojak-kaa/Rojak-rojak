@@ -19,17 +19,22 @@ export function createAccounts(path) {
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, name TEXT NOT NULL,
       salt TEXT NOT NULL, password TEXT NOT NULL, language TEXT NOT NULL DEFAULT 'en',
-      outfit TEXT NOT NULL, served INTEGER NOT NULL DEFAULT 0
+      outfit TEXT NOT NULL, served INTEGER NOT NULL DEFAULT 0, outfit_configured INTEGER NOT NULL DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS sessions (
       token TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       expires INTEGER NOT NULL
     );
   `)
+  if (!db.prepare('PRAGMA table_info(users)').all().some(column => column.name === 'outfit_configured')) {
+    db.exec('ALTER TABLE users ADD COLUMN outfit_configured INTEGER NOT NULL DEFAULT 0')
+  }
   const userByName = db.prepare('SELECT * FROM users WHERE username = ?')
   const userById = db.prepare('SELECT * FROM users WHERE id = ?')
   const sessionUser = db.prepare('SELECT users.* FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.token = ? AND sessions.expires > ?')
-  const publicProfile = ({ id, username, name, language, outfit, served }) => ({ id, username, name, language, outfit: { ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }, served })
+  const publicProfile = ({ id, username, name, language, outfit, served, outfit_configured }) => ({
+    id, username, name, language, outfit: { ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }, served, outfitConfigured: Boolean(outfit_configured)
+  })
   const tokenFrom = headers => /(?:^|;\s*)rojak_account=([A-Za-z0-9_-]{43})(?:;|$)/.exec(headers.cookie ?? '')?.[1]
   function identify(headers) {
     const token = tokenFrom(headers)
@@ -88,7 +93,7 @@ export function createAccounts(path) {
       return res.status(400).json({ error: 'Check your profile details.' })
     }
     const cleanOutfit = { chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim }
-    db.prepare('UPDATE users SET name = ?, language = ?, outfit = ? WHERE id = ?').run(name.trim(), language, JSON.stringify(cleanOutfit), user.id)
+    db.prepare('UPDATE users SET name = ?, language = ?, outfit = ?, outfit_configured = 1 WHERE id = ?').run(name.trim(), language, JSON.stringify(cleanOutfit), user.id)
     res.json(publicProfile(userById.get(user.id)))
   })
   router.post('/logout', (req, res) => {

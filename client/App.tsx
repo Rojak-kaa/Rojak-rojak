@@ -176,7 +176,8 @@ export default function App() {
   const [copied, setCopied] = useState('')
   const [pending, setPending] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [accountOpen, setAccountOpen] = useState(false)
+  const [checkingAccount, setCheckingAccount] = useState(true)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [language, setLocale] = useState<Language>(() => {
     const stored = localStorage.getItem('rojak-language')
     return stored && Object.hasOwn(LANGUAGES, stored) ? stored as Language : 'en'
@@ -203,7 +204,7 @@ export default function App() {
     let active = true
     void accountRequest<Profile | null>('me').then(value => {
       if (active && value) updateProfile(value)
-    }).catch(() => {})
+    }).catch(() => {}).finally(() => { if (active) setCheckingAccount(false) })
     return () => { active = false }
   }, [])
 
@@ -217,7 +218,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (!profile?.id) return
+    if (!profile?.id || !profile.outfitConfigured) return
     function connected() {
       setOnline(true)
       const token = sessionStorage.getItem(SESSION_KEY)
@@ -249,7 +250,7 @@ export default function App() {
       socket.off('connect', connected).off('disconnect', disconnected).off('room', snapshot).off('notice', announce)
       socket.disconnect()
     }
-  }, [profile?.id])
+  }, [profile?.id, profile?.outfitConfigured])
 
   const phase = room?.phase
   useEffect(() => {
@@ -269,7 +270,6 @@ export default function App() {
   }
 
   function enter(create: boolean, solo = false, training?: string) {
-    if (!profile) return setAccountOpen(true)
     const nickname = name.trim() || (solo ? 'Solo Chef' : '')
     if (!nickname) return setError('Enter a chef nickname.')
     if (!create && !solo && !/^[a-z0-9]{6}$/i.test(code)) return setError('Enter the six-character room code.')
@@ -286,7 +286,6 @@ export default function App() {
   }
 
   function startSolo(training?: string) {
-    if (!profile) return setAccountOpen(true)
     if (!online) return setError('The kitchen server is connecting. Try again in a moment.')
     enter(true, true, training)
   }
@@ -324,7 +323,6 @@ export default function App() {
   }
 
   function openLobby() {
-    if (!profile) return setAccountOpen(true)
     ping(sound)
     setError('')
     setPage('join')
@@ -343,7 +341,27 @@ export default function App() {
     leave()
     setProfile(null)
     setOnline(false)
-    setAccountOpen(false)
+    setProfileOpen(false)
+  }
+
+  if (checkingAccount || !profile || !profile.outfitConfigured || profileOpen) {
+    const onboarding = Boolean(profile && !profile.outfitConfigured)
+    return <main className="player-page">
+      <div className="player-page-art" style={{ backgroundImage: `url("${kitchenCrew}")` }} aria-hidden="true" />
+      <section className="player-page-panel" aria-labelledby="player-page-title">
+        <div className="player-page-content">
+          {profileOpen && profile?.outfitConfigured && <button className="back profile-back" onClick={() => setProfileOpen(false)}>{t('Back to main page')}</button>}
+          <div className="player-brand"><span className="brand-icon" aria-hidden="true">♨</span> Rojak-rojak</div>
+          <h1 id="player-page-title">{t(onboarding ? 'Design your chef' : profile ? 'Your profile' : 'Sign in')}</h1>
+          {checkingAccount ? <p role="status">{t('Connecting…')}</p> : profile ? (
+            <Wardrobe key={profile.id} profile={profile} onSave={updateProfile} onSignOut={signOut} onboarding={onboarding} />
+          ) : <>
+            <LanguagePicker value={language} change={selectLanguage} />
+            <SignIn language={language} onSignIn={updateProfile} />
+          </>}
+        </div>
+      </section>
+    </main>
   }
 
   return <div className="site">
@@ -354,9 +372,9 @@ export default function App() {
         </button>
         <div className="nav-actions">
           {!room && <button className="button secondary compact" onClick={() => {
-            setAccountOpen(true)
-            if (profile) void accountRequest<Profile>('me').then(value => { if (value) setProfile(value) }).catch(() => {})
-          }}>{t(profile ? 'Profile & outfit' : 'Sign in')}</button>}
+            setProfileOpen(true)
+            void accountRequest<Profile>('me').then(value => { if (value) setProfile(value) }).catch(() => {})
+          }}>{t('Profile & outfit')}</button>}
           <button className="icon-btn" aria-label={sound ? 'Mute sound' : 'Unmute sound'} aria-pressed={sound} onClick={toggleSound}>{sound ? '◖))' : '◖×'}</button>
           <button className="icon-btn gear" aria-label="Settings" onClick={() => setSettings(true)}>⚙</button>
         </div>
@@ -390,7 +408,6 @@ export default function App() {
         <span className="step-icon">🧑‍🍳</span>
         <h1>{t("Find your kitchen")}</h1>
         <p>{t("Choose a nickname, then host a private room or join your friends.")}</p>
-        {!profile && <button className="button primary" onClick={() => setAccountOpen(true)}>{t('Sign in')}</button>}
         <form onSubmit={(event: FormEvent) => { event.preventDefault(); enter(Boolean(!code.trim())) }}>
           <label htmlFor="nickname">{t("Chef nickname")}</label>
           <input id="nickname" value={name} maxLength={20} onChange={event => setName(event.target.value)} placeholder="e.g. Chef Miso" autoComplete="nickname" />
@@ -512,12 +529,6 @@ export default function App() {
         selectLanguage(value)
         if (profile) void accountRequest<Profile>('me', 'PATCH', { ...profile, language: value }).then(setProfile).catch(() => {})
       }} />
-    </Dialog>}
-    {accountOpen && <Dialog title={t(profile ? 'Profile & outfit' : 'Sign in')} close={() => setAccountOpen(false)}>
-      {profile ? <Wardrobe profile={profile} onSave={updateProfile} onSignOut={signOut} /> : <>
-        <LanguagePicker value={language} change={selectLanguage} />
-        <SignIn language={language} onSignIn={value => { updateProfile(value); setAccountOpen(false) }} />
-      </>}
     </Dialog>}
   </div>
 }

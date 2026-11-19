@@ -15,6 +15,9 @@ Password|Kata laluan|密码|கடவுச்சொல்
 Chef nickname|Nama panggilan cef|厨师昵称|சமையலர் புனைப்பெயர்
 Language|Bahasa|语言|மொழி
 Profile & outfit|Profil dan pakaian|个人资料与服装|சுயவிவரமும் உடையும்
+Your profile|Profil anda|你的个人资料|உங்கள் சுயவிவரம்
+Design your chef|Reka cef anda|设计你的厨师|உங்கள் சமையலரை வடிவமைக்கவும்
+Save and continue|Simpan dan teruskan|保存并继续|சேமித்துத் தொடரவும்
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
 Fabric colour|Warna kain|布料颜色|துணி நிறம்

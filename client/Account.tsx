@@ -57,7 +57,15 @@ export function OutfitPreview({ outfit }: { outfit: Outfit }) {
   return <span aria-hidden="true" className={'outfit-preview outfit-' + outfit.garment} style={{ background: PALETTE[outfit.fabric], borderColor: PALETTE[outfit.trim] }} />
 }
 
-export function Wardrobe({ profile, onSave, onSignOut }: { profile: Profile; onSave: (profile: Profile) => void; onSignOut: () => Promise<void> }) {
+function ChefPreview({ outfit }: { outfit: Outfit }) {
+  const chef = CHEFS[outfit.chef]
+  return <div className="chef-preview" aria-hidden="true">
+    <span className={'portrait-head portrait-' + outfit.accessory} style={{ backgroundColor: '#' + chef.skin.toString(16) }} />
+    <OutfitPreview outfit={outfit} />
+  </div>
+}
+
+export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: Profile; onSave: (profile: Profile) => void; onSignOut: () => Promise<void>; onboarding: boolean }) {
   const [draft, setDraft] = useState(profile)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
@@ -80,13 +88,16 @@ export function Wardrobe({ profile, onSave, onSignOut }: { profile: Profile; onS
     } finally { setPending(false) }
   }
   return <form className="account-form" onSubmit={submit}>
-    <p>{t('Dishes served')} <strong>{profile.served}</strong></p>
+    <div className="profile-summary">
+      <div><strong>{profile.name}</strong><p>@{profile.username}</p></div>
+      {!onboarding && <p>{t('Dishes served')} <strong>{profile.served}</strong></p>}
+    </div>
     <label>{t('Chef nickname')}<input required maxLength={20} value={draft.name} onChange={event => { setDraft({ ...draft, name: event.target.value }); setSaved(false) }} /></label>
     <LanguagePicker value={draft.language} change={language => { setDraft({ ...draft, language }); setSaved(false) }} />
     <label>{t('Chef character')}<select value={draft.outfit.chef} onChange={event => outfit('chef', event.target.value)}>
       {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>{chef.name} · {t(chef.culture)}</option>)}
     </select></label>
-    <div className="outfit-heading"><strong>{t('Traditional clothing')}</strong><OutfitPreview outfit={draft.outfit} /></div>
+    <div className="outfit-heading"><strong>{t('Traditional clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
     <select aria-label={t('Traditional clothing')} value={draft.outfit.garment} onChange={event => outfit('garment', event.target.value)}>
       {clothingGroups.map(([culture, ...garments]) => <optgroup key={culture} label={t(culture)}>
         {garments.map(id => <option key={id} value={id}>{GARMENTS[id]}</option>)}
@@ -102,7 +113,7 @@ export function Wardrobe({ profile, onSave, onSignOut }: { profile: Profile; onS
     {error && <p className="error" role="alert">{t(error)}</p>}
     {saved && <p role="status">{t('Profile saved')}</p>}
     <div className="account-actions">
-      <button className="button primary" disabled={pending}>{t('Save profile')}</button>
+      <button className="button primary" disabled={pending}>{t(onboarding ? 'Save and continue' : 'Save profile')}</button>
       <button type="button" className="back" disabled={pending} onClick={() => void onSignOut().catch(failure => setError(failure.message))}>{t('Sign out')}</button>
     </div>
   </form>

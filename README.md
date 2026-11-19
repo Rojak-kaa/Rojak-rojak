@@ -13,7 +13,7 @@ npm run dev
 
 Open http://localhost:5173. Vite forwards account requests and Socket.IO to the Express server on port 3001. Create an account or sign in to play. Choose **Play Solo** for a one-player match or **Play Team** to create or join a room for up to four players.
 
-Open **Profile & outfit** to choose Ayu, Li Wei, or Kavitha, change your nickname, and design your chef’s outfit. The wardrobe includes Malay baju Melayu and baju kurung, Chinese samfu and cheongsam, and Indian kurta and sari, with custom fabric colours, trims and headwear. Choose Bahasa Melayu, Mandarin Chinese (Simplified), Tamil, or English. Your account saves your profile and lifetime dishes served.
+On your first sign-in, design your chef and choose **Save and continue** to reach the landing page. Returning players go straight to the landing page. Open **Profile & outfit** to view your dishes served or edit your nickname, chef, and wardrobe. Choose Ayu, Li Wei, or Kavitha and dress them in Malay baju Melayu or baju kurung, Chinese samfu or cheongsam, or Indian kurta or sari, with custom colours and headwear. Choose Bahasa Melayu, Mandarin Chinese (Simplified), Tamil, or English.
 
 Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
 

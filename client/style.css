@@ -207,3 +207,25 @@ form .button { margin-top: 9px; }
 .palette legend { font-weight: 800; margin-bottom: 6px; }
 .swatch { width: 27px; height: 27px; border: 1px solid #37263f; border-radius: 50%; }
 .swatch[aria-pressed="true"] { outline: 2px solid #37263f; outline-offset: 2px; }
+.player-page { display: grid; grid-template-columns: 1fr minmax(450px, 42%); min-height: 100dvh; }
+.player-page-art { background: #342633 center / cover no-repeat; }
+.player-page-panel { display: grid; align-items: center; padding: clamp(24px, 5vw, 65px); background: var(--cream); }
+.player-page-content { width: min(100%, 440px); margin-inline: auto; }
+.player-brand { display: flex; align-items: center; gap: 9px; font-weight: 900; }
+.player-page h1 { font-size: clamp(2rem, 4vw, 3.35rem); font-weight: 1000; letter-spacing: -.055em; line-height: 1.05; margin-block: 18px; }
+.profile-back { margin-bottom: 16px; }
+.profile-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); }
+.profile-summary p { color: var(--muted); }
+.player-page .outfit-preview { width: 55px; height: 50px; }
+.chef-preview { display: grid; justify-items: center; padding: 8px 12px 5px; background: #f4e6d5; border-radius: 12px; }
+.portrait-head { z-index: 1; position: relative; width: 29px; height: 27px; border-radius: 42%; margin-bottom: -4px; }
+.portrait-head::before { content: ""; position: absolute; inset: 2px 2px auto; height: 7px; border-radius: 50% 50% 30% 30%; background: #403038; }
+.portrait-head::after { content: ""; position: absolute; top: 14px; left: 8px; width: 3px; height: 3px; border-radius: 50%; background: #403038; box-shadow: 10px 0 #403038; }
+.portrait-chef::before { inset: -5px 1px auto; height: 12px; background: #fff9ea; box-shadow: 0 -3px 0 -1px #fff9ea; }
+.portrait-songkok::before { inset: -4px 0 auto; height: 11px; border-radius: 3px; }
+.portrait-flower::before { box-shadow: 7px -3px #f6b35c; }
+@media (max-width: 720px) {
+  .player-page { grid-template-columns: 1fr; grid-template-rows: minmax(130px, 28dvh) 1fr; }
+  .player-page-art { background-position: center 42%; }
+  .player-page-panel { align-items: start; }
+}
