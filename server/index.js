@@ -89,15 +89,16 @@ export function createKitchenServer({ database = process.env.ROJAK_DB ?? './data
       const name = typeof data?.name === 'string' ? data.name.trim().slice(0, 20) : ''
       if (!name) return respond(ack, { error: 'Enter a chef nickname.' })
       let room
-      const training = typeof data.training === 'string' && TRAINING_RECIPES.includes(data.training) ? data.training : null
-      if (data.training != null && !training) return respond(ack, { error: 'That training recipe is unavailable.' })
       const shop = typeof data.shop === 'string' && Object.hasOwn(SHOPS, data.shop) ? data.shop : null
       if (data.shop != null && !shop) return respond(ack, { error: 'That shop is unavailable.' })
+      const training = typeof data.training === 'string' &&
+        (shop ? SHOPS[shop].tutorial === data.training : TRAINING_RECIPES.includes(data.training)) ? data.training : null
+      if (data.training != null && !training) return respond(ack, { error: 'That training recipe is unavailable.' })
       const solo = data.solo === true || Boolean(training)
       if (data.create === true || solo) {
         let code
         do { code = Array.from({ length: 6 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('') } while (rooms.has(code))
-        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: training ? 'Hard' : 'Easy', solo, training, shop: training ? null : shop, game: null }
+        room = { code, phase: 'lobby', players: new Map(), host: null, difficulty: training ? 'Hard' : 'Easy', solo, training, shop, game: null }
         rooms.set(code, room)
       } else {
         const code = typeof data.code === 'string' ? data.code.trim().toUpperCase() : ''

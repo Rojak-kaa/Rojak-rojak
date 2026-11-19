@@ -222,6 +222,7 @@ export default function App() {
   const [checkingAccount, setCheckingAccount] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
   const [shopMenu, setShopMenu] = useState<string>()
+  const [skipShopTutorial, setSkipShopTutorial] = useState(false)
   const [selectedShop, setSelectedShop] = useState<string>()
   const [trainingMenu, setTrainingMenu] = useState(false)
   const [language, setLocale] = useState<Language>(() => {
@@ -447,7 +448,7 @@ export default function App() {
         <div className="landing-scene">
           <img src={foodTown} alt="An illustrated Malaysian town map with four food shops and a traditional house." width="1536" height="1024" fetchPriority="high" />
           {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className="food-hotspot town-shop" disabled={pending}
-            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setShopMenu(id) }}>
+            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setSkipShopTutorial(false); setShopMenu(id) }}>
             <span>{shop.name}</span>
           </button>)}
           <button type="button" className="food-hotspot town-shop" style={{ left: '50%', top: '37%' }} onClick={openProfile}><span>{t('Your profile')}</span></button>
@@ -545,7 +546,9 @@ export default function App() {
         {room.training && <ol className="practice-steps">
           <li>{t('Collect the listed ingredients. Chop marked ingredients at a board and fry ikan bilis when listed.')}</li>
           <li>Load the recipe station with <kbd>{showTouchControls ? t('Use') : 'E'}</kbd> and press <kbd>{showTouchControls ? t('Work') : 'Space'}</kbd> to prepare the dish.</li>
-          <li>{t('Use a clean plate to collect the finished dish before it burns, then bring it to Serve.')}</li>
+          <li>{t(RECIPES[room.training].vessel === 'cup'
+            ? 'Fill a clean cup at the recipe station, then bring it to Serve.'
+            : 'Use a clean plate to collect the finished dish before it burns, then bring it to Serve.')}</li>
         </ol>}
       </aside>
       <section className="play-kitchen" aria-label="Kitchen">
@@ -577,6 +580,12 @@ export default function App() {
         </div>
         <div className="result-chefs">{room.players.map(player => <div className="player-row" key={player.id}><Apron color={player.color} /><strong className="player-name">{player.name}</strong><span>{player.served} served</span></div>)}</div>
         <div className="lobby-actions">
+          {room.training && room.shop && <button className="button primary" onClick={() => {
+            const shop = room.shop
+            leave()
+            setSkipShopTutorial(true)
+            setShopMenu(shop ?? undefined)
+          }}>{t('Continue to shop')}</button>}
           {host ? <button className="button primary" disabled={!online} onClick={() => lobby('rematch')}>{t("Play again")}</button> : <span>{t('Waiting for the host to start a rematch.')}</span>}
           <button className="button secondary" onClick={leave}>{t("Back to main page")}</button>
         </div>
@@ -592,19 +601,33 @@ export default function App() {
       }} />
     </Dialog>}
     {shopMenu && !room && <Dialog title={SHOPS[shopMenu].name} close={() => setShopMenu(undefined)}>
-      <ul className="shop-menu">{SHOPS[shopMenu].pool.map(id => <li key={id}>
-        <strong>{RECIPES[id].name}</strong><span>{t(RECIPES[id].method)}</span>
-      </li>)}</ul>
+      {!skipShopTutorial ? <section>
+        <h3 className="briefing-menu-title">{t('Beginner tutorial')}</h3>
+        <p>{t('Practice in this kitchen and serve one order without a timer.')}</p>
+        <ul className="shop-menu"><li>
+          <strong>{RECIPES[SHOPS[shopMenu].tutorial].name}</strong>
+          <span>{t(RECIPES[SHOPS[shopMenu].tutorial].method)}</span>
+          <RecipeIngredients ingredients={RECIPES[SHOPS[shopMenu].tutorial].ingredients} />
+        </li></ul>
+        <div className="account-actions">
+          <button className="button primary" disabled={pending} onClick={() => startSolo(SHOPS[shopMenu].tutorial, shopMenu)}>{t('Start tutorial')}</button>
+          <button className="button secondary" disabled={pending} onClick={() => { setError(''); setSkipShopTutorial(true) }}>{t('Skip tutorial')}</button>
+        </div>
+      </section> : <>
+        <ul className="shop-menu">{SHOPS[shopMenu].pool.map(id => <li key={id}>
+          <strong>{RECIPES[id].name}</strong><span>{t(RECIPES[id].method)}</span>
+        </li>)}</ul>
+        <div className="account-actions">
+          <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
+          <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
+          {shopMenu === 'hawker' && <button className="button secondary" disabled={pending} onClick={() => {
+            setError('')
+            setShopMenu(undefined)
+            setTrainingMenu(true)
+          }}>{t('Training')}</button>}
+        </div>
+      </>}
       {error && <p className="error" role="alert">{t(error)}</p>}
-      <div className="account-actions">
-        <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
-        <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
-        {shopMenu === 'hawker' && <button className="button secondary" disabled={pending} onClick={() => {
-          setError('')
-          setShopMenu(undefined)
-          setTrainingMenu(true)
-        }}>{t('Training')}</button>}
-      </div>
     </Dialog>}
     {trainingMenu && !room && <Dialog title={t('Training')} close={() => setTrainingMenu(false)}>
       <div className="account-actions">{TRAINING_RECIPES.map(id =>

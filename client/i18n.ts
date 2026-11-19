@@ -155,6 +155,12 @@ Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it�
 Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.|Angkat makanan panas sebelum hangus. Gunakan pinggan bersih dan hantar ke kaunter sajian.|在烧焦倒计时结束前取出热菜。用干净餐盘装盘并送到出餐台。|கருகும் நேரம் முடியும் முன் சூடான உணவை எடுங்கள். சுத்தமான தட்டில் வைத்து பரிமாறும் இடத்தில் கொடுங்கள்.
 Work at a station|Gunakan stesen|操作工作台|நிலையத்தைப் பயன்படுத்து
 On-screen controls|Kawalan pada skrin|屏幕操控|திரைக் கட்டுப்பாடுகள்
+Beginner tutorial|Tutorial pemula|新手教程|தொடக்கப் பயிற்சி
+Start tutorial|Mulakan tutorial|开始教程|பயிற்சியைத் தொடங்கு
+Skip tutorial|Langkau tutorial|跳过教程|பயிற்சியைத் தவிர்
+Continue to shop|Teruskan ke kedai|继续前往店铺|கடைக்குச் செல்
+Practice in this kitchen and serve one order without a timer.|Berlatih di dapur ini dan hidangkan satu pesanan tanpa had masa.|在这间厨房练习，不限时完成一份订单。|இந்தச் சமையலறையில் பயிற்சி செய்து, நேரக் கட்டுப்பாடின்றி ஒரு ஆர்டரைப் பரிமாறுங்கள்.
+Fill a clean cup at the recipe station, then bring it to Serve.|Isi cawan bersih di stesen resipi, kemudian bawa ke kaunter hidangan.|在料理台用干净的杯子盛好饮品，再送到出餐台。|சமையல் நிலையத்தில் சுத்தமான கோப்பையை நிரப்பி, பரிமாறும் இடத்திற்குக் கொண்டு செல்லுங்கள்.
 Move up|Gerak ke atas|向上移动|மேலே நகர்
 Move down|Gerak ke bawah|向下移动|கீழே நகர்
 Move left|Gerak ke kiri|向左移动|இடப்புறம் நகர்

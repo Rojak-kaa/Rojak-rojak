@@ -235,6 +235,12 @@ for (const recipe of TRAINING_RECIPES) {
 }
 
 for (const [id, shop] of Object.entries(SHOPS)) {
+  test(shop.name + ' tutorial serves one dish in the shop kitchen', () => {
+    assert.ok(shop.pool.includes(shop.tutorial))
+    assert.equal(stationsFor('Hard', shop.tutorial, id), stationsFor('Hard', null, id))
+    verifyMenu('Hard', { ...DIFFICULTIES.Hard, pool: [shop.tutorial] }, shop.tutorial, id)
+  })
+
   test(shop.name + ' stocks and serves its own menu', () => {
     const layout = stationsFor('Easy', null, id)
     assert.equal(new Set(layout.map(({ x, y }) => x + ',' + y)).size, layout.length)

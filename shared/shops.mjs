@@ -49,8 +49,8 @@ export const SHOP_RECIPES = {
 }
 
 export const SHOPS = {
-  chickenRice: { name: 'Chicken Rice Shop', x: 19, y: 26, pool: ['chickenRice', 'barleyWater', 'icedLiangTeh', 'charSiewRice', 'roastedChickenRice'] },
-  mamak: { name: 'Mamak', x: 81, y: 23, pool: ['rotiCanai', 'rotiTissue', 'meeGoreng', 'tehTarik', 'nasiKandar', 'ayamPaprik'] },
-  hawker: { name: 'Hawker Centre', x: 18, y: 66, pool: ['banMee', 'chickenRice', 'charKwayTeow', 'laksa', 'rojak'] },
-  kopitiam: { name: 'Kopitiam', x: 83, y: 67, pool: ['kayaToast', 'blackCoffee', 'whiteCoffee', 'halfBoiledEgg'] }
+  chickenRice: { name: 'Chicken Rice Shop', x: 19, y: 26, tutorial: 'chickenRice', pool: ['chickenRice', 'barleyWater', 'icedLiangTeh', 'charSiewRice', 'roastedChickenRice'] },
+  mamak: { name: 'Mamak', x: 81, y: 23, tutorial: 'rotiCanai', pool: ['rotiCanai', 'rotiTissue', 'meeGoreng', 'tehTarik', 'nasiKandar', 'ayamPaprik'] },
+  hawker: { name: 'Hawker Centre', x: 18, y: 66, tutorial: 'rojak', pool: ['banMee', 'chickenRice', 'charKwayTeow', 'laksa', 'rojak'] },
+  kopitiam: { name: 'Kopitiam', x: 83, y: 67, tutorial: 'blackCoffee', pool: ['kayaToast', 'blackCoffee', 'whiteCoffee', 'halfBoiledEgg'] }
 }

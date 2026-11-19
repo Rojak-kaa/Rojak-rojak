@@ -117,8 +117,8 @@ const trainingLayouts = Object.fromEntries(TRAINING_RECIPES.map(id => [id, build
 const shopLayouts = Object.fromEntries(Object.entries(SHOPS).map(([id, shop]) => [id, buildStations('Hard', shop.pool, true)]))
 
 export function stationsFor(difficulty, training, shop) {
-  if (training) return trainingLayouts[training]
-  return shop ? shopLayouts[shop] : stationLayouts[difficulty]
+  if (shop) return shopLayouts[shop]
+  return training ? trainingLayouts[training] : stationLayouts[difficulty]
 }
 
 export function nearestStation(x, y, stations = STATIONS) {
