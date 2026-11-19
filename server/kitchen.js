@@ -119,10 +119,7 @@ function beginAction(player, now) {
   return true
 }
 
-export function dropOrPickUp(room, player, now) {
-  const { floorItems, endsAt } = room.game
-  if (!room.training && now >= endsAt) return 'Time is up.'
-  if (!beginAction(player, now)) return ''
+function dropOrPickUp(floorItems, player) {
   const x = Math.floor(player.x)
   const y = Math.floor(player.y)
   const key = y * WIDTH + x
@@ -131,7 +128,7 @@ export function dropOrPickUp(room, player, now) {
     floorItems[key] = { x, y, item: player.item }
     player.item = null
   } else {
-    if (!floorItems[key]) return 'Stand on a dropped item and press Q to pick it up.'
+    if (!floorItems[key]) return 'Stand on a dropped item and press E to pick it up.'
     player.item = floorItems[key].item
     delete floorItems[key]
   }
@@ -143,6 +140,10 @@ export function interact(room, player, start, now) {
   if (!room.training && now >= game.endsAt) return 'Time is up.'
   if (!beginAction(player, now)) return ''
   const station = nearestStation(player.x, player.y, room.stations)
+  const floorKey = Math.floor(player.y) * WIDTH + Math.floor(player.x)
+  if (!start && (!station || (!player.item && game.floorItems[floorKey]))) {
+    return dropOrPickUp(game.floorItems, player)
+  }
   if (!station) return 'Move closer to a station.'
   const state = game.stations[station.id]
   advanceStation(room, state, now)

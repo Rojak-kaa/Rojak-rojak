@@ -125,7 +125,10 @@ Collect hot food before the burn countdown reaches zero. Use clean dishware to p
 Work at a station|Gunakan stesen|操作工作台|நிலையத்தைப் பயன்படுத்து
 Drop or pick up a floor item|Letak atau ambil barang di lantai|放下或捡起地上的物品|தரையில் வை அல்லது தரையிலிருந்து எடு
 There’s already an item here. Move to a clear tile.|Sudah ada barang di sini. Pindah ke petak kosong.|这里已有物品。请移到空格。|இங்கே ஏற்கெனவே ஒரு பொருள் உள்ளது. காலியான கட்டத்திற்குச் செல்லுங்கள்.
-Stand on a dropped item and press Q to pick it up.|Berdiri di atas barang dan tekan Q untuk mengambilnya.|站到物品所在格，按 Q 捡起。|கீழே வைத்த பொருளின் மீது நின்று Q அழுத்தி எடுங்கள்.
+Stand on a dropped item and press E to pick it up.|Berdiri di atas barang dan tekan E untuk mengambilnya.|站到物品所在格，按 E 捡起。|கீழே வைத்த பொருளின் மீது நின்று E அழுத்தி எடுங்கள்.
+Pick up, drop, serve|Ambil, letak, sajikan|拿取、放下、上菜|எடு, வை, பரிமாறு
+E · Pick up floor item|E · Ambil barang di lantai|E · 捡起地上的物品|E · தரையிலிருந்து பொருளை எடு
+E · Drop held item|E · Letak barang di lantai|E · 放下手中的物品|E · கையிலுள்ள பொருளைத் தரையில் வை
 Pick up, place, serve|Ambil, letak, sajikan|拿取、放置、上菜|எடு, வை, பரிமாறு
 Arrow keys|Kekunci anak panah|方向键|அம்புக்குறி விசைகள்
 The timer starts when you’re ready.|Masa bermula apabila anda sedia.|准备好后开始计时。|நீங்கள் தயாரானதும் நேரம் தொடங்கும்.

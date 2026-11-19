@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, SHOPS, stationsFor, TRAINING_RECIPES } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, SHOPS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 import type { Difficulty, Player, Room } from './model'
 import type { Profile } from './model'
 import { LANGUAGES } from '../shared/profile.mjs'
@@ -95,7 +95,7 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
     <section className="panel briefing-controls" aria-label="Kitchen instructions">
       <p><kbd>WASD</kbd> or arrow keys <strong>{t("Move")}</strong></p>
       <p><kbd>E</kbd> <strong>{t("Pick up, place, plate, or serve")}</strong></p>
-      <p><kbd>Q</kbd> <strong>{t('Drop or pick up a floor item')}</strong></p>
+      <p><kbd>E</kbd> <strong>{t('Drop or pick up a floor item')}</strong></p>
       <p><kbd>Space</kbd> <strong>{t("Work at the highlighted station")}</strong></p>
     </section>
     <p className="briefing-tip">{t('Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe.')} <kbd>E</kbd> {t('Pick up, place, serve')} · <kbd>Space</kbd> {t('Work at a station')}. {t('Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.')}</p>
@@ -126,7 +126,9 @@ function CanvasFallback() {
 function guidance(room: Room, player?: Player) {
   if (!player) return 'Waiting for your chef…'
   const station = nearestStation(player.x, player.y, stationsFor(room.difficulty, room.training, room.shop))
-  if (!station) return 'Walk up to a station to interact.'
+  const floorItem = room.game?.floorItems[Math.floor(player.y) * WIDTH + Math.floor(player.x)]
+  if (!player.item && floorItem) return 'E · Pick up floor item'
+  if (!station) return player.item ? 'E · Drop held item' : 'Walk up to a station to interact.'
   const state = room.game!.stations[station.id]
   const remaining = state.until ? Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's' : ''
   const method = METHODS[station.kind]
@@ -509,7 +511,7 @@ export default function App() {
       <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
         {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
       </span></div>
-      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, place, serve')}</span><span><kbd>Q</kbd> · {t('Drop or pick up a floor item')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
+      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, drop, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
       </section>
     </main>}
 

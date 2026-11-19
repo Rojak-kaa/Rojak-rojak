@@ -9,7 +9,7 @@ type Props = {
   room?: Room
   me?: string
   onMove?: (x: number, y: number) => void
-  onAct?: (action: 'use' | 'work' | 'drop') => void
+  onAct?: (action: 'use' | 'work') => void
 }
 
 const names: Record<string, string> = {
@@ -50,12 +50,9 @@ class KitchenScene extends Phaser.Scene {
       }
     }
     if (!this.preview && this.input.keyboard) {
-      this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,LEFT,DOWN,RIGHT,E,Q,SPACE') as typeof this.keys
+      this.keys = this.input.keyboard.addKeys('W,A,S,D,UP,LEFT,DOWN,RIGHT,E,SPACE') as typeof this.keys
       this.input.keyboard.on('keydown-E', (event: KeyboardEvent) => {
         if (!event.repeat) this.current().onAct?.('use')
-      })
-      this.input.keyboard.on('keydown-Q', (event: KeyboardEvent) => {
-        if (!event.repeat) this.current().onAct?.('drop')
       })
       this.input.keyboard.on('keydown-SPACE', (event: KeyboardEvent) => {
         if (!event.repeat && !(event.target instanceof HTMLButtonElement)) this.current().onAct?.('work')

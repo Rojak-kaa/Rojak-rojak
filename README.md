@@ -32,8 +32,7 @@ Create a private room and share its code or invite link. Select aprons, have eve
 | Control | Action |
 | --- | --- |
 | WASD or arrow keys | Move |
-| E | Pick up, place, plate, serve, or discard |
-| Q | Drop a held item on a clear floor tile, or pick it up while standing on that tile |
+| E | Use a nearby station, drop a held item on open floor, or pick up a dropped item while standing on it with empty hands |
 | Space | Work at a station or clear a burned batch |
 
 1. Read the tickets and collect their ingredients. Chop cucumber, pineapple, and chicken on a cutting board. Other ingredients go straight to the recipe station.
