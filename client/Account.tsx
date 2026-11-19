@@ -75,7 +75,7 @@ function EcoChefPreview({ outfit }: { outfit: Outfit }) {
     source.src = ecoPortrait
     return () => { source.onload = null }
   }, [outfit])
-  return <canvas ref={canvas} width={ECO_WIDTH} height={ECO_HEIGHT} className="eco-chef-portrait" role="img" aria-label={CHEFS[outfit.chef].name} />
+  return <canvas ref={canvas} width={ECO_WIDTH} height={ECO_HEIGHT} className="eco-chef-portrait" role="img" aria-label={t(CHEFS[outfit.chef].name)} />
 }
 
 function ChefPreview({ outfit }: { outfit: Outfit }) {
@@ -104,9 +104,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
         const chef = String(value)
         return { ...previous, outfit: { ...(FIXED_OUTFITS[chef] ?? BASE_OUTFIT), chef } }
       }
-      const next = { ...previous.outfit, [part]: value }
-      if (part === 'garment' && value === 'cheongsam') Object.assign(next, { fabric: 0, trim: 8 })
-      return { ...previous, outfit: next }
+      return { ...previous, outfit: { ...previous.outfit, [part]: value } }
     })
     setSaved(false)
   }
@@ -131,7 +129,9 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     <label>{t('Chef nickname')}<input required maxLength={20} value={draft.name} onChange={event => { setDraft({ ...draft, name: event.target.value }); setSaved(false) }} /></label>
     <LanguagePicker value={draft.language} change={language => { setDraft({ ...draft, language }); setSaved(false) }} />
     <label>{t('Chef character')}<select value={draft.outfit.chef} onChange={event => outfit('chef', event.target.value)}>
-      {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>{id === ECO_OUTFIT.chef ? chef.name : chef.name + ' · ' + t(chef.culture)}</option>)}
+      {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>
+        {chef.culture && id !== ECO_OUTFIT.chef ? chef.name + ' · ' + t(chef.culture) : t(chef.name)}
+      </option>)}
     </select></label>
     <div className="outfit-heading"><strong>{t('Clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
     {fixedClothing ? <p>{t(GARMENTS[fixedClothing.garment])} · {t(HAIRSTYLES[fixedClothing.hairStyle])}</p> :

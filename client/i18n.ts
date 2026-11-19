@@ -20,6 +20,7 @@ Design your chef|Reka cef anda|设计你的厨师|உங்கள் சமை�
 Save and continue|Simpan dan teruskan|保存并继续|சேமித்துத் தொடரவும்
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
+Customise|Sesuaikan|自定义|தனிப்பயனாக்கு
 Facial expression|Ekspresi muka|面部表情|முகபாவனை
 Hairstyle|Gaya rambut|发型|சிகை அலங்காரம்
 No hair|Tiada rambut|无头发|முடி இல்லை

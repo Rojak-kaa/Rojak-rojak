@@ -1,7 +1,7 @@
 export type Language = 'en' | 'ms' | 'zh' | 'ta'
 export type Outfit = { chef: string; garment: string; accessory: string; fabric: number; trim: number; expression: string; handSign: string; hairStyle: string }
 export const LANGUAGES: Record<Language, string>
-export const CHEFS: Record<string, { name: string; culture: string; skin: number; hair: number }>
+export const CHEFS: Record<string, { name: string; culture?: string; skin: number; hair: number }>
 export const GARMENTS: Record<string, string>
 export const ACCESSORIES: Record<string, string>
 export const EXPRESSIONS: Record<string, string>

@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
-import { AYU_OUTFIT, CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT } from '../shared/profile.mjs'
+import { AYU_OUTFIT, BASE_OUTFIT, CHEFS, ECO_OUTFIT, KAVITHA_OUTFIT, LI_WEN_OUTFIT } from '../shared/profile.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
@@ -57,6 +57,13 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   })
   assert.equal(updated.status, 200)
   assert.deepEqual((await updated.json()).outfit, outfit)
+  const custom = { ...BASE_OUTFIT, garment: 'cheongsam', accessory: 'flower', fabric: 4, trim: 7, expression: 'happy', handSign: 'okay', hairStyle: 'bun' }
+  const customSaved = await fetch(address + '/api/account/me', {
+    method: 'PATCH', headers: { cookie: cookies[1], 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Bean', language: 'en', outfit: custom })
+  })
+  assert.equal(customSaved.status, 200)
+  assert.deepEqual((await customSaved.json()).outfit, custom)
   const [a, b, c, d, outsider] = await Promise.all(cookies.map(open))
   const command = (socket, type, value) => send(socket, 'lobby', { type, value })
   const host = await send(a, 'enter', { name: 'Pip', create: true })
@@ -68,6 +75,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   await outsider.timeout(1500).emitWithAck('leave')
   assert.match((await send(b, 'enter', { name: 'Bean', code: 'INVALID' })).error, /not found/)
   const member = await send(b, 'enter', { name: 'Bean', code: code.toLowerCase() })
+  assert.deepEqual(member.room.players.find(player => player.name === 'Bean').outfit, custom)
   await send(c, 'enter', { name: 'Sunny', code })
   await send(d, 'enter', { name: 'Basil', code })
   assert.match((await send(outsider, 'enter', { name: 'Guest', code })).error, /full/)

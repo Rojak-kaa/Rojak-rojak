@@ -3,7 +3,8 @@ export const CHEFS = {
   ayu: { name: 'Ayu', culture: 'Malay', skin: 0xefc2a7, hair: 0x242024 },
   liWei: { name: 'Li Wen', culture: 'Chinese', skin: 0xf9c59e, hair: 0x47302c },
   kavitha: { name: 'Kavitha', culture: 'Indian', skin: 0xc78761, hair: 0x322633 },
-  eco: { name: '全村最环保的人', culture: 'Chinese', skin: 0xffdec9, hair: 0x20191c }
+  eco: { name: '全村最环保的人', culture: 'Chinese', skin: 0xffdec9, hair: 0x20191c },
+  custom: { name: 'Customise', skin: 0xf9ece5, hair: 0x30242a }
 }
 export const GARMENTS = {
   none: 'No clothing',
@@ -21,7 +22,7 @@ export const HAND_SIGNS = { relaxed: 'Relaxed hands', peace: 'Peace sign', wave:
 export const HAIRSTYLES = { none: 'No hair', short: 'Short hair', bob: 'Bob', bun: 'Bun', braids: 'Braids' }
 export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029', '#efd78b']
 export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace', hairStyle: 'none' }
-export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
+export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'custom', garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
 export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7, hairStyle: 'braids' }
 export const AYU_OUTFIT = { ...DEFAULT_OUTFIT, accessory: 'none', fabric: 9, trim: 1, handSign: 'relaxed', hairStyle: 'short' }
 export const LI_WEN_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'liWei', garment: 'samfu', accessory: 'none', trim: 3, hairStyle: 'short', handSign: 'relaxed' }
