@@ -5,7 +5,7 @@ import { drawChef, drawnIngredients, drawItem, drawStation, floor, TILE, WORLD_H
 import { t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import breadIcon from './assets/bread-icon.png'
-import { ecoPortrait, usesEcoPortrait } from './ecoPortrait'
+import { drawEcoWalk, ecoPortrait, tintEcoPortrait, usesEcoPortrait } from './ecoPortrait'
 import type { Player, Room } from './model'
 
 type Props = {
@@ -36,7 +36,18 @@ class KitchenScene extends Phaser.Scene {
   private lastSent = 0
   private breadSprites: Phaser.GameObjects.Image[] = []
   private breadCount = 0
-  private chefPortraits = new Map<string, Phaser.GameObjects.Image>()
+  private chefPortraits = new Map<string, {
+    image: Phaser.GameObjects.Image; texture: Phaser.Textures.CanvasTexture
+    tinted: HTMLCanvasElement; stride: number; phase: number
+  }>()
+
+  private removePortrait(id: string) {
+    const portrait = this.chefPortraits.get(id)
+    if (!portrait) return
+    portrait.image.destroy()
+    this.textures.remove(portrait.texture.key)
+    this.chefPortraits.delete(id)
+  }
 
   preload() {
     this.load.image('bread-source', breadIcon)
@@ -139,8 +150,7 @@ class KitchenScene extends Phaser.Scene {
       label.destroy()
       this.labels.delete(id)
       this.positions.delete(id)
-      this.chefPortraits.get(id)?.destroy()
-      this.chefPortraits.delete(id)
+      this.removePortrait(id)
     }
     const ordered = [...players].sort((a, b) => a.y - b.y)
     for (const player of ordered) {
@@ -156,21 +166,28 @@ class KitchenScene extends Phaser.Scene {
       const px = pos.x * TILE
       const py = pos.y * TILE
       const bounce = moving ? Math.sin(time / 65) * 2 : 0
-      const illustrated = usesEcoPortrait(player.outfit)
+      const outfit = player.outfit
+      const illustrated = outfit && usesEcoPortrait(outfit)
       let portrait = this.chefPortraits.get(player.id)
-      if (illustrated) {
+      if (illustrated && outfit) {
         if (!portrait) {
-          portrait = this.add.image(px, py, 'eco-chef').setOrigin(0.5, 1).setDisplaySize(37, 59).setDepth(1)
+          const texture = this.textures.createCanvas('eco-chef-' + player.id, 80, 126)!
+          const source = this.textures.get('eco-chef').getSourceImage() as HTMLImageElement
+          const tinted = tintEcoPortrait(source, outfit)
+          const image = this.add.image(px, py, texture.key).setOrigin(0.5, 1).setDisplaySize(37, 59).setDepth(1)
+          portrait = { image, texture, tinted, stride: 0, phase: 0 }
           this.chefPortraits.set(player.id, portrait)
         }
+        const increment = Math.min(delta, 55)
+        portrait.stride += ((moving ? 1 : 0) - portrait.stride) * (1 - Math.exp(-increment / 65))
+        portrait.phase += increment * 0.015 * portrait.stride
+        drawEcoWalk(portrait.texture.getContext(), portrait.tinted, portrait.phase, portrait.stride)
+        portrait.texture.refresh()
         this.layer.fillStyle(0x3b2637, 0.19).fillEllipse(px, py + 17, 38, 11)
-        portrait.setPosition(px, py + 20 + bounce).setFlipX(player.facing < 0).setAlpha(player.connected ? 1 : 0.38)
+        portrait.image.setPosition(px, py + 20 + bounce * 0.35).setFlipX(player.facing < 0).setAlpha(player.connected ? 1 : 0.38)
         if (player.item) drawItem(this.layer, px + 27, py + 10 + bounce, player.item)
       } else {
-        if (portrait) {
-          portrait.destroy()
-          this.chefPortraits.delete(player.id)
-        }
+        this.removePortrait(player.id)
         drawChef(this.layer, player, px, py, time, moving)
       }
       if (player.item?.name === 'bread') {

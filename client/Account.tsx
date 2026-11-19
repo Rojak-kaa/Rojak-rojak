@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ACCESSORIES, CHEFS, ECO_OUTFIT, GARMENTS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
-import { ecoPortrait, usesEcoPortrait } from './ecoPortrait'
+import { ecoPortrait, ECO_HEIGHT, ECO_WIDTH, tintEcoPortrait, usesEcoPortrait } from './ecoPortrait'
 
 const clothingGroups = [
   ['Malay', 'bajuMelayu', 'bajuKurung'],
@@ -62,8 +62,24 @@ export function OutfitPreview({ outfit }: { outfit: Outfit }) {
   return <span aria-hidden="true" className={'outfit-preview outfit-' + outfit.garment} style={{ background, borderColor: trim }} />
 }
 
+function EcoChefPreview({ outfit }: { outfit: Outfit }) {
+  const canvas = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const source = new Image()
+    source.onload = () => {
+      const context = canvas.current?.getContext('2d')
+      if (!context) return
+      context.clearRect(0, 0, ECO_WIDTH, ECO_HEIGHT)
+      context.drawImage(tintEcoPortrait(source, outfit), 0, 0)
+    }
+    source.src = ecoPortrait
+    return () => { source.onload = null }
+  }, [outfit])
+  return <canvas ref={canvas} width={ECO_WIDTH} height={ECO_HEIGHT} className="eco-chef-portrait" role="img" aria-label={CHEFS[outfit.chef].name} />
+}
+
 function ChefPreview({ outfit }: { outfit: Outfit }) {
-  if (usesEcoPortrait(outfit)) return <img className="eco-chef-portrait" src={ecoPortrait} alt={CHEFS[outfit.chef].name} />
+  if (usesEcoPortrait(outfit)) return <EcoChefPreview outfit={outfit} />
   const chef = CHEFS[outfit.chef]
   return <div className={'chef-preview' + (outfit.chef === 'eco' ? ' chef-preview-eco' : '')} aria-hidden="true">
     <span className={'portrait-head portrait-' + outfit.accessory} style={{ backgroundColor: '#' + chef.skin.toString(16) }}>
