@@ -40,11 +40,40 @@ function plate(g: Phaser.GameObjects.Graphics, x: number, y: number, dirty = fal
   if (dirty) g.fillStyle(0xab6a44).fillCircle(x - 3, y, 4).fillCircle(x + 4, y + 2, 2)
 }
 
+export const drawnIngredients = new Set(['bread', 'kaya', 'butter', 'egg', 'coffee', 'water', 'condensedMilk'])
+
 function ingredient(g: Phaser.GameObjects.Graphics, x: number, y: number, name: string, chopped = false) {
   const color = INGREDIENTS[name] ? hex(INGREDIENTS[name].color) : 0xffffff
   g.fillStyle(color)
   if (chopped) {
     g.fillRoundedRect(x - 9, y - 6, 8, 7, 2).fillRoundedRect(x + 2, y - 8, 7, 7, 2).fillRoundedRect(x - 2, y + 2, 8, 7, 2)
+  } else if (name === 'bread') {
+    g.fillStyle(0xa56338).fillRoundedRect(x - 10, y - 3, 20, 15, 4).fillEllipse(x, y - 4, 25, 15)
+    g.fillStyle(0xf8d699).fillRoundedRect(x - 7, y - 3, 14, 12, 3).fillEllipse(x, y - 4, 18, 10)
+    g.fillStyle(0xc89153).fillCircle(x - 3, y + 1, 1).fillCircle(x + 4, y - 4, 1)
+  } else if (name === 'kaya') {
+    g.fillStyle(0x507742).fillRoundedRect(x - 8, y - 7, 16, 18, 4)
+    g.fillStyle(0xf1cb83).fillRoundedRect(x - 9, y - 10, 18, 5, 2)
+    g.fillStyle(0xf6e8aa).fillRoundedRect(x - 6, y - 1, 12, 7, 2)
+    g.fillStyle(0x527c45).fillEllipse(x, y + 2, 8, 4)
+  } else if (name === 'butter') {
+    g.fillStyle(0xe2a746).fillRoundedRect(x - 11, y - 3, 22, 12, 3)
+    g.fillStyle(0xffdf71).fillRoundedRect(x - 11, y - 7, 22, 9, 3)
+    g.fillStyle(0xffedab).fillRoundedRect(x - 8, y - 5, 13, 2, 1)
+  } else if (name === 'egg') {
+    g.fillStyle(0xc38f68).fillEllipse(x, y + 2, 17, 21)
+    g.fillStyle(0xffead0).fillEllipse(x - 1, y, 15, 20)
+    g.fillStyle(0xfff8e6).fillEllipse(x - 4, y - 4, 4, 7)
+  } else if (name === 'coffee') {
+    g.fillStyle(0x603729).fillEllipse(x - 5, y - 2, 11, 16).fillEllipse(x + 6, y + 3, 11, 15)
+    g.lineStyle(2, 0xc28e63).lineBetween(x - 6, y - 7, x - 4, y + 3).lineBetween(x + 5, y - 2, x + 7, y + 7)
+  } else if (name === 'water') {
+    g.fillStyle(0x79cde9).fillTriangle(x, y - 11, x - 8, y + 2, x + 8, y + 2).fillCircle(x, y + 3, 8)
+    g.fillStyle(0xd4f4fa).fillEllipse(x - 3, y + 2, 4, 7)
+  } else if (name === 'condensedMilk') {
+    g.fillStyle(0xe8e2ca).fillRoundedRect(x - 8, y - 9, 16, 19, 3)
+    g.fillStyle(0xfff5c8).fillEllipse(x, y - 8, 16, 5)
+    g.fillStyle(0x7ea0b1).fillRect(x - 8, y - 1, 16, 7)
   } else if (name === 'cucumber') {
     g.fillRoundedRect(x - 11, y - 5, 22, 10, 5)
     g.fillStyle(0xc5da8d).fillEllipse(x + 7, y, 7, 8)
@@ -109,6 +138,7 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
   switch (station.kind) {
     case 'crate':
       g.fillStyle(0xa46a4c).fillRoundedRect(x + 7, y + 11, 42, 27, 5)
+      if (drawnIngredients.has(station.id)) ingredient(g, cx, cy, station.id)
       break
     case 'oven':
       g.fillStyle(0x635360).fillRoundedRect(cx - 21, cy - 16, 42, 32, 4)

@@ -479,6 +479,7 @@ export default function App() {
       <aside className="order-rail" aria-labelledby="order-rail-title">
         <div className="order-rail-heading">
           {room.shop && <span className="shop-service-name">{SHOPS[room.shop].name}</span>}
+          {!room.training && <div className="service-score">{t("Score")} <strong>{room.game.score}</strong></div>}
           <h1 id="order-rail-title">{t(room.training ? 'Training order' : 'Customer orders')}</h1>
           {room.training ? <span className="practice-mode">{t("Untimed practice")}</span> : <div className={'round-clock' + (roundLeft <= 20000 ? ' clock-urgent' : '')}>
             <span>{t("Round left")}</span><strong role="timer">{formatTime(roundLeft)}</strong>
@@ -506,18 +507,17 @@ export default function App() {
           <li>Load the recipe station with <kbd>E</kbd> and press <kbd>Space</kbd> to prepare the dish.</li>
           <li>{t('Use a clean plate to collect the finished dish before it burns, then bring it to Serve.')}</li>
         </ol>}
-        {!room.training && <div className="service-score">{t("Score")} <strong>{room.game.score}</strong></div>}
       </aside>
       <section className="play-kitchen" aria-label="Kitchen">
+      <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
+        {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
+      </span></div>
+      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, drop, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
       <div className="match-board"><Suspense fallback={<CanvasFallback />}><GameCanvas room={room} me={me} onMove={(x, y) => { if (socket.connected) socket.volatile.emit('move', { x, y }) }} onAct={action => {
         if (!socket.connected || settings) return
         socket.emit('act', action)
         ping(sound, [380])
       }} /></Suspense></div>
-      <div className="match-under"><span role="status">{!online ? t('Connection lost. Reconnecting…') : t(notice || guidance(room, chef))}</span><span>{t("Clean plates")} <b>{room.game.clean}</b> · {t('Returned')} <b>{room.game.dirty}</b>
-        {room.game.stations.cups && <> · {t('Clean cups')} <b>{room.game.cleanCups}</b> · {t('Cup returns')} <b>{room.game.dirtyCups}</b></>}
-      </span></div>
-      <div className="control-strip"><span><kbd>WASD</kbd> / {t('Arrow keys')} · {t('Move')}</span><span><kbd>E</kbd> · {t('Pick up, drop, serve')}</span><span><kbd>Space</kbd> · {t('Work at a station')}</span><button className="back ml-auto" onClick={() => { if (window.confirm(t('Leave the match and return to the main page?'))) leave() }}>{t("Back to main page")}</button></div>
       </section>
     </main>}
 

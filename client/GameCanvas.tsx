@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Phaser from 'phaser'
 import { INGREDIENTS, nearestStation, SPAWNS, stationsFor } from '../shared/kitchen.mjs'
-import { drawChef, drawItem, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
+import { drawChef, drawnIngredients, drawItem, drawStation, floor, TILE, WORLD_HEIGHT, WORLD_WIDTH } from './art'
 import { t } from './i18n'
 import { ingredientIcon } from './ingredientIcons'
 import type { Player, Room } from './model'
@@ -39,7 +39,7 @@ class KitchenScene extends Phaser.Scene {
     const room = this.current().room
     for (const station of stationsFor(room?.difficulty ?? 'Hard', room?.training, room?.shop)) {
       const caption = station.kind === 'crate' ? INGREDIENTS[station.id].label : names[station.kind]
-      if (station.kind === 'crate') this.add.text((station.x + 0.5) * TILE, station.y * TILE + 25, ingredientIcon(station.id), {
+      if (station.kind === 'crate' && !drawnIngredients.has(station.id)) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 25, ingredientIcon(station.id), {
         fontFamily: 'Segoe UI Emoji, Apple Color Emoji, sans-serif', fontSize: '21px'
       }).setOrigin(0.5)
       if (caption) this.add.text((station.x + 0.5) * TILE, station.y * TILE + 48, t(caption), {

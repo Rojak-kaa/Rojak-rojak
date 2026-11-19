@@ -168,8 +168,9 @@ form .button { margin-top: 9px; }
 .practice-mode, .practice-steps { color: var(--muted); font-size: .81rem; }
 .practice-steps { list-style: decimal; padding-left: 19px; overflow: auto; }
 .practice-steps li + li { margin-top: 5px; }
-.service-score { margin-top: auto; font-size: .86rem; }
-.play-kitchen { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px; }
+.service-score { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 6px; background: #fff5e5; font-size: .86rem; }
+.service-score strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.play-kitchen { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 6px; }
 .match-board { min-height: 0; border-radius: 14px; background: #2c2633; overflow: hidden; }
 .match-board .canvas-wrap { height: 100%; aspect-ratio: auto; }
 .play-kitchen .match-under { padding: 3px 6px; color: #fff4e5; }
