@@ -258,9 +258,7 @@ form .button { margin-top: 9px; }
 .town-hero .landing-scene { width: min(100%, 185dvh); }
 .town-shop { width: 25%; height: 28%; }
 .town-shop span { background: #392719ec; }
-.shop-menu { display: grid; gap: 0; margin-top: 9px; }
-.shop-menu li { display: grid; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
-.shop-menu li span, .shop-service-name { color: var(--muted); font-size: .85rem; }
+.shop-service-name { color: var(--muted); font-size: .85rem; }
 @media (max-width: 500px) {
   .town-shop span { padding-inline: 6px; font-size: .68rem; }
 }

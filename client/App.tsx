@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { io } from 'socket.io-client'
-import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, serviceStars, SHOPS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
+import { COLORS, DIFFICULTIES, INGREDIENTS, METHODS, menuFor, nearestStation, recipeFor, RECIPES, serviceStars, SHOPS, stationsFor, WIDTH } from '../shared/kitchen.mjs'
 import type { Difficulty, Player, Room } from './model'
 import type { Profile } from './model'
 import { LANGUAGES } from '../shared/profile.mjs'
@@ -222,9 +222,7 @@ export default function App() {
   const [checkingAccount, setCheckingAccount] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
   const [shopMenu, setShopMenu] = useState<string>()
-  const [skipShopTutorial, setSkipShopTutorial] = useState(false)
   const [selectedShop, setSelectedShop] = useState<string>()
-  const [trainingMenu, setTrainingMenu] = useState(false)
   const [language, setLocale] = useState<Language>(() => {
     const stored = localStorage.getItem('rojak-language')
     return stored && Object.hasOwn(LANGUAGES, stored) ? stored as Language : 'en'
@@ -329,7 +327,6 @@ export default function App() {
       if (failure || reply?.error) return setError(reply?.error ?? 'The kitchen server did not respond. Try again.')
       accept(reply)
       setShopMenu(undefined)
-      setTrainingMenu(false)
       if (solo) window.scrollTo(0, 0)
     })
   }
@@ -448,7 +445,7 @@ export default function App() {
         <div className="landing-scene">
           <img src={foodTown} alt="An illustrated Malaysian town map with four food shops and a traditional house." width="1536" height="1024" fetchPriority="high" />
           {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className="food-hotspot town-shop" disabled={pending}
-            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setSkipShopTutorial(false); setShopMenu(id) }}>
+            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setShopMenu(id) }}>
             <span>{shop.name}</span>
           </button>)}
           <button type="button" className="food-hotspot town-shop" style={{ left: '50%', top: '37%' }} onClick={openProfile}><span>{t('Your profile')}</span></button>
@@ -583,7 +580,6 @@ export default function App() {
           {room.training && room.shop && <button className="button primary" onClick={() => {
             const shop = room.shop
             leave()
-            setSkipShopTutorial(true)
             setShopMenu(shop ?? undefined)
           }}>{t('Continue to shop')}</button>}
           {host ? <button className="button primary" disabled={!online} onClick={() => lobby('rematch')}>{t("Play again")}</button> : <span>{t('Waiting for the host to start a rematch.')}</span>}
@@ -601,37 +597,10 @@ export default function App() {
       }} />
     </Dialog>}
     {shopMenu && !room && <Dialog title={SHOPS[shopMenu].name} close={() => setShopMenu(undefined)}>
-      {!skipShopTutorial ? <section>
-        <h3 className="briefing-menu-title">{t('Beginner tutorial')}</h3>
-        <p>{t('Practice in this kitchen and serve one order without a timer.')}</p>
-        <ul className="shop-menu"><li>
-          <strong>{RECIPES[SHOPS[shopMenu].tutorial].name}</strong>
-          <span>{t(RECIPES[SHOPS[shopMenu].tutorial].method)}</span>
-          <RecipeIngredients ingredients={RECIPES[SHOPS[shopMenu].tutorial].ingredients} />
-        </li></ul>
-        <div className="account-actions">
-          <button className="button primary" disabled={pending} onClick={() => startSolo(SHOPS[shopMenu].tutorial, shopMenu)}>{t('Start tutorial')}</button>
-          <button className="button secondary" disabled={pending} onClick={() => { setError(''); setSkipShopTutorial(true) }}>{t('Skip tutorial')}</button>
-        </div>
-      </section> : <>
-        <ul className="shop-menu">{SHOPS[shopMenu].pool.map(id => <li key={id}>
-          <strong>{RECIPES[id].name}</strong><span>{t(RECIPES[id].method)}</span>
-        </li>)}</ul>
-        <div className="account-actions">
-          <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
-          <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
-          {shopMenu === 'hawker' && <button className="button secondary" disabled={pending} onClick={() => {
-            setError('')
-            setShopMenu(undefined)
-            setTrainingMenu(true)
-          }}>{t('Training')}</button>}
-        </div>
-      </>}
-      {error && <p className="error" role="alert">{t(error)}</p>}
-    </Dialog>}
-    {trainingMenu && !room && <Dialog title={t('Training')} close={() => setTrainingMenu(false)}>
-      <div className="account-actions">{TRAINING_RECIPES.map(id =>
-        <button className="button secondary compact" key={id} disabled={pending} onClick={() => startSolo(id)}>{RECIPES[id].name}</button>)}
+      <div className="account-actions">
+        <button className="button primary" disabled={pending} onClick={() => startSolo(undefined, shopMenu)}>{t('Play Solo')}</button>
+        <button className="button secondary" disabled={pending} onClick={() => openLobby(shopMenu)}>{t('Play Team')}</button>
+        <button className="button secondary" disabled={pending} onClick={() => startSolo(SHOPS[shopMenu].tutorial, shopMenu)}>{t('Training')}</button>
       </div>
       {error && <p className="error" role="alert">{t(error)}</p>}
     </Dialog>}
