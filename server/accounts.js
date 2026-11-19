@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { promisify } from 'node:util'
 import express from 'express'
-import { ACCESSORIES, BASE_OUTFIT, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, lockEcoOutfit, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, AYU_OUTFIT, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAIRSTYLES, HAND_SIGNS, LANGUAGES, lockSignatureOutfit, PALETTE } from '../shared/profile.mjs'
 
 const derive = promisify(scrypt)
 const COOKIE = 'rojak_account'
@@ -33,7 +33,7 @@ export function createAccounts(path) {
   const userById = db.prepare('SELECT * FROM users WHERE id = ?')
   const sessionUser = db.prepare('SELECT users.* FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.token = ? AND sessions.expires > ?')
   const publicProfile = ({ id, username, name, language, outfit, served, outfit_configured }) => ({
-    id, username, name, language, outfit: lockEcoOutfit({ ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }), served, outfitConfigured: Boolean(outfit_configured)
+    id, username, name, language, outfit: lockSignatureOutfit({ ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }), served, outfitConfigured: Boolean(outfit_configured)
   })
   const tokenFrom = headers => /(?:^|;\s*)rojak_account=([A-Za-z0-9_-]{43})(?:;|$)/.exec(headers.cookie ?? '')?.[1]
   function identify(headers) {
@@ -77,7 +77,7 @@ export function createAccounts(path) {
       const key = await derive(password, salt, 64)
       const id = randomUUID()
       const language = Object.hasOwn(LANGUAGES, req.body.language) ? req.body.language : 'en'
-      const result = db.prepare('INSERT OR IGNORE INTO users (id, username, name, salt, password, language, outfit) VALUES (?, ?, ?, ?, ?, ?, ?)').run(id, username, name, salt, key.toString('hex'), language, JSON.stringify(BASE_OUTFIT))
+      const result = db.prepare('INSERT OR IGNORE INTO users (id, username, name, salt, password, language, outfit) VALUES (?, ?, ?, ?, ?, ?, ?)').run(id, username, name, salt, key.toString('hex'), language, JSON.stringify(AYU_OUTFIT))
       if (!result.changes) return res.status(409).json({ error: 'That username is already taken.' })
       return issue(res, id)
     } catch (error) { next(error) }
@@ -98,7 +98,7 @@ export function createAccounts(path) {
       ![outfit.fabric, outfit.trim].every(value => Number.isInteger(value) && PALETTE[value])) {
       return res.status(400).json({ error: 'Check your profile details.' })
     }
-    const cleanOutfit = lockEcoOutfit({ chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim, expression, handSign, hairStyle })
+    const cleanOutfit = lockSignatureOutfit({ chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim, expression, handSign, hairStyle })
     db.prepare('UPDATE users SET name = ?, language = ?, outfit = ?, outfit_configured = 1 WHERE id = ?').run(name.trim(), language, JSON.stringify(cleanOutfit), user.id)
     res.json(publicProfile(userById.get(user.id)))
   })

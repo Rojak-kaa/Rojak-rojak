@@ -123,7 +123,9 @@ function drawHairstyle(context: CanvasRenderingContext2D, outfit: Outfit) {
   context.fillStyle = hair
   context.strokeStyle = '#261c26'
   context.lineWidth = 2.5
-  const cap = new Path2D('M74 140 Q60 114 81 78 Q105 42 148 42 Q196 41 220 75 Q238 103 225 141 L214 130 Q209 113 203 105 Q177 124 142 122 Q115 134 86 126 L78 145 Z')
+  const cap = new Path2D(outfit.chef === 'ayu' ?
+    'M77 151 Q62 133 64 109 Q64 84 91 66 Q113 47 137 46 Q151 36 166 46 Q192 49 217 70 Q240 89 232 118 Q231 136 219 151 L210 132 Q213 115 200 107 Q184 108 171 98 Q153 103 140 98 Q129 103 117 101 Q105 108 95 108 Q85 120 83 146 Z' :
+    'M74 140 Q60 114 81 78 Q105 42 148 42 Q196 41 220 75 Q238 103 225 141 L214 130 Q209 113 203 105 Q177 124 142 122 Q115 134 86 126 L78 145 Z')
   context.fill(cap)
   context.stroke(cap)
 
@@ -154,8 +156,49 @@ export function garmentHem(garment: string) {
   return ({ cheongsam: 388, saree: 399, bajuKurung: 390, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
 }
 
+function drawBajuMelayu(context: CanvasRenderingContext2D, outfit: Outfit) {
+  const cloth = PALETTE[outfit.fabric]
+  const trim = PALETTE[outfit.trim]
+  context.fillStyle = cloth
+  context.strokeStyle = '#65434a'
+  context.lineWidth = 2.5
+  const leftSleeve = outfit.handSign === 'relaxed'
+    ? 'M114 223 Q105 234 90 268 L79 292 L96 300 L120 274 Z'
+    : 'M119 223 L112 234 L96 216 L84 224 Q90 243 113 260 L122 271 Z'
+  const outfitPaths = [
+    'M110 325 L151 326 L145 353 L141 448 Q122 455 104 448 L108 395 Q98 353 110 325 Z',
+    'M148 325 L188 324 Q196 350 185 390 L189 448 Q171 455 154 449 L151 365 Z',
+    leftSleeve,
+    'M180 225 Q191 231 198 251 Q210 278 223 296 L207 301 L182 274 Z',
+    'M111 222 Q122 212 137 211 Q149 223 164 212 Q178 215 187 226 L184 291 Q151 302 113 290 Z'
+  ]
+  for (const path of outfitPaths) {
+    const piece = new Path2D(path)
+    context.fill(piece)
+    context.stroke(piece)
+  }
+  context.fillStyle = trim
+  context.fill(new Path2D('M104 448 Q122 453 141 448 L139 458 Q138 467 127 467 L108 467 Q98 466 104 448 Z M153 449 Q171 454 189 448 Q195 465 182 467 L162 467 Q155 465 153 449 Z'))
+
+  const sampin = new Path2D('M112 286 Q151 295 185 286 L194 344 Q151 355 104 344 Z')
+  context.fill(sampin)
+  context.save()
+  context.clip(sampin)
+  context.strokeStyle = '#f3d58c'
+  context.lineWidth = 5
+  for (let x = 82; x < 232; x += 12) {
+    context.stroke(new Path2D(`M${x} 280 l-41 74`))
+  }
+  context.restore()
+  context.stroke(sampin)
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
+  if (outfit.garment === 'bajuMelayu') {
+    drawBajuMelayu(context, outfit)
+    return
+  }
   if (outfit.garment === 'striped') {
     const shirt = new Path2D('M116 224 Q127 212 138 212 Q147 226 163 212 Q179 214 185 229 L185 288 Q150 297 113 288 Z')
     context.fillStyle = PALETTE[outfit.fabric]
@@ -230,10 +273,6 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
     context.moveTo(104, hem - 9)
     context.quadraticCurveTo(150, hem - 3, 191, hem - 9)
     context.stroke()
-    if (outfit.garment === 'bajuMelayu') {
-      context.fillStyle = trim
-      context.fillRect(103, 283, 87, 9)
-    }
   }
 }
 

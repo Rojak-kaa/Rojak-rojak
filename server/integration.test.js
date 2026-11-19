@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { io as connect } from 'socket.io-client'
 import { createKitchenServer } from './index.js'
-import { BASE_OUTFIT, CHEFS, ECO_OUTFIT } from '../shared/profile.mjs'
+import { AYU_OUTFIT, CHEFS, ECO_OUTFIT } from '../shared/profile.mjs'
 import { interact, startMatch, tickMatch } from './kitchen.js'
 import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, recipeFor, serviceStars, SHOPS, SPAWNS, stationsFor, TRAINING_RECIPES, WIDTH } from '../shared/kitchen.mjs'
 
@@ -166,7 +166,14 @@ test('sign-in, language and outfit survive a server restart', async () => {
     const cookie = await register(first, 'chef_persist')
     const initial = await fetch(first + '/api/account/me', { headers: { cookie } }).then(response => response.json())
     assert.equal(initial.outfitConfigured, false)
-    assert.deepEqual(initial.outfit, BASE_OUTFIT)
+    assert.deepEqual(initial.outfit, AYU_OUTFIT)
+    const ayu = { ...AYU_OUTFIT, accessory: 'songkok', expression: 'happy', handSign: 'wave', fabric: 2 }
+    const locked = await fetch(first + '/api/account/me', {
+      method: 'PATCH', headers: { cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Mei', language: 'zh', outfit: { ...ayu, garment: 'saree', hairStyle: 'bun', trim: 3 } })
+    })
+    assert.equal(locked.status, 200)
+    assert.deepEqual((await locked.json()).outfit, ayu)
     const profile = { name: 'Mei', language: 'zh', outfit: { ...ECO_OUTFIT, accessory: 'songkok', fabric: 2, expression: 'happy', handSign: 'okay' } }
     assert.equal(CHEFS[profile.outfit.chef].name, '全村最环保的人')
     const updated = await fetch(first + '/api/account/me', {
