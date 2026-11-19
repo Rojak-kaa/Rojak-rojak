@@ -21,6 +21,9 @@ Save and continue|Simpan dan teruskan|保存并继续|சேமித்து�
 Traditional clothing|Pakaian tradisional|传统服装|பாரம்பரிய உடை
 Chef character|Watak cef|厨师角色|சமையலர் பாத்திரம்
 Facial expression|Ekspresi muka|面部表情|முகபாவனை
+No clothing|Tanpa pakaian|未穿服装|உடை இல்லை
+Blank face|Muka kosong|无表情五官|முக அம்சங்கள் இல்லை
+Relaxed hands|Tangan santai|双手放松|தளர்ந்த கைகள்
 Hand sign|Isyarat tangan|手势|கை சைகை
 Calm|Tenang|平静|அமைதி
 Happy|Gembira|开心|மகிழ்ச்சி

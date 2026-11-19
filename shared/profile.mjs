@@ -6,6 +6,7 @@ export const CHEFS = {
   eco: { name: '全村最环保的人', culture: 'Chinese', skin: 0xffdec9, hair: 0x20191c }
 }
 export const GARMENTS = {
+  none: 'No clothing',
   bajuMelayu: 'Baju Melayu',
   bajuKurung: 'Baju Kurung',
   samfu: 'Samfu',
@@ -15,14 +16,17 @@ export const GARMENTS = {
   striped: 'Striped shirt'
 }
 export const ACCESSORIES = { chef: 'Chef hat', songkok: 'Songkok', flower: 'Flower', sprout: 'Sprout', none: 'No headwear' }
-export const EXPRESSIONS = { calm: 'Calm', happy: 'Happy', wink: 'Wink', worried: 'Worried', determined: 'Determined', sleepy: 'Sleepy' }
-export const HAND_SIGNS = { peace: 'Peace sign', wave: 'Wave', fist: 'Fist', point: 'Point', okay: 'OK sign' }
+export const EXPRESSIONS = { none: 'Blank face', calm: 'Calm', happy: 'Happy', wink: 'Wink', worried: 'Worried', determined: 'Determined', sleepy: 'Sleepy' }
+export const HAND_SIGNS = { relaxed: 'Relaxed hands', peace: 'Peace sign', wave: 'Wave', fist: 'Fist', point: 'Point', okay: 'OK sign' }
 export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029']
 export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3, expression: 'calm', handSign: 'peace' }
+export const BASE_OUTFIT = { ...DEFAULT_OUTFIT, garment: 'none', accessory: 'none', expression: 'none', handSign: 'relaxed' }
 export const ECO_OUTFIT = { ...DEFAULT_OUTFIT, chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7 }
 
 export function lockEcoOutfit(outfit) {
   return outfit.chef === ECO_OUTFIT.chef
-    ? { ...outfit, garment: ECO_OUTFIT.garment, trim: ECO_OUTFIT.trim }
+    ? { ...outfit, garment: ECO_OUTFIT.garment, trim: ECO_OUTFIT.trim,
+        expression: outfit.expression === 'none' ? ECO_OUTFIT.expression : outfit.expression,
+        handSign: outfit.handSign === 'relaxed' ? ECO_OUTFIT.handSign : outfit.handSign }
     : outfit
 }

@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { promisify } from 'node:util'
 import express from 'express'
-import { ACCESSORIES, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, lockEcoOutfit, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, BASE_OUTFIT, CHEFS, DEFAULT_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, lockEcoOutfit, PALETTE } from '../shared/profile.mjs'
 
 const derive = promisify(scrypt)
 const COOKIE = 'rojak_account'
@@ -77,7 +77,7 @@ export function createAccounts(path) {
       const key = await derive(password, salt, 64)
       const id = randomUUID()
       const language = Object.hasOwn(LANGUAGES, req.body.language) ? req.body.language : 'en'
-      const result = db.prepare('INSERT OR IGNORE INTO users (id, username, name, salt, password, language, outfit) VALUES (?, ?, ?, ?, ?, ?, ?)').run(id, username, name, salt, key.toString('hex'), language, JSON.stringify(DEFAULT_OUTFIT))
+      const result = db.prepare('INSERT OR IGNORE INTO users (id, username, name, salt, password, language, outfit) VALUES (?, ?, ?, ?, ?, ?, ?)').run(id, username, name, salt, key.toString('hex'), language, JSON.stringify(BASE_OUTFIT))
       if (!result.changes) return res.status(409).json({ error: 'That username is already taken.' })
       return issue(res, id)
     } catch (error) { next(error) }

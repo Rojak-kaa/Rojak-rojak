@@ -8,4 +8,5 @@ export const EXPRESSIONS: Record<string, string>
 export const HAND_SIGNS: Record<string, string>
 export const PALETTE: string[]
 export const DEFAULT_OUTFIT: Outfit
+export const BASE_OUTFIT: Outfit
 export const ECO_OUTFIT: Outfit

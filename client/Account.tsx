@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ACCESSORIES, CHEFS, ECO_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, BASE_OUTFIT, CHEFS, ECO_OUTFIT, EXPRESSIONS, GARMENTS, HAND_SIGNS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
 import type { Language, Outfit } from '../shared/profile.mjs'
 import type { Profile } from './model'
 import { t } from './i18n'
@@ -100,6 +100,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
   function outfit(part: keyof Outfit, value: string | number) {
     setDraft(previous => {
       if (part === 'chef' && value === ECO_OUTFIT.chef) return { ...previous, outfit: { ...ECO_OUTFIT } }
+      if (part === 'chef') return { ...previous, outfit: { ...BASE_OUTFIT, chef: String(value) } }
       const next = { ...previous.outfit, [part]: value }
       if (part === 'garment' && value === 'cheongsam') Object.assign(next, { fabric: 0, trim: 8 })
       return { ...previous, outfit: next }
@@ -132,6 +133,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
     <div className="outfit-heading"><strong>{t('Clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
     {fixedClothing ? <p>{t(GARMENTS[ECO_OUTFIT.garment])}</p> :
     <select aria-label={t('Clothing')} value={draft.outfit.garment} onChange={event => outfit('garment', event.target.value)}>
+      <option value="none">{t(GARMENTS.none)}</option>
       {clothingGroups.map(([culture, ...garments]) => <optgroup key={culture} label={t(culture)}>
         {garments.map(id => <option key={id} value={id}>{t(GARMENTS[id])}</option>)}
       </optgroup>)}
@@ -140,10 +142,10 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
       {Object.entries(ACCESSORIES).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
     <label>{t('Facial expression')}<select value={draft.outfit.expression} onChange={event => outfit('expression', event.target.value)}>
-      {Object.entries(EXPRESSIONS).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
+      {Object.entries(EXPRESSIONS).filter(([id]) => !fixedClothing || id !== 'none').map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
     <label>{t('Hand sign')}<select value={draft.outfit.handSign} onChange={event => outfit('handSign', event.target.value)}>
-      {Object.entries(HAND_SIGNS).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
+      {Object.entries(HAND_SIGNS).filter(([id]) => !fixedClothing || id !== 'relaxed').map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
     {([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
       <fieldset className="palette" key={part}><legend>{t(label)}</legend>{PALETTE.map((color, index) =>

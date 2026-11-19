@@ -19,8 +19,8 @@ function sampleColour(context: CanvasRenderingContext2D, x: number, y: number) {
   return `rgb(${r}, ${g}, ${b})`
 }
 
-function drawExpression(context: CanvasRenderingContext2D, expression: string) {
-  if (expression === 'calm') return
+function drawExpression(context: CanvasRenderingContext2D, expression: string, blankBase: boolean) {
+  if (expression === 'none' || (expression === 'calm' && !blankBase)) return
   const skin = sampleColour(context, 145, 164)
   for (const [x, y, rx, ry] of [[111, 162, 17, 16], [177, 163, 17, 16], [146, 180, 10, 6]]) {
     context.fillStyle = skin
@@ -38,11 +38,11 @@ function drawExpression(context: CanvasRenderingContext2D, expression: string) {
     if (expression === 'happy') context.stroke(new Path2D(arc))
   } else if (expression === 'sleepy') {
     context.stroke(new Path2D('M103 166 Q112 169 121 166 M168 166 Q177 169 186 166'))
-  } else {
+  } else if (expression !== 'calm') {
     const brow = expression === 'worried' ? 'M104 152 L119 146 M170 146 L184 152' : 'M102 148 L119 155 M169 154 L187 148'
     context.stroke(new Path2D(brow))
   }
-  if (['wink', 'worried', 'determined'].includes(expression)) {
+  if (['calm', 'wink', 'worried', 'determined'].includes(expression)) {
     for (const x of expression === 'wink' ? [111] : [111, 177]) {
       context.fillStyle = '#583840'
       context.beginPath()
@@ -54,9 +54,9 @@ function drawExpression(context: CanvasRenderingContext2D, expression: string) {
       context.fill()
     }
   }
-  if (expression === 'worried') {
+  if (expression === 'worried' || expression === 'calm') {
     context.lineWidth = 2
-    context.stroke(new Path2D('M141 183 Q146 178 152 182'))
+    context.stroke(new Path2D(expression === 'calm' ? 'M141 181 Q146 184 152 181' : 'M141 183 Q146 178 152 182'))
     return
   }
   const mouth = expression === 'sleepy'
@@ -69,20 +69,23 @@ function drawExpression(context: CanvasRenderingContext2D, expression: string) {
 }
 
 const handPaths: Record<string, string> = {
+  peace: 'M83 220 Q75 216 75 207 L72 191 Q72 186 77 188 L84 201 L85 188 Q90 185 91 190 L92 202 Q97 202 98 208 Q99 216 91 220 Z',
   wave: 'M83 220 Q76 215 72 208 L66 202 Q64 197 69 198 L76 204 L69 192 Q68 188 72 189 L80 199 L75 185 Q76 180 80 184 L86 197 L85 183 Q89 179 91 184 L94 202 Q98 200 99 205 Q99 216 91 220 Z',
   fist: 'M83 220 Q76 216 75 209 L76 199 Q78 194 82 197 Q86 193 90 197 Q94 194 96 200 L98 208 Q98 216 91 220 Z M78 205 Q86 202 91 207',
   point: 'M83 220 Q75 214 76 206 L78 196 L76 186 Q77 181 81 184 L88 200 Q95 195 97 204 L98 210 Q97 216 91 220 Z',
   okay: 'M83 220 Q75 216 75 207 Q73 201 77 198 L73 192 Q72 188 76 189 L82 196 L80 186 Q83 182 86 186 L89 198 Q95 198 98 205 Q101 216 91 220 Z M84 204 Q92 200 94 207 Q90 212 85 210 Q82 208 84 204 Z'
 }
 
-function drawHandSign(context: CanvasRenderingContext2D, handSign: string) {
+function drawHandSign(context: CanvasRenderingContext2D, handSign: string, baseSkin?: string) {
   const outline = handPaths[handSign]
-  if (!outline) return
-  const skin = sampleColour(context, 89, 218)
-  context.save()
-  context.globalCompositeOperation = 'destination-out'
-  context.fill(new Path2D('M72 188 L92 186 L98 204 L99 217 L93 221 L82 220 L71 210 Z'))
-  context.restore()
+  if (!outline || (!baseSkin && handSign === 'peace')) return
+  const skin = baseSkin ?? sampleColour(context, 89, 218)
+  if (!baseSkin) {
+    context.save()
+    context.globalCompositeOperation = 'destination-out'
+    context.fill(new Path2D('M72 188 L92 186 L98 204 L99 217 L93 221 L82 220 L71 210 Z'))
+    context.restore()
+  }
   context.fillStyle = skin
   context.strokeStyle = '#65434a'
   context.lineWidth = 1.8
@@ -92,35 +95,49 @@ function drawHandSign(context: CanvasRenderingContext2D, handSign: string) {
   context.stroke(path)
 }
 
-function tintCharacter(context: CanvasRenderingContext2D, outfit: Outfit) {
-  if (outfit.chef === ECO_OUTFIT.chef) return
-  const chef = CHEFS[outfit.chef]
-  const skin = rgb('#' + chef.skin.toString(16).padStart(6, '0'))
-  const hair = rgb('#' + chef.hair.toString(16).padStart(6, '0'))
-  const pixels = context.getImageData(0, 52, ECO_WIDTH, ECO_HEIGHT - 52)
-  for (let y = 0; y < pixels.height; y++) {
-    for (let x = 0; x < pixels.width; x++) {
-      const i = (y * pixels.width + x) * 4
-      const [red, green, blue, alpha] = pixels.data.subarray(i, i + 4)
-      if (!alpha) continue
-      const onHair = y < 168 && (y < 79 || x < 89 || x > 205)
-      const foxClip = onHair && x > 75 && x < 132 && y > 36 && y < 86 && red > 150 && red > blue * 1.35
-      const tone = onHair && (Math.max(red, green, blue) < 73 || foxClip) ? hair :
-        red > 190 && green < red * 0.95 && blue < green * 0.98 ? skin : null
-      if (!tone) continue
-      const shade = tone === skin ? red / 250 : foxClip ? 1 : Math.max(0.65, red / 34)
-      for (let channel = 0; channel < 3; channel++) pixels.data[i + channel] = tone[channel] * shade
-    }
-  }
-  context.putImageData(pixels, 0, 52)
+function drawBaseBody(context: CanvasRenderingContext2D, skin: string, handSign: string) {
+  const leftArm = handSign === 'relaxed'
+    ? 'L100 299 Q91 310 80 308 Q70 306 78 296 L91 280 Q108 253 114 230'
+    : 'L111 257 Q88 240 83 220 L95 215 Q106 232 115 234 L119 223'
+  const body = new Path2D(`M137 197 L164 197 L164 211 Q181 215 189 235
+    Q198 270 223 297 Q233 308 221 311 Q210 310 201 299 L181 276
+    Q183 311 191 333 Q199 353 186 390 L189 452 Q195 465 182 467
+    L162 467 Q154 466 154 456 L150 353 L143 353 L139 456
+    Q139 467 128 467 L107 467 Q98 466 103 453 L107 392 Q96 354 107 329
+    Q116 308 120 275 ${leftArm} Q119 217 137 211 Z`)
+  context.fillStyle = skin
+  context.strokeStyle = '#65434a'
+  context.lineWidth = 2.5
+  context.fill(body)
+  context.stroke(body)
+  if (handSign !== 'relaxed') drawHandSign(context, handSign, skin)
+  const head = new Path2D('M77 143 Q60 136 60 152 Q60 173 80 178 Q98 206 148 207 Q199 207 218 178 Q238 171 238 154 Q236 138 221 143 Q235 107 209 75 Q184 46 149 46 Q107 46 83 79 Q62 107 77 143 Z')
+  context.fillStyle = skin
+  context.fill(head)
+  context.stroke(head)
 }
 
 export function garmentHem(garment: string) {
   return ({ cheongsam: 388, saree: 399, bajuKurung: 390, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
 }
 
-function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit) {
-  if (outfit.garment === 'striped') return
+function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
+  if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
+  if (outfit.garment === 'striped') {
+    const shirt = new Path2D('M116 224 Q127 212 138 212 Q147 226 163 212 Q179 214 185 229 L185 288 Q150 297 113 288 Z')
+    context.fillStyle = PALETTE[outfit.fabric]
+    context.fill(shirt)
+    context.save()
+    context.clip(shirt)
+    context.fillStyle = PALETTE[outfit.trim]
+    for (const y of [232, 251, 270]) context.fillRect(106, y, 84, 8)
+    context.restore()
+    context.strokeStyle = '#473037'
+    context.stroke(shirt)
+    context.fillStyle = '#334520'
+    context.fill(new Path2D('M113 289 L184 289 L195 346 L151 344 L146 336 L141 345 L103 345 Z'))
+    return
+  }
   const hem = garmentHem(outfit.garment)
   const fitted = outfit.garment === 'cheongsam'
   const trim = PALETTE[outfit.trim]
@@ -187,14 +204,24 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit) {
   }
 }
 
-function drawHeadwear(context: CanvasRenderingContext2D, accessory: string) {
+function drawHeadwear(context: CanvasRenderingContext2D, accessory: string, blankBase: boolean) {
+  if (blankBase && accessory === 'sprout') {
+    context.strokeStyle = '#638441'
+    context.lineWidth = 3
+    context.stroke(new Path2D('M150 50 Q153 36 145 31'))
+    context.fillStyle = '#88ab58'
+    context.fill(new Path2D('M149 39 Q132 39 128 28 Q143 24 149 39 M151 36 Q155 22 171 26 Q167 39 151 36'))
+    return
+  }
   if (accessory === ECO_OUTFIT.accessory) return
+  if (!blankBase) {
   const sprout = context.getImageData(107, 0, 70, 55)
   for (let offset = 0; offset < sprout.data.length; offset += 4) {
     const [red, green, blue] = sprout.data.subarray(offset, offset + 3)
     if (green > red * 1.035 && green > blue * 1.15) sprout.data[offset + 3] = 0
   }
   context.putImageData(sprout, 107, 0)
+  }
   context.lineWidth = 3
   context.strokeStyle = '#33252b'
 
@@ -241,11 +268,20 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
   canvas.width = ECO_WIDTH
   canvas.height = ECO_HEIGHT
   const context = canvas.getContext('2d')!
-  context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
-  tintCharacter(context, outfit)
-  drawHeadwear(context, outfit.accessory)
-  drawExpression(context, outfit.expression)
-  drawHandSign(context, outfit.handSign)
+  const blankBase = outfit.chef !== ECO_OUTFIT.chef
+  if (blankBase) {
+    const skin = '#' + CHEFS[outfit.chef].skin.toString(16).padStart(6, '0')
+    drawBaseBody(context, skin, outfit.handSign)
+  } else {
+    context.drawImage(source, 0, 0, ECO_WIDTH, ECO_HEIGHT)
+    drawHandSign(context, outfit.handSign)
+  }
+  drawHeadwear(context, outfit.accessory, blankBase)
+  drawExpression(context, outfit.expression, blankBase)
+  if (blankBase) {
+    drawGarment(context, outfit, true)
+    return canvas
+  }
   if (outfit.garment === 'striped' && outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas
 
   const fabric = rgb(PALETTE[outfit.fabric])
