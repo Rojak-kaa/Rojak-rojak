@@ -15,7 +15,7 @@ Open http://localhost:5173. Vite forwards Socket.IO to the Express server on por
 
 Review the controls, ingredients, and cooking methods for the selected menu in the pre-game guide. Each connected chef selects **Ready to cook** before the timer starts. The round clock and receipt-style order tickets appear to the left of the kitchen. Stations show seconds remaining while they work, and hot dishes display how soon they need plating.
 
-Select a dish in the landing illustration to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Each lesson supplies the relevant ingredients, runs without order or burn timers, and ends when you serve the dish.
+Select a dish in the landing illustration to practise Fruit Rojak, Nasi Lemak, Curry Laksa, or Ais Kacang. Lessons have no round or order deadline, but hot stations still have a burn timer so players can practise taking food off the heat.
 
 For a one-computer multiplayer test, open two or more separate tabs and enter a different nickname in each. Each tab uses a separate room session unless it inherited one from a duplicated tab.
 
@@ -36,7 +36,7 @@ Create a private room and share its code or invite link. Select aprons, have eve
 
 | Dish | Station | In-game ingredients |
 | --- | --- | --- |
-| Nasi Lemak | Stove | Coconut rice, sambal, chopped cucumber |
+| Nasi Lemak | Fryer and stove | Coconut rice, sambal, chopped cucumber, fried ikan bilis |
 | Fruit Rojak | Mixing bowl | Chopped cucumber, chopped pineapple, rojak sauce |
 | Ais Kacang | Ice station | Ice, red beans, rose syrup |
 | Char Kway Teow | Stove | Flat rice noodles, prawns, bean sprouts |
@@ -44,7 +44,7 @@ Create a private room and share its code or invite link. Select aprons, have eve
 
 The game uses simplified recipes. Quick service and streaks earn bonus points. Expired orders cost 20 points and break the streak. Difficulty changes the menu and the stations and ingredients available in the kitchen.
 
-- **Easy · Rice & dessert** serves nasi lemak and ais kacang. Sambal and rose syrup are provided at their stations, leaving two ingredients to collect per dish.
+- **Easy · Rice & dessert** serves nasi lemak and ais kacang. The stove provides sambal, and the ice station provides rose syrup. Fry ikan bilis separately before adding it to nasi lemak.
 - **Normal · Hot favourites** serves nasi lemak, char kway teow, and chicken satay.
 - **Hard · Full hawker menu** serves all five dishes with their full in-game ingredient lists.
 

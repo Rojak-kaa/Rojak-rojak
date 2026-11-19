@@ -3,6 +3,7 @@ export const HEIGHT = 9
 export const COLORS = ['#f36a47', '#3d9d89', '#8266c4', '#eca73d']
 export const SPAWNS = [[3.5, 2.5], [6.5, 2.5], [9.5, 2.5], [11.5, 2.5]]
 export const STATIONS = [
+  ['bilis', 'crate', 1, 1], ['fryer', 'fryer', 2, 3],
   ['rice', 'crate', 2, 1], ['sambal', 'crate', 3, 1], ['cucumber', 'crate', 4, 1],
   ['pineapple', 'crate', 5, 1], ['dressing', 'crate', 6, 1],
   ['boardA', 'board', 7, 1], ['boardB', 'board', 8, 1],
@@ -18,6 +19,7 @@ export const STATIONS = [
   ['counterE', 'counter', 7, 7]
 ].map(([id, kind, x, y]) => ({ id, kind, x, y }))
 export const INGREDIENTS = {
+  bilis: { name: 'Ikan bilis', label: 'IKAN BILIS', color: '#aa7650' },
   rice: { name: 'Coconut rice', label: 'RICE', color: '#fff0cc' },
   sambal: { name: 'Sambal', label: 'SAMBAL', color: '#cf482d' },
   cucumber: { name: 'Cucumber', label: 'CUCUMBER', color: '#69a85e', chop: true },
@@ -40,7 +42,7 @@ export const METHODS = {
   shave: { label: 'Ice station', action: 'Shave and top', busy: 'Shaving and topping', hot: false, scale: 0.6 }
 }
 export const RECIPES = {
-  nasiLemak: { name: 'Nasi Lemak', station: 'pot', ingredients: ['rice', 'sambal', 'cucumber'], method: 'Cook at the stove', color: '#5a955d', points: 110 },
+  nasiLemak: { name: 'Nasi Lemak', station: 'pot', ingredients: ['rice', 'sambal', 'cucumber', 'bilis'], method: 'Cook at the stove', color: '#5a955d', points: 110 },
   rojak: { name: 'Fruit Rojak', station: 'mix', ingredients: ['cucumber', 'pineapple', 'dressing'], method: 'Toss in the mixing bowl', color: '#b76538', points: 110 },
   aisKacang: { name: 'Ais Kacang', station: 'shave', ingredients: ['ice', 'beans', 'syrup'], method: 'Shave and top at the ice station', color: '#db659a', points: 90 },
   charKwayTeow: { name: 'Char Kway Teow', station: 'pot', ingredients: ['noodles', 'prawn', 'sprouts'], method: 'Stir-fry at the stove', color: '#bd6a3c', points: 110 },
@@ -57,7 +59,7 @@ export const DIFFICULTIES = {
 
 export function recipeFor(difficulty, id) {
   const recipe = RECIPES[id]
-  if (difficulty === 'Easy' && id === 'nasiLemak') return { ...recipe, ingredients: ['rice', 'cucumber'], included: 'Sambal is provided at the stove.' }
+  if (difficulty === 'Easy' && id === 'nasiLemak') return { ...recipe, ingredients: ['rice', 'cucumber', 'bilis'], included: 'Sambal is provided at the stove.' }
   if (difficulty === 'Easy' && id === 'aisKacang') return { ...recipe, ingredients: ['ice', 'beans'], included: 'Rose syrup is provided at the ice station.' }
   return recipe
 }
@@ -68,6 +70,7 @@ function buildStations(difficulty, pool) {
   const methods = new Set(recipes.map(recipe => recipe.station))
   return STATIONS.filter(station => {
     if (station.kind === 'crate') return ingredients.has(station.id)
+    if (station.kind === 'fryer') return ingredients.has('bilis')
     return !Object.hasOwn(METHODS, station.kind) || methods.has(station.kind)
   })
 }

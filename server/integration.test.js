@@ -100,7 +100,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   const soloGame = (await soloStarted).game
   assert.equal(soloGame.solo, true)
   assert.equal(soloGame.orders.length, 1)
-  assert.equal(Object.keys(soloGame.stations).filter(id => Object.hasOwn(INGREDIENTS, id)).length, 4)
+  assert.equal(Object.keys(soloGame.stations).filter(id => Object.hasOwn(INGREDIENTS, id)).length, 5)
   assert.equal(soloGame.stations.sambal, undefined)
   assert.ok(soloGame.orderLife > DIFFICULTIES.Easy.orderLife)
   assert.match((await send(d, 'enter', { name: 'Guest', code: solo.room.code })).error, /started/)
@@ -198,13 +198,21 @@ function verifyMenu(difficulty, rules, training = null) {
         advance(1500)
         use(chef, 'boardA')
       }
+      if (ingredient === 'bilis') {
+        assert.match(act(chef, station), /Fry/)
+        use(chef, 'fryer')
+        use(chef, 'fryer', true)
+        advance(2600)
+        use(chef, 'fryer')
+        assert.equal(chef.item.kind, 'fried')
+      }
       use(chef, station)
     }
     use(chefs[0], station, true)
     assert.equal(game.stations[station].recipe, key)
     advance(Math.ceil(rules.cook * METHODS[recipe.station].scale))
     assert.equal(game.stations[station].status, 'cooked')
-    assert.equal(Boolean(game.stations[station].until), !training && METHODS[recipe.station].hot)
+    assert.equal(Boolean(game.stations[station].until), METHODS[recipe.station].hot)
     const platingChef = chefs[1] ?? chefs[0]
     use(platingChef, 'plates')
     use(platingChef, station)
@@ -234,3 +242,22 @@ function verifyMenu(difficulty, rules, training = null) {
   tickMatch(room, game.endsAt, 0)
   assert.equal(room.phase, 'results')
 }
+
+test('a hot dish burns at its deadline even if a player acts before the next tick', () => {
+  const now = 1000
+  const room = { difficulty: 'Easy', players: new Map([['chef', { color: 0, socketId: 'chef' }]]) }
+  startMatch(room, now)
+  const player = room.players.get('chef')
+  Object.assign(player, { x: 9.5, y: 2.4, item: { kind: 'plate' } })
+  const pot = room.game.stations.potA
+  const cookedAt = now + 1000
+  Object.assign(pot, { status: 'cooking', until: cookedAt, recipe: 'nasiLemak' })
+  tickMatch(room, cookedAt + 40, 0)
+  const deadline = cookedAt + room.matchRules.burn
+  assert.equal(pot.until, deadline)
+  assert.match(interact(room, player, false, deadline), /clear the burned batch/)
+  assert.equal(player.item.kind, 'plate')
+  assert.equal(pot.status, 'burned')
+  assert.equal(interact(room, player, true, deadline + 200), '')
+  assert.equal(pot.status, 'empty')
+})

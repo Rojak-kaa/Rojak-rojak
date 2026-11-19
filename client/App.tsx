@@ -79,7 +79,8 @@ function formatTime(ms: number) {
 function RecipeIngredients({ ingredients }: { ingredients: string[] }) {
   return <ul className="recipe-ingredients" aria-label="Ingredients">{ingredients.map(id => {
     const ingredient = INGREDIENTS[id]
-    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}>{ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name}</li>
+    const name = id === 'bilis' ? 'Fried ikan bilis' : ingredient.chop ? 'Chopped ' + ingredient.name.toLowerCase() : ingredient.name
+    return <li key={id} style={{ borderInlineStartColor: ingredient.color }}>{name}</li>
   })}</ul>
 }
 
@@ -96,7 +97,7 @@ function ServiceBriefing({ online, chef, room, onReady, onLeave, error }: {
       <p><kbd>E</kbd> <strong>Pick up, place, plate, or serve</strong></p>
       <p><kbd>Space</kbd> <strong>Work at the highlighted station</strong></p>
     </section>
-    <p className="briefing-tip">Chop marked ingredients at a cutting board. Load the recipe station with <kbd>E</kbd>, then press <kbd>Space</kbd>. Bring clean dishware to collect the finished dish and deliver it to Serve. Wash returns at the sink.</p>
+    <p className="briefing-tip">Chop marked ingredients at a cutting board. Fry ikan bilis at the fryer when it’s on the recipe. Load stations with <kbd>E</kbd>, then press <kbd>Space</kbd>. Collect hot food before the burn countdown reaches zero. Use clean dishware to plate and deliver at Serve.</p>
     <h2 className="briefing-menu-title">{room.training ? 'Practice recipe' : room.difficulty + ' · ' + DIFFICULTIES[room.difficulty].category}</h2>
     <ul className="briefing-menu">
       {(room.training ? [room.training] : DIFFICULTIES[room.difficulty].pool).map(id => {
@@ -136,6 +137,11 @@ function guidance(room: Room, player?: Player) {
     return 'E · Add the ingredients listed on the ticket'
   }
   switch (station.kind) {
+    case 'fryer':
+      if (state.status === 'frying') return 'Frying ikan bilis · ' + remaining
+      if (state.status === 'cooked') return 'E · Collect fried ikan bilis · Burns in ' + remaining
+      if (state.status === 'burned') return 'Space · Clear burned ikan bilis'
+      return state.status === 'raw' ? 'Space · Fry ikan bilis' : 'E · Put raw ikan bilis in the fryer'
     case 'crate': return 'E · Pick up ' + INGREDIENTS[station.id].name.toLowerCase()
     case 'counter': return 'E · Place or pick up an item'
     case 'board':
@@ -414,9 +420,9 @@ export default function App() {
         })}
         </div>
         {room.training && <ol className="practice-steps">
-          <li>Collect the listed ingredients. Chop any marked ingredients at a cutting board.</li>
+          <li>Collect the listed ingredients. Chop marked ingredients at a board and fry ikan bilis when listed.</li>
           <li>Load the recipe station with <kbd>E</kbd> and press <kbd>Space</kbd> to prepare the dish.</li>
-          <li>Use a clean plate to collect the finished dish, then bring it to Serve.</li>
+          <li>Use a clean plate to collect the finished dish before it burns, then bring it to Serve.</li>
         </ol>}
         {!room.training && <div className="service-score">Score <strong>{room.game.score}</strong></div>}
       </aside>
@@ -461,7 +467,7 @@ function Status({ online }: { online: boolean }) {
 }
 
 const difficultyText: Record<Difficulty, string> = {
-  Easy: 'Rice & dessert. Nasi lemak and ais kacang each use two ingredients, with sauces provided.',
+  Easy: 'Rice & dessert. Make nasi lemak with fried ikan bilis and ais kacang with two ingredients. Sauces are provided.',
   Normal: 'Hot favourites. Make nasi lemak, char kway teow, and chicken satay.',
   Hard: 'Full hawker menu. Make all five dishes across all four cooking stations.'
 }

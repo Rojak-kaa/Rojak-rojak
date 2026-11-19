@@ -13,7 +13,7 @@ type Props = {
 
 const names: Record<string, string> = {
   board: 'CHOP', pot: 'STOVE', grill: 'GRILL', mix: 'MIX', shave: 'ICE STATION', sink: 'WASH', serve: 'SERVE',
-  plates: 'PLATES', dirty: 'RETURN', bin: 'BIN'
+  plates: 'PLATES', dirty: 'RETURN', bin: 'BIN', fryer: 'FRYER'
 }
 
 const demo: Player[] = SPAWNS.map(([x, y], color) => ({
@@ -81,7 +81,9 @@ class KitchenScene extends Phaser.Scene {
         label.setText(Math.max(1, Math.ceil((state.until - room.now) / 1000)) + 's').setBackgroundColor('#392633').setVisible(true)
       } else if (state?.status === 'cooked') {
         const seconds = Math.ceil((state.until - room.now) / 1000)
-        label.setText(state.until ? 'PLATE ' + Math.max(1, seconds) + 's' : 'READY').setBackgroundColor(state.until && seconds <= 6 ? '#9e3829' : '#266346').setVisible(true)
+        label.setText(state.until ? 'BURN ' + Math.max(1, seconds) + 's' : 'READY').setBackgroundColor(state.until && seconds <= 6 ? '#9e3829' : '#266346').setVisible(true)
+      } else if (state?.status === 'burned') {
+        label.setText('BURNED').setBackgroundColor('#9e3829').setVisible(true)
       } else {
         label.setVisible(false)
       }

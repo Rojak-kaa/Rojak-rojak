@@ -2,6 +2,7 @@ import { DIFFICULTIES, HEIGHT, INGREDIENTS, METHODS, nearestStation, recipeFor, 
 
 const CHOP_TIME = 1500
 const WASH_TIME = 2200
+const FRY_TIME = 2600
 const SPEED = 3.75
 const RADIUS = 0.22
 
@@ -44,6 +45,34 @@ export function startMatch(room, now) {
   if (!solo) addOrder(room, now)
 }
 
+function ingredientKind(name) {
+  if (name === 'bilis') return 'fried'
+  return INGREDIENTS[name].chop ? 'chopped' : 'raw'
+}
+
+function advanceStation(room, state, now) {
+  if (!state.until || now < state.until) return
+  const finishedAt = state.until
+  state.until = 0
+  if (state.status === 'chopping') {
+    state.item = { kind: 'chopped', name: state.item.name }
+    state.status = 'ready'
+  } else if (state.status === 'washing') {
+    room.game.clean++
+    state.status = 'empty'
+  } else if (state.status === 'frying' || state.status === 'cooking') {
+    const frying = state.status === 'frying'
+    if (frying) state.item = { kind: 'fried', name: 'bilis' }
+    const hot = frying || METHODS[RECIPES[state.recipe].station].hot
+    const burnsAt = finishedAt + room.matchRules.burn
+    state.status = hot && now >= burnsAt ? 'burned' : 'cooked'
+    if (hot && state.status === 'cooked') state.until = burnsAt
+  } else if (state.status === 'cooked') {
+    state.status = 'burned'
+  }
+  if (state.status === 'burned') state.item = null
+}
+
 function addOrder(room, now) {
   const game = room.game
   const rules = room.matchRules
@@ -69,22 +98,7 @@ export function tickMatch(room, now, delta) {
     if (game.orders.length < (game.solo ? 2 : 5)) addOrder(room, now)
     game.nextOrder = now + room.matchRules.interval
   }
-  for (const state of Object.values(game.stations)) {
-    if (!state.until || now < state.until) continue
-    state.until = 0
-    if (state.status === 'chopping') {
-      state.item = { kind: 'chopped', name: state.item.name }
-      state.status = 'ready'
-    } else if (state.status === 'washing') {
-      game.clean++
-      state.status = 'empty'
-    } else if (state.status === 'cooking') {
-      state.status = 'cooked'
-      if (!room.training && METHODS[RECIPES[state.recipe].station].hot) state.until = now + room.matchRules.burn
-    } else if (state.status === 'cooked') {
-      state.status = 'burned'
-    }
-  }
+  for (const state of Object.values(game.stations)) advanceStation(room, state, now)
   for (const player of room.players.values()) {
     if (!player.socketId || now - player.inputAt > 350) continue
     const length = Math.hypot(player.dx, player.dy)
@@ -105,6 +119,7 @@ export function interact(room, player, start, now) {
   const station = nearestStation(player.x, player.y, room.stations)
   if (!station) return 'Move closer to a station.'
   const state = game.stations[station.id]
+  advanceStation(room, state, now)
   const item = player.item
   const reset = () => Object.assign(state, { item: null, recipe: null, ingredients: [], status: 'empty', until: 0 })
   const take = next => { player.item = next; return '' }
@@ -134,6 +149,27 @@ export function interact(room, player, start, now) {
         return take(null)
       }
       return 'Use E to place cucumber, pineapple, or chicken, then press Space to chop.'
+    case 'fryer':
+      if (state.status === 'burned') {
+        if (!start) return 'Press Space to clear the burned ikan bilis.'
+        reset()
+        return ''
+      }
+      if (state.status === 'frying') return 'Frying ikan bilis…'
+      if (start && state.status === 'raw') {
+        Object.assign(state, { status: 'frying', until: now + FRY_TIME })
+        return ''
+      }
+      if (!start && !item && state.item) {
+        const next = state.item
+        reset()
+        return take(next)
+      }
+      if (!start && item?.kind === 'raw' && item.name === 'bilis' && state.status === 'empty') {
+        Object.assign(state, { item, status: 'raw' })
+        return take(null)
+      }
+      return 'Load raw ikan bilis with E, press Space to fry, then collect it with E.'
     case 'pot':
     case 'grill':
     case 'mix':
@@ -158,10 +194,11 @@ export function interact(room, player, start, now) {
       if (!start && !item && state.status === 'loaded') {
         const name = state.ingredients.pop()
         if (!state.ingredients.length) reset()
-        return take({ name, kind: INGREDIENTS[name].chop ? 'chopped' : 'raw' })
+        return take({ name, kind: ingredientKind(name) })
       }
-      if (!start && item?.name && INGREDIENTS[item.name] && ['raw', 'chopped'].includes(item.kind) && ['empty', 'loaded'].includes(state.status)) {
-        if (INGREDIENTS[item.name].chop && item.kind !== 'chopped') return 'Chop this ingredient first.'
+      if (!start && item?.name && INGREDIENTS[item.name] && ['raw', 'chopped', 'fried'].includes(item.kind) && ['empty', 'loaded'].includes(state.status)) {
+        const needed = ingredientKind(item.name)
+        if (item.kind !== needed) return needed === 'fried' ? 'Fry the ikan bilis first.' : 'Chop this ingredient first.'
         if (state.ingredients.includes(item.name)) return 'That ingredient is already in this batch.'
         const ingredients = [...state.ingredients, item.name]
         if (!recipes.some(([, recipe]) => ingredients.every(name => recipe.ingredients.includes(name)))) return 'This ingredient does not match the recipe at this station.'

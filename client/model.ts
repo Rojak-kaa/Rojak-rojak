@@ -1,5 +1,5 @@
 export type Difficulty = 'Easy' | 'Normal' | 'Hard'
-export type Item = { kind: 'raw' | 'chopped' | 'plate' | 'dirty' | 'dish'; name?: string }
+export type Item = { kind: 'raw' | 'chopped' | 'fried' | 'plate' | 'dirty' | 'dish'; name?: string }
 export type Player = {
   id: string; name: string; color: number; ready: boolean; connected: boolean
   x: number; y: number; facing: number; item: Item | null; served: number

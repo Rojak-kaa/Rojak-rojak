@@ -56,7 +56,9 @@ function ingredient(g: Phaser.GameObjects.Graphics, x: number, y: number, name: 
 }
 
 export function drawItem(g: Phaser.GameObjects.Graphics, x: number, y: number, item: Item) {
-  if (item.kind === 'raw' || item.kind === 'chopped') ingredient(g, x, y, item.name ?? '', item.kind === 'chopped')
+  if (item.kind === 'fried') {
+    g.fillStyle(0xaf6836).fillEllipse(x - 3, y - 3, 14, 4).fillEllipse(x + 2, y + 3, 14, 4)
+  } else if (item.kind === 'raw' || item.kind === 'chopped') ingredient(g, x, y, item.name ?? '', item.kind === 'chopped')
   else {
     plate(g, x, y, item.kind === 'dirty')
     const recipe = item.kind === 'dish' && item.name ? RECIPES[item.name] : undefined
@@ -106,6 +108,7 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
     case 'mix':
     case 'shave':
     case 'grill':
+    case 'fryer':
     case 'pot': {
       if (station.kind === 'grill') {
         g.fillStyle(0x584150).fillRoundedRect(cx - 21, cy - 13, 42, 30, 5)
@@ -156,7 +159,7 @@ export function drawStation(g: Phaser.GameObjects.Graphics, station: Station, st
       break
   }
   if (state?.item) drawItem(g, cx, cy, state.item)
-  if (state && ['chopping', 'cooking', 'cooked', 'washing', 'burned'].includes(state.status)) {
+  if (state && ['chopping', 'cooking', 'frying', 'cooked', 'washing', 'burned'].includes(state.status)) {
     const tint = state.status === 'cooked' ? 0x52b985 : state.status === 'burned' ? 0xfa7155 : 0xffc95e
     g.fillStyle(tint).fillCircle(x + 45, y + 10, 5)
   }
