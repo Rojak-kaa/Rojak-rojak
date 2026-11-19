@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { promisify } from 'node:util'
 import express from 'express'
-import { ACCESSORIES, CHEFS, DEFAULT_OUTFIT, GARMENTS, LANGUAGES, PALETTE } from '../shared/profile.mjs'
+import { ACCESSORIES, CHEFS, DEFAULT_OUTFIT, GARMENTS, LANGUAGES, lockEcoOutfit, PALETTE } from '../shared/profile.mjs'
 
 const derive = promisify(scrypt)
 const COOKIE = 'rojak_account'
@@ -33,7 +33,7 @@ export function createAccounts(path) {
   const userById = db.prepare('SELECT * FROM users WHERE id = ?')
   const sessionUser = db.prepare('SELECT users.* FROM sessions JOIN users ON users.id = sessions.user_id WHERE sessions.token = ? AND sessions.expires > ?')
   const publicProfile = ({ id, username, name, language, outfit, served, outfit_configured }) => ({
-    id, username, name, language, outfit: { ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }, served, outfitConfigured: Boolean(outfit_configured)
+    id, username, name, language, outfit: lockEcoOutfit({ ...DEFAULT_OUTFIT, ...JSON.parse(outfit) }), served, outfitConfigured: Boolean(outfit_configured)
   })
   const tokenFrom = headers => /(?:^|;\s*)rojak_account=([A-Za-z0-9_-]{43})(?:;|$)/.exec(headers.cookie ?? '')?.[1]
   function identify(headers) {
@@ -92,7 +92,7 @@ export function createAccounts(path) {
       ![outfit.fabric, outfit.trim].every(value => Number.isInteger(value) && PALETTE[value])) {
       return res.status(400).json({ error: 'Check your profile details.' })
     }
-    const cleanOutfit = { chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim }
+    const cleanOutfit = lockEcoOutfit({ chef: outfit.chef, garment: outfit.garment, accessory: outfit.accessory, fabric: outfit.fabric, trim: outfit.trim })
     db.prepare('UPDATE users SET name = ?, language = ?, outfit = ?, outfit_configured = 1 WHERE id = ?').run(name.trim(), language, JSON.stringify(cleanOutfit), user.id)
     res.json(publicProfile(userById.get(user.id)))
   })

@@ -18,3 +18,9 @@ export const ACCESSORIES = { chef: 'Chef hat', songkok: 'Songkok', flower: 'Flow
 export const PALETTE = ['#c85243', '#2c8976', '#674993', '#cb8c29', '#376ca0', '#ab4b81', '#88aa58', '#fff4dc', '#2b2029']
 export const DEFAULT_OUTFIT = { chef: 'ayu', garment: 'bajuMelayu', accessory: 'chef', fabric: 0, trim: 3 }
 export const ECO_OUTFIT = { chef: 'eco', garment: 'striped', accessory: 'sprout', fabric: 6, trim: 7 }
+
+export function lockEcoOutfit(outfit) {
+  return outfit.chef === ECO_OUTFIT.chef
+    ? { ...ECO_OUTFIT, accessory: outfit.accessory, fabric: outfit.fabric }
+    : outfit
+}

@@ -96,6 +96,7 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const fixedClothing = draft.outfit.chef === ECO_OUTFIT.chef
   function outfit(part: keyof Outfit, value: string | number) {
     setDraft(previous => {
       if (part === 'chef' && value === ECO_OUTFIT.chef) return { ...previous, outfit: { ...ECO_OUTFIT } }
@@ -129,15 +130,16 @@ export function Wardrobe({ profile, onSave, onSignOut, onboarding }: { profile: 
       {Object.entries(CHEFS).map(([id, chef]) => <option key={id} value={id}>{id === ECO_OUTFIT.chef ? chef.name : chef.name + ' · ' + t(chef.culture)}</option>)}
     </select></label>
     <div className="outfit-heading"><strong>{t('Clothing')}</strong><ChefPreview outfit={draft.outfit} /></div>
+    {fixedClothing ? <p>{t(GARMENTS[ECO_OUTFIT.garment])}</p> :
     <select aria-label={t('Clothing')} value={draft.outfit.garment} onChange={event => outfit('garment', event.target.value)}>
       {clothingGroups.map(([culture, ...garments]) => <optgroup key={culture} label={t(culture)}>
         {garments.map(id => <option key={id} value={id}>{t(GARMENTS[id])}</option>)}
       </optgroup>)}
-    </select>
+    </select>}
     <label>{t('Headwear')}<select value={draft.outfit.accessory} onChange={event => outfit('accessory', event.target.value)}>
       {Object.entries(ACCESSORIES).map(([id, label]) => <option key={id} value={id}>{t(label)}</option>)}
     </select></label>
-    {([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).map(([part, label]) =>
+    {([['fabric', 'Fabric colour'], ['trim', 'Trim colour']] as const).filter(([part]) => !fixedClothing || part === 'fabric').map(([part, label]) =>
       <fieldset className="palette" key={part}><legend>{t(label)}</legend>{PALETTE.map((color, index) =>
         <button type="button" className="swatch" style={{ background: color }} aria-label={t(label) + ' ' + (index + 1)}
           aria-pressed={draft.outfit[part] === index} onClick={() => outfit(part, index)} key={color} />)}</fieldset>)}
