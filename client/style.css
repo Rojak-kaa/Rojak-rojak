@@ -140,15 +140,15 @@ form .button { margin-top: 9px; }
 
 .landing-topbar { position: absolute; inset: 0 0 auto; z-index: 3; border: 0; background: linear-gradient(#251820d9, #25182088 64%, transparent); }
 .landing-topbar .brand { color: #fff8ed; text-shadow: 0 2px 5px #21151a; }
-.landing-hero { position: relative; height: 100dvh; overflow: hidden; isolation: isolate; background: #241d23 center / cover no-repeat; }
-.landing-hero::before { content: ""; position: absolute; z-index: -1; inset: 0; backdrop-filter: blur(18px) brightness(.66); }
-.landing-scene { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(150dvh, 100%, 250dvh); }
-.landing-scene img { display: block; width: 100%; height: auto; }
-.food-hotspot { position: absolute; display: grid; place-items: center; width: 22%; height: 23%; transform: translate(-50%, -50%); border: 2px solid transparent; border-radius: 50%; }
-.food-hotspot span { background: #2d2720e8; color: #fff8e7; border: 1px solid #fff0d6; border-radius: 99px; padding: 5px 11px; font-size: clamp(.74rem, 1.45vw, 1rem); font-weight: 900; white-space: nowrap; box-shadow: 0 2px 6px #2f1c25a6; }
-.food-hotspot:hover, .food-hotspot:focus-visible { border-color: #fff3b8; background: #ffe29622; }
-.food-hotspot:hover span, .food-hotspot:focus-visible span { background: #fff3cf; color: #432619; }
-.food-hotspot[aria-label="Train: Laksa"] { width: 14%; height: 20%; }
+.landing-hero { height: 100dvh; overflow: auto hidden; background: #241d23; }
+.landing-scene { position: relative; width: 100%; min-width: 112dvh; height: 100%; }
+.landing-scene img { display: block; width: 100%; height: 100%; object-fit: fill; }
+.town-building { position: absolute; width: 24%; height: 32%; transform: translate(-50%, -50%); border: 2px solid transparent; border-radius: 14%; background: transparent; cursor: pointer; }
+.town-building:hover, .town-building:focus-visible { border-color: #fff3b8; background: #ffe29624; }
+.town-building-mamak { height: 27%; }
+.town-building-hawker { width: 31%; }
+.town-building-kopitiam { width: 27%; height: 35%; }
+.town-building-profile { left: 50%; top: 36%; height: 26%; }
 
 .match { display: grid; grid-template-columns: clamp(150px, 19vw, 240px) minmax(0, 1fr); gap: 10px; width: 100%; height: 100dvh; padding: 10px; background: #312932; }
 .order-rail { min-height: 0; display: flex; flex-direction: column; gap: 9px; padding: 11px; border-radius: 12px; background: #eee1ce; }
@@ -205,13 +205,6 @@ form .button { margin-top: 9px; }
   .touch-controls { position: sticky; bottom: 0; z-index: 1; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
 }
 
-@media (max-aspect-ratio: 6/5) {
-  .landing-scene { width: 100%; }
-}
-
-@media (orientation: portrait) {
-  .landing-scene { top: max(56%, min(calc(175px + 100vw / 3), 100% - 100vw / 3)); }
-}
 .account-form { min-width: 0; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
 .dialog { max-height: min(88dvh, 780px); overflow-y: auto; }
@@ -254,13 +247,7 @@ form .button { margin-top: 9px; }
 .portrait-leaves::before { left: -7px; top: 0; transform: rotate(25deg); }
 .portrait-leaves::after { left: 1px; top: -3px; }
 .portrait-shorts { width: 28px; height: 9px; margin-top: -4px; border-radius: 0 0 4px 4px; background: #334520; }
-.town-hero .landing-scene { width: min(100%, 185dvh); }
-.town-shop { width: 25%; height: 28%; }
-.town-shop span { background: #392719ec; }
 .shop-service-name { color: var(--muted); font-size: .85rem; }
-@media (max-width: 500px) {
-  .town-shop span { padding-inline: 6px; font-size: .68rem; }
-}
 @media (max-width: 720px) {
   .player-page { grid-template-columns: 1fr; grid-template-rows: minmax(130px, 28dvh) 1fr; }
   .player-page-art { background-position: center 42%; }

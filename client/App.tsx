@@ -14,7 +14,7 @@ import TouchControls from './TouchControls'
 import { trainingGuide } from './trainingGuide'
 import type { Direction } from './TouchControls'
 import kitchenCrew from './assets/kitchen-crew.webp'
-import foodTown from './assets/food-town.webp'
+import foodTown from './assets/food-town-signs.webp'
 
 const GameCanvas = lazy(() => import('./GameCanvas'))
 const socket = io({ autoConnect: false })
@@ -452,15 +452,14 @@ export default function App() {
     </header>}
 
     {onLanding && <main className="landing">
-      <section className="landing-hero town-hero" aria-labelledby="landing-title" style={{ backgroundImage: `url("${foodTown}")` }}>
+      <section className="landing-hero" aria-labelledby="landing-title">
         <h1 id="landing-title" className="sr-only">Malaysian Food Town</h1>
         <div className="landing-scene">
           <img src={foodTown} alt="An illustrated Malaysian town map with four food shops and a traditional house." width="1536" height="1024" fetchPriority="high" />
-          {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className="food-hotspot town-shop" disabled={pending}
-            style={{ left: shop.x + '%', top: shop.y + '%' }} onClick={() => { setError(''); setShopMenu(id) }}>
-            <span>{shop.name}</span>
-          </button>)}
-          <button type="button" className="food-hotspot town-shop" style={{ left: '50%', top: '37%' }} onClick={openProfile}><span>{t('Your profile')}</span></button>
+          {Object.entries(SHOPS).map(([id, shop]) => <button key={id} type="button" className={'town-building town-building-' + id}
+            aria-label={t(shop.name)} disabled={pending} style={{ left: shop.x + '%', top: shop.y + '%' }}
+            onClick={() => { setError(''); setShopMenu(id) }} />)}
+          <button type="button" className="town-building town-building-profile" aria-label={t('Your profile')} onClick={openProfile} />
         </div>
       </section>
     </main>}
