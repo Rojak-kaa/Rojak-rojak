@@ -310,6 +310,39 @@ function drawBajuKurung(context: CanvasRenderingContext2D, outfit: Outfit) {
   context.restore()
 }
 
+function drawKurta(context: CanvasRenderingContext2D, outfit: Outfit) {
+  const cloth = PALETTE[outfit.fabric]
+  const trim = PALETTE[outfit.trim]
+  const raised = outfit.handSign !== 'relaxed'
+  const leftSleeve = raised
+    ? 'M120 219 L110 234 L96 215 L82 223 Q88 249 112 265 L123 255 Z'
+    : 'M116 220 Q102 230 92 252 L78 291 Q87 299 101 298 L122 265 Z'
+  const tunic = new Path2D('M111 221 Q124 211 135 212 L136 204 Q150 214 164 204 L166 212 Q181 211 189 225 L181 271 Q185 320 199 358 Q155 373 101 359 Q115 319 119 272 Z')
+  context.save()
+  context.lineJoin = 'round'
+  context.lineCap = 'round'
+  context.lineWidth = 2.8
+  context.strokeStyle = '#49333c'
+  context.fillStyle = cloth
+  for (const piece of [new Path2D(leftSleeve), new Path2D('M179 222 Q192 225 201 249 L224 294 Q214 303 201 300 L178 267 Z'), tunic]) {
+    context.fill(piece)
+    context.stroke(piece)
+  }
+  context.strokeStyle = trim
+  context.lineWidth = 4
+  context.stroke(new Path2D(raised ? 'M86 230 L101 222' : 'M82 286 L102 293'))
+  context.stroke(new Path2D('M202 294 L220 287 M136 210 Q142 220 150 219 Q158 218 165 210 M150 219 V270 M106 350 Q152 363 194 349'))
+  context.lineWidth = 1.8
+  context.stroke(new Path2D('M141 223 l-4 6 4 6 -4 6 4 6 -4 6 4 6 9 12 9-12 4-6-4-6 4-6-4-6 4-6-4-6 M109 354 l7 5 7-3 7 5 7-3 7 5 7-4 7 4 7-5 7 3 7-5 7 2 7-5'))
+  context.fillStyle = '#49333c'
+  for (const y of [230, 244, 258]) {
+    context.beginPath()
+    context.arc(150, y, 2, 0, Math.PI * 2)
+    context.fill()
+  }
+  context.restore()
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
   if (outfit.garment === 'samfu') {
@@ -318,6 +351,10 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
   }
   if (outfit.chef === KAVITHA_OUTFIT.chef) {
     drawKavithaKurta(context, outfit.handSign)
+    return
+  }
+  if (outfit.garment === 'kurta') {
+    drawKurta(context, outfit)
     return
   }
   if (outfit.garment === 'bajuMelayu') {
@@ -398,7 +435,7 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
     context.moveTo(130, 216)
     context.quadraticCurveTo(145, 232, 160, 216)
     context.moveTo(145, 225)
-    context.lineTo(145, outfit.garment === 'kurta' ? 270 : 248)
+    context.lineTo(145, 248)
     context.moveTo(104, hem - 9)
     context.quadraticCurveTo(150, hem - 3, 191, hem - 9)
     context.stroke()
