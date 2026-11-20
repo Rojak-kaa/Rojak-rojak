@@ -343,6 +343,43 @@ function drawKurta(context: CanvasRenderingContext2D, outfit: Outfit) {
   context.restore()
 }
 
+function drawSari(context: CanvasRenderingContext2D, outfit: Outfit) {
+  const fabric = PALETTE[outfit.fabric]
+  const trim = PALETTE[outfit.trim]
+  const shade = 'rgb(' + rgb(fabric).map(channel => Math.round(channel * 0.78)).join(', ') + ')'
+  const sleeve = outfit.handSign === 'relaxed' ? 'M119 216 Q103 219 94 241 L111 252 L126 229 Z'
+    : 'M119 218 L111 234 L102 225 L94 236 Q104 251 114 252 L126 229 Z'
+  const skirt = 'M117 264 Q149 276 179 265 Q184 327 202 390 Q154 408 98 391 Q113 335 117 264 Z'
+  const drape = 'M173 212 Q184 212 191 226 Q179 258 165 286 Q181 324 204 385 Q187 399 165 396 Q160 343 143 298 Q124 302 112 315 L115 282 Q146 250 173 212 Z'
+  context.save()
+  context.lineJoin = 'round'
+  context.lineCap = 'round'
+  context.lineWidth = 2.5
+  context.strokeStyle = '#49333c'
+  for (const [color, outline] of [
+    [shade, sleeve],
+    [shade, 'M176 216 Q195 218 203 241 L185 251 L173 232 Z'],
+    [shade, 'M107 223 Q120 213 135 212 Q147 228 164 212 Q178 213 186 226 L181 272 Q149 282 115 271 Z'],
+    [fabric, skirt],
+    [fabric, drape]
+  ]) {
+    const path = new Path2D(outline)
+    context.fillStyle = color
+    context.fill(path)
+    context.stroke(path)
+  }
+  context.strokeStyle = shade
+  context.stroke(new Path2D('M121 317 Q114 356 109 387 M132 314 L125 394 M141 320 L142 396'))
+  context.strokeStyle = trim
+  context.lineWidth = 5
+  context.stroke(new Path2D('M102 387 Q135 398 163 393 M175 217 Q145 260 115 285 M144 296 Q164 347 167 391 Q184 394 200 383'))
+  context.lineWidth = 1.6
+  for (const [x, y] of [[155, 260], [146, 280], [160, 300], [167, 320], [174, 341], [183, 363], [119, 337], [133, 359], [115, 373], [147, 380]]) {
+    context.stroke(new Path2D(`M${x} ${y - 3} l3 3 -3 3 -3-3 Z`))
+  }
+  context.restore()
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
   if (outfit.garment === 'samfu') {
@@ -355,6 +392,10 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
   }
   if (outfit.garment === 'kurta') {
     drawKurta(context, outfit)
+    return
+  }
+  if (outfit.garment === 'saree') {
+    drawSari(context, outfit)
     return
   }
   if (outfit.garment === 'bajuMelayu') {
@@ -423,13 +464,6 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
       context.lineTo(175, hem - 39)
       context.stroke()
     }
-  } else if (outfit.garment === 'saree') {
-    context.lineWidth = 10
-    context.beginPath()
-    context.moveTo(115, 220)
-    context.quadraticCurveTo(137, 264, 176, 288)
-    context.lineTo(178, hem - 8)
-    context.stroke()
   } else {
     context.beginPath()
     context.moveTo(130, 216)
