@@ -155,7 +155,7 @@ function drawHairstyle(context: CanvasRenderingContext2D, outfit: Outfit) {
 }
 
 export function garmentHem(garment: string) {
-  return ({ cheongsam: 388, saree: 399, bajuKurung: 390, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
+  return ({ cheongsam: 388, saree: 399, bajuKurung: 434, kurta: 366, samfu: 350, bajuMelayu: 354 } as Record<string, number>)[garment] ?? 347
 }
 
 function drawBajuMelayu(context: CanvasRenderingContext2D, outfit: Outfit) {
@@ -260,6 +260,46 @@ function drawKavithaKurta(context: CanvasRenderingContext2D, handSign: string) {
   }
 }
 
+function drawBajuKurung(context: CanvasRenderingContext2D, outfit: Outfit) {
+  const cloth = PALETTE[outfit.fabric]
+  const scarf = PALETTE[outfit.trim]
+  const skirt = 'rgb(' + rgb(cloth).map(channel => Math.round(channel * 0.77)).join(', ') + ')'
+  const leftSleeve = outfit.handSign === 'relaxed'
+    ? 'M116 218 Q102 227 92 250 L77 292 Q87 300 101 298 L123 262 Z'
+    : 'M119 218 L110 233 L95 215 L82 223 Q87 246 111 265 L123 263 Z'
+  const pieces = [
+    [skirt, 'M112 329 L185 329 Q187 383 194 428 Q168 439 146 431 Q125 437 103 431 Z'],
+    [cloth, leftSleeve],
+    [cloth, 'M178 219 Q192 225 201 250 L224 294 Q213 302 201 301 L179 269 Z'],
+    [cloth, 'M111 221 Q120 212 135 211 Q150 224 164 211 Q179 212 189 225 L181 273 Q187 323 198 368 Q152 383 101 369 Q112 318 117 273 Z']
+  ]
+  context.save()
+  context.lineJoin = 'round'
+  context.lineWidth = 2.5
+  context.strokeStyle = '#473442'
+  for (const [color, outline] of pieces) {
+    const path = new Path2D(outline)
+    context.fillStyle = color
+    context.fill(path)
+    context.stroke(path)
+  }
+  context.lineWidth = 1.5
+  context.stroke(new Path2D('M124 318 Q120 347 119 371 M158 379 L151 430'))
+  context.fillStyle = scarf
+  if (outfit.hairStyle === 'none') {
+    const hijab = new Path2D('M68 155 Q59 90 100 57 Q145 23 192 53 Q233 76 233 142 Q232 185 201 207 Q192 210 185 217 Q176 248 153 254 Q128 250 111 230 L101 214 Q73 199 68 155 Z M90 143 Q91 111 116 94 Q144 76 173 91 Q200 104 209 135 Q204 181 177 196 Q146 215 118 191 Q95 176 90 143 Z')
+    context.fill(hijab, 'evenodd')
+    context.stroke(hijab)
+  } else {
+    const drape = new Path2D('M105 216 Q120 203 135 208 Q149 223 164 207 Q179 207 191 218 Q174 250 153 254 Q127 248 105 216 Z')
+    context.fill(drape)
+    context.stroke(drape)
+  }
+  context.globalAlpha = 0.45
+  context.stroke(new Path2D('M115 220 Q148 246 178 221 M124 231 Q150 249 169 233'))
+  context.restore()
+}
+
 function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBase = false) {
   if (outfit.garment === 'none' || (outfit.garment === 'striped' && !blankBase)) return
   if (outfit.chef === LI_WEN_OUTFIT.chef) {
@@ -272,6 +312,10 @@ function drawGarment(context: CanvasRenderingContext2D, outfit: Outfit, blankBas
   }
   if (outfit.garment === 'bajuMelayu') {
     drawBajuMelayu(context, outfit)
+    return
+  }
+  if (outfit.garment === 'bajuKurung') {
+    drawBajuKurung(context, outfit)
     return
   }
   if (outfit.garment === 'striped') {
@@ -445,10 +489,12 @@ export function tintEcoPortrait(source: CanvasImageSource, outfit: Outfit) {
     if (tone) tintIllustratedSkin(context, tone)
     drawHandSign(context, outfit.handSign)
   }
+  const bajuKurung = blankBase && outfit.garment === 'bajuKurung'
+  if (bajuKurung) drawGarment(context, outfit, true)
   drawHeadwear(context, outfit.accessory, blankBase)
   drawExpression(context, outfit.expression, blankBase)
   if (blankBase) {
-    drawGarment(context, outfit, true)
+    if (!bajuKurung) drawGarment(context, outfit, true)
     return canvas
   }
   if (outfit.garment === 'striped' && outfit.fabric === ECO_OUTFIT.fabric && outfit.trim === ECO_OUTFIT.trim) return canvas

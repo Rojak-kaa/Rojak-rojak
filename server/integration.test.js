@@ -57,7 +57,7 @@ test('real Socket.IO clients enforce room rules and synchronize movement, action
   })
   assert.equal(updated.status, 200)
   assert.deepEqual((await updated.json()).outfit, outfit)
-  const custom = { ...BASE_OUTFIT, garment: 'cheongsam', accessory: 'flower', fabric: 4, trim: 7, expression: 'happy', handSign: 'okay', hairStyle: 'bun', skinTone: 3 }
+  const custom = { ...BASE_OUTFIT, garment: 'bajuKurung', accessory: 'flower', fabric: 4, trim: 7, expression: 'happy', handSign: 'okay', skinTone: 3 }
   const customSaved = await fetch(address + '/api/account/me', {
     method: 'PATCH', headers: { cookie: cookies[1], 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Bean', language: 'en', outfit: custom })
